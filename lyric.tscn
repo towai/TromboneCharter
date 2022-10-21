@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://dyqwt6pgwm8ae"]
+
+[ext_resource type="Script" path="res://lyric.gd" id="1_7oxlp"]
+[ext_resource type="Texture2D" uid="uid://bf23fo001m0n4" path="res://trashcan.svg" id="1_517y3"]
+[ext_resource type="Texture2D" uid="uid://cu0ygufwrvrfu" path="res://draghandle.svg" id="3_65fow"]
+
+[node name="Lyric" type="Control"]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+script = ExtResource("1_7oxlp")
+
+[node name="DeleteButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+icon = ExtResource("1_517y3")
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.75
+anchor_bottom = 0.75
+offset_top = -15.0
+offset_right = 67.0625
+offset_bottom = 16.0
+grow_vertical = 2
+expand_to_text_length = true
+
+[node name="DragHandle" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.75
+anchor_bottom = 0.75
+offset_left = -4.0
+offset_top = 64.0
+grow_vertical = 2
+mouse_default_cursor_shape = 15
+texture_normal = ExtResource("3_65fow")
+
+[connection signal="pressed" from="DeleteButton" to="." method="_on_delete_button_pressed"]
+[connection signal="text_changed" from="LineEdit" to="." method="_on_line_edit_text_changed"]
+[connection signal="gui_input" from="DragHandle" to="." method="_on_drag_handle_gui_input"]
