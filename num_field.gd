@@ -13,16 +13,22 @@ signal value_changed(new_value)
 var value : int:
 	set(with):
 		value = clamp(with, min_value, max_value)
+		if !has_node("SpinBox"): await(get_tree().process_frame)
+		if !has_node("SpinBox"):
+			print("Still no SpinBox??!")
+			return
 		$SpinBox.value = value
 		emit_signal("value_changed",value)
 
 @export var min_value : int:
 	set(with):
 		min_value = with
+		if !has_node("SpinBox"): return
 		$SpinBox.min_value = min_value
 @export var max_value : int:
 	set(with):
 		max_value = with
+		if !has_node("SpinBox"): return
 		$SpinBox.max_value = max_value
 
 

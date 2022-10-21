@@ -24,6 +24,7 @@ func _ready():
 		return
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir")
 	print($SaveDialog.current_path)
+	_on_new_chart_confirmed()
 
 
 func show_popup(window:Window):
@@ -75,7 +76,9 @@ func try_cfg_save():
 func _on_description_text_changed(): tmb.description = %Description.text
 
 
-func _on_copy_button_pressed(): $CopyConfirm.show()
+func _on_copy_button_pressed():
+	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint: return
+	$CopyConfirm.show()
 
 func _on_copy_confirmed():
 	var start = Global.settings.section_start
@@ -87,13 +90,17 @@ func _on_copy_confirmed():
 		return
 	
 	var copy_target = Global.settings.section_target
-	if copy_target + length > tmb.endpoint:
-		print("No")
-		return
+	
+	# now checked when you hit the button, so shouldn't be possible to reach this
+	# keeping it anyway
+	if copy_target + length > tmb.endpoint: return
+	
 	tmb.clear_section(copy_target,length)
+	print("Finished clearing section")
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
+	print("Finished copying notes")
 	emit_signal("chart_loaded")
 
 

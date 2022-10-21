@@ -48,14 +48,17 @@ func clear_section(start:float,length:float):
 		return (bar >= start && bar <= start + length)
 	print("Clear section %d - %d" % [start,length + start])
 	var note_array = notes.duplicate(true)
+	
 	var any_notes_left : bool = true
 	while any_notes_left:
-#		print("Aough")
 		for note in note_array:
 			var bar = note[NOTE_BAR]
-			if is_in_section.call(note[NOTE_BAR]):
+			
+			if is_in_section.call(bar):
+				print("Erase note @ %.3f" % bar)
 				note_array.erase(note)
 				break # start from the beginning of the array
+			
 			if note == note_array.back(): any_notes_left = false
 	notes = note_array
 

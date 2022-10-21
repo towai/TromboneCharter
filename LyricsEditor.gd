@@ -4,6 +4,7 @@ extends Control
 var lyric_scn = preload("res://lyric.tscn")
 @onready var chart = %Chart
 
+
 func _ready():
 	Global.tmb_updated.connect(_update_lyrics)
 
@@ -55,7 +56,8 @@ func _on_chart_loaded():
 func _on_add_lyric_pressed(): _add_lyric(%LyricBar.value,"")
 
 
-func _on_lyric_bar_value_changed(value): queue_redraw()
+func _on_lyric_bar_value_changed(_value): queue_redraw()
+
 
 func _draw():
 	draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))

@@ -66,6 +66,3 @@ func _find_note_overlapping_bar(time:float):
 		if time >= note[TMBInfo.NOTE_BAR] && time <= end_bar:
 			return note
 	return []
-
-
-func _process(delta): pass

@@ -77,7 +77,6 @@ func timing_snap_changed(_value:float): queue_redraw()
 func _on_tmb_loaded():
 	# this reference should theoretically never change but let's anyway
 	tmb = Global.working_tmb
-	_on_tmb_updated()
 	for child in get_children():
 		if !(child is Note): continue
 		child.touching_notes.clear()
@@ -91,6 +90,9 @@ func _on_tmb_loaded():
 				note[TMBInfo.NOTE_PITCH_DELTA]
 		)
 	doot_enabled = %DootToggle.button_pressed
+	print("ASDF")
+	_on_tmb_updated()
+	print("HJKL")
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
@@ -106,9 +108,9 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 		add_child(new_note)
 
 
-func stepped_note_overlaps(time:float, len:float, exclude : Array = []) -> bool:
-	var steps : int = ceil(len) * 8
-	var step_length : float = len / steps
+func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
+	var steps : int = ceil(length) * 8
+	var step_length : float = length / steps
 	for step in steps + 1:
 		var step_time = step_length * step
 		if Global.overlaps_any_note(time + step_time, exclude): return true

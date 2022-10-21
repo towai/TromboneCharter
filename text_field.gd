@@ -12,6 +12,7 @@ var value : String:
 	get: return $TextEntry.text
 	set(string):
 		value = string
+		if !has_node("TextEntry"): return
 		$TextEntry.text = string
 
 func _ready():

@@ -116,6 +116,6 @@ func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 func _on_section_start_value_changed(value):
 	%SectionLength.max_value = max(1,tmb.endpoint - value)
 	%Chart.queue_redraw()
-func _on_section_length_value_changed(value): %Chart.queue_redraw()
 
-func _on_copy_target_value_changed(value): %Chart.queue_redraw()
+func _on_section_length_value_changed(_value): %Chart.queue_redraw()
+func _on_copy_target_value_changed(_value): %Chart.queue_redraw()

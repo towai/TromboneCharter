@@ -34,7 +34,7 @@ func _on_delete_button_pressed():
 	editor._refresh_lyrics()
 
 
-func _process(delta):
+func _process(_delta):
 	if !dragging: return
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		dragging = false

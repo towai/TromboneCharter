@@ -31,8 +31,3 @@ func _on_key_mouse_exit(key:int):
 		return
 	current_key = 69
 	emit_signal("redraw_board")
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
