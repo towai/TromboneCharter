@@ -6,7 +6,6 @@ extends HBoxContainer
 @export var field_name : String:
 	set(with):
 		field_name = with
-		# needed else it tries to do this on load before the child exists
 		if has_node("Label"): $Label.text = field_name
 var value : String:
 	get: return $TextEntry.text

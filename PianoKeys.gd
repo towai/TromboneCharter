@@ -3,7 +3,6 @@ extends VBoxContainer
 @onready var player : AudioStreamPlayer = %AudioStreamPlayer
 var current_key : int = 69
 signal redraw_board
-var redraw : StringName = "redraw_board"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -27,7 +26,7 @@ func _on_key_mouseover(key:int):
 	emit_signal("redraw_board")
 func _on_key_mouse_exit(key:int):
 	if current_key != key:
-		print("Mouse exited %d but only after entering %d -- do nothing" % [key,current_key])
+		print("Mouse exited %d but only after entering %d -- do nothing" % [key, current_key])
 		return
 	current_key = 69
 	emit_signal("redraw_board")

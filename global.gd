@@ -39,5 +39,4 @@ func _ready(): pass
 func _on_tmb_updated(value,key:String):
 	if key == "title": key = "name" # fix collision
 	working_tmb.set(key,value)
-	if key in ["notes","lyrics"]: return # don't print
 	emit_signal("tmb_updated")

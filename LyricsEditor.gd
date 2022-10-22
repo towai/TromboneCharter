@@ -3,13 +3,19 @@ extends Control
 
 var lyric_scn = preload("res://lyric.tscn")
 @onready var chart = %Chart
-
+var updated_this_frame := 0
 
 func _ready():
 	Global.tmb_updated.connect(_update_lyrics)
 
 
+func _process(_delta):
+	if updated_this_frame: print("lyrics: updated %d times this frame" % updated_this_frame)
+	updated_this_frame = 0
+
+
 func package_lyrics() -> Array:
+	print("Packagesd")
 	var result := []
 	for lyric in get_children():
 		if !(lyric is Lyric) || lyric.is_queued_for_deletion(): continue
@@ -19,6 +25,7 @@ func package_lyrics() -> Array:
 		}
 		result.append(dict)
 	result.sort_custom(func(a, b): return (a.bar < b.bar))
+	print("Packagesd")
 	return result
 
 
@@ -33,13 +40,22 @@ func _update_lyrics():
 	for child in get_children():
 		if !(child is Lyric): continue
 		child.position.x = chart.bar_to_x(child.bar)
+	updated_this_frame += 1
 
 
 func _refresh_lyrics():
-	for child in get_children():
-		if child is Lyric: child.queue_free()
+	
+	var children = get_children()
+	var front = children.front()
+	print(front.name)
+	for i in children.size():
+		var child = children[-(i + 1)]
+		if child is Lyric && !child.is_queued_for_deletion():
+			child.queue_free()
+	
 	for lyric in Global.working_tmb.lyrics:
 		_add_lyric(lyric.bar,lyric.text)
+	
 	_update_lyrics()
 
 
@@ -50,6 +66,7 @@ func _on_show_lyrics_toggled(button_pressed):
 
 func _on_chart_loaded():
 	_refresh_lyrics()
+	print("finished lyrics refresh")
 	move_to_front()
 
 

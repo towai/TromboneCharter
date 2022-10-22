@@ -14,17 +14,18 @@ func _draw():
 	for i in Global.NUM_KEYS:
 		var key : int = 13 - i
 		var key_color = Color.BLACK if Global.BLACK_KEYS.has(key) else Color.WHITE
-#		draw_rect(Rect2(0, key_height * i, size.x, key_height), key_color, false,2)
-		draw_bordered_rect(Rect2(0, key_height * i, size.x, key_height), key_color, 2)
+		draw_bordered_rect(Rect2(0, key_height * i, size.x, key_height), key_color, 3)
 		if key == keyboard.current_key:
 			draw_rect(Rect2(0, key_height * i, size.x, key_height),Color(1, 1, 0, 0.3))
 
 
-func draw_bordered_rect(rect:Rect2, color:Color, width : int):
+func draw_bordered_rect(rect:Rect2, color:Color, width:float):
 	draw_rect(rect, color)
 	draw_rect(rect, border_color, false, width)
+#	draw_line(rect.position, rect.position + Vector2(size.x, 0), border_color, width, true)
 
 
 func _on_button_pressed():
 	collapsed = !collapsed
 	custom_minimum_size.x = 64 if collapsed else 144
+	$Button.text = "< >" if collapsed else "> <"

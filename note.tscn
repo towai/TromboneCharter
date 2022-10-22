@@ -11,6 +11,7 @@ anchors_preset = 0
 script = ExtResource("1_4pqog")
 
 [node name="NoteTail" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
 anchor_bottom = 0.5
@@ -21,6 +22,7 @@ grow_vertical = 2
 texture = ExtResource("2_wtrys")
 
 [node name="NoteOff" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = -1
 offset_left = -12.0
 offset_top = -12.0
@@ -31,6 +33,7 @@ grow_vertical = 2
 texture = ExtResource("3_schcy")
 
 [node name="NoteOn" type="TextureRect" parent="."]
+layout_mode = 1
 anchors_preset = -1
 offset_left = -16.0
 offset_top = -16.0
@@ -42,21 +45,21 @@ texture = ExtResource("4_2e4fj")
 
 [node name="PitchHandle" type="Control" parent="."]
 show_behind_parent = true
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_default_cursor_shape = 14
 
 [node name="EndHandle" type="Control" parent="."]
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_default_cursor_shape = 6
 
 [node name="BarHandle" type="Control" parent="."]
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0

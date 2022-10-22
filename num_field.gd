@@ -13,10 +13,7 @@ signal value_changed(new_value)
 var value : int:
 	set(with):
 		value = clamp(with, min_value, max_value)
-		if !has_node("SpinBox"): await(get_tree().process_frame)
-		if !has_node("SpinBox"):
-			print("Still no SpinBox??!")
-			return
+		if !has_node("SpinBox"): return
 		$SpinBox.value = value
 		emit_signal("value_changed",value)
 

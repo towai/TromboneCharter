@@ -61,8 +61,6 @@ var doot_enabled : bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	get_local_mouse_position()
-	
 	bar_handle.size = BARHANDLE_SIZE
 	bar_handle.position = -BARHANDLE_SIZE / 2
 	
@@ -169,6 +167,7 @@ func _process_drag():
 			length = new_end.x
 			pitch_delta = new_end.y
 		DRAG_INITIAL:
+			@warning_ignore(unassigned_variable)
 			var new_pos : Vector2
 			
 			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
@@ -241,6 +240,7 @@ func update_touching_notes():
 		_: 
 			next_note.touching_notes[Global.START_IS_TOUCHING] = self if bar >= 0 else null
 			next_note.update_handle_visibility()
+	
 	update_handle_visibility()
 
 
@@ -291,13 +291,17 @@ func _update():
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
+	
 	$NoteOff.position = Vector2(scaled_length, end_height) - ENDHANDLE_SIZE / 2
 	end_handle.position = $NoteOff.position
+	
 	$NoteTail.size.x = scaled_length
 	pitch_handle.size = Vector2(scaled_length, visual_height + TAIL_HEIGHT)
 	pitch_handle.position = Vector2(0, higher_pitch - (TAIL_HEIGHT / 2) )
+	
 	if pitch_delta != 0: $NoteTail.hide()
 	else: $NoteTail.show()
+	
 	size.x = scaled_length
 	queue_redraw()
 

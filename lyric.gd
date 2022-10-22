@@ -25,7 +25,9 @@ func _draw():
 			)
 
 
-func _on_line_edit_text_changed(new_text): text = new_text
+func _on_line_edit_text_changed(new_text):
+	text = new_text
+	print(text)
 
 
 func _on_delete_button_pressed():
@@ -48,5 +50,3 @@ func _on_drag_handle_gui_input(event):
 	if event == null || event.button_index != MOUSE_BUTTON_LEFT || !event.pressed:
 		return
 	dragging = true
-
-

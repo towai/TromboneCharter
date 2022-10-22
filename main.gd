@@ -37,11 +37,13 @@ func _on_help_button_pressed(): show_popup($Instructions)
 func _on_new_chart_pressed(): show_popup($NewChartConfirm)
 func _on_new_chart_confirmed():
 	tmb = TMBInfo.new()
+	print("new tmb")
 	emit_signal("chart_loaded")
 
 
 func _on_load_chart_pressed(): show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path):
+	print("Load tmb from %s" % path)
 	var err = tmb.load_from_file(path)
 	if err:
 		print("Chart load failed")
@@ -66,7 +68,6 @@ func _on_save_dialog_file_selected(path):
 
 func try_cfg_save():
 		if !cfg.has_section("Config"): return
-		print("Try save cfg")
 		var err = cfg.save("user://config.cfg")
 		if err:
 			print("Oh noes")
@@ -78,6 +79,9 @@ func _on_description_text_changed(): tmb.description = %Description.text
 
 func _on_copy_button_pressed():
 	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint: return
+	if Input.is_key_pressed(KEY_SHIFT):
+		_on_copy_confirmed()
+		return
 	$CopyConfirm.show()
 
 func _on_copy_confirmed():
@@ -96,12 +100,11 @@ func _on_copy_confirmed():
 	if copy_target + length > tmb.endpoint: return
 	
 	tmb.clear_section(copy_target,length)
-	print("Finished clearing section")
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
-	print("Finished copying notes")
 	emit_signal("chart_loaded")
 
 
-func _on_refresh_button_pressed(): emit_signal("chart_loaded")
+func _on_refresh_button_pressed():
+	emit_signal("chart_loaded")

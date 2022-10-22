@@ -3,7 +3,8 @@ extends Control
 const scrollbar_height : float = 8
 var bar_spacing : int:
 	get: return tmb.savednotespacing * %ZoomLevel.value
-var tmb : TMBInfo
+@onready var tmb : TMBInfo:
+	get: return Global.working_tmb
 var middle_c_y : float:
 	get: return (key_height * 13.0) + (key_height / 2.0)
 var key_height : float:
@@ -27,6 +28,8 @@ var bar_font : Font
 var draw_targets : bool:
 	get: return %ShowMouseTargets.button_pressed
 var doot_enabled : bool = true
+var updated_this_frame := 0
+var clearing_notes := false
 
 
 func doot(pitch:float):
@@ -39,14 +42,15 @@ func doot(pitch:float):
 
 func _ready():
 	bar_font = measure_font.duplicate()
-	
-	tmb = Global.working_tmb
 	main.chart_loaded.connect(_on_tmb_loaded)
 	Global.tmb_updated.connect(_on_tmb_updated)
 	%TimingSnap.value_changed.connect(timing_snap_changed)
 
 
-func _process(_delta): if %PreviewController.is_playing: queue_redraw()
+func _process(_delta):
+	if updated_this_frame: print("chart: updated %d times in one frame" % updated_this_frame)
+	updated_this_frame = 0
+	if %PreviewController.is_playing: queue_redraw()
 
 
 func to_snapped(pos:Vector2):
@@ -75,12 +79,15 @@ func timing_snap_changed(_value:float): queue_redraw()
 
 
 func _on_tmb_loaded():
-	# this reference should theoretically never change but let's anyway
-	tmb = Global.working_tmb
-	for child in get_children():
-		if !(child is Note): continue
-		child.touching_notes.clear()
-		child.queue_free()
+	var children := get_children()
+	var front = children.front()
+	print(front.name)
+	print(children.size() * 7)
+	for i in children.size():
+		var child = children[-(i + 1)]
+		if child is Note: child.queue_free()
+	print("done freeing notes")
+	
 	doot_enabled = false
 	for note in tmb.notes:
 		add_note(false,
@@ -89,23 +96,22 @@ func _on_tmb_loaded():
 				note[TMBInfo.NOTE_PITCH_START],
 				note[TMBInfo.NOTE_PITCH_DELTA]
 		)
+	print("done adding notes")
 	doot_enabled = %DootToggle.button_pressed
-	print("ASDF")
 	_on_tmb_updated()
-	print("HJKL")
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-		var new_note = note_scn.instantiate()
-		new_note.bar = bar
-		new_note.length = length
-		new_note.pitch_start = pitch
-		new_note.pitch_delta = pitch_delta
-		new_note.position.x = bar_to_x(bar)
-		new_note.position.y = pitch_to_height(pitch)
-		new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
-		if doot_enabled: doot(pitch)
-		add_child(new_note)
+	var new_note = note_scn.instantiate()
+	new_note.bar = bar
+	new_note.length = length
+	new_note.pitch_start = pitch
+	new_note.pitch_delta = pitch_delta
+	new_note.position.x = bar_to_x(bar)
+	new_note.position.y = pitch_to_height(pitch)
+	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
+	if doot_enabled: doot(pitch)
+	add_child(new_note)
 
 
 func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -124,9 +130,12 @@ func _on_tmb_updated():
 	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
 	for note in get_children():
-		if !(note is Note): continue
+		if !(note is Note) \
+				|| note.is_queued_for_deletion():
+			continue
 		note.position.x = note.bar * bar_spacing
 	queue_redraw()
+	updated_this_frame += 1
 
 
 func find_touching_notes(the_note:Note) -> Dictionary:
@@ -193,6 +202,7 @@ func _gui_input(event):
 	event = event as InputEventMouseButton
 	if event == null || %PreviewController.is_playing: return
 	if event.pressed && event.button_index == MOUSE_BUTTON_LEFT:
+		@warning_ignore(unassigned_variable)
 		var new_note_pos : Vector2
 		
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
@@ -210,7 +220,9 @@ func _gui_input(event):
 func _notification(what):
 	match what:
 		NOTIFICATION_RESIZED:
-			for note in get_children(): if note is Note: note._update()
+			for note in get_children():
+				if note is Note && !note.is_queued_for_deletion():
+					note._update()
 
 
 func _on_doot_toggle_toggled(toggle): doot_enabled = toggle

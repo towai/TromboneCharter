@@ -20,6 +20,7 @@ func _do_preview():
 	# actually an int but i don't want weird shit happening when i try to do math on it
 	var bpm : float = chart.tmb.tempo
 	var time : float
+	@warning_ignore(unused_variable)
 	var previous_time : float
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
