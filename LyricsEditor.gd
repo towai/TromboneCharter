@@ -3,15 +3,14 @@ extends Control
 
 var lyric_scn = preload("res://lyric.tscn")
 @onready var chart = %Chart
-var updated_this_frame := 0
+var _update_queued := false
 
 func _ready():
-	Global.tmb_updated.connect(_update_lyrics)
+	Global.tmb_updated.connect(_on_tmb_update)
 
+func _on_tmb_update(): _update_queued = true
 
-func _process(_delta):
-	if updated_this_frame: print("lyrics: updated %d times this frame" % updated_this_frame)
-	updated_this_frame = 0
+func _process(_delta): if _update_queued: _update_lyrics()
 
 
 func package_lyrics() -> Array:
@@ -40,7 +39,7 @@ func _update_lyrics():
 	for child in get_children():
 		if !(child is Lyric): continue
 		child.position.x = chart.bar_to_x(child.bar)
-	updated_this_frame += 1
+	_update_queued = false
 
 
 func _refresh_lyrics():
@@ -65,7 +64,6 @@ func _on_show_lyrics_toggled(button_pressed):
 
 func _on_chart_loaded():
 	_refresh_lyrics()
-	print("finished lyrics refresh")
 	move_to_front()
 
 

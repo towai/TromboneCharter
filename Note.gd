@@ -38,6 +38,9 @@ var visual_height : float:
 	get: return abs(end_height)
 var is_slide: bool:
 	get: return pitch_delta != 0
+var is_in_view : bool:
+	get: return position.x + size.x >= chart.scroll_position \
+			&& position.x <= chart.scroll_end
 var dragging := 0
 enum {
 	DRAG_NONE,
@@ -347,4 +350,5 @@ func _draw():
 
 func _exit_tree():
 	bar = -69420.0
+	if chart.clearing_notes: return
 	update_touching_notes()

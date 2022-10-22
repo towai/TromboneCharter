@@ -96,6 +96,7 @@ dialog_autowrap = true
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2i(360, 270)
+layout_mode = 2
 offset_right = 1280.0
 offset_bottom = 396.0
 size_flags_vertical = 3
@@ -103,7 +104,7 @@ theme_override_constants/separation = 0
 
 [node name="Piano" type="Control" parent="PianoRoll"]
 custom_minimum_size = Vector2i(144, 0)
-layout_mode = 3
+layout_mode = 2
 anchors_preset = 0
 offset_right = 144.0
 offset_bottom = 396.0
@@ -111,6 +112,7 @@ mouse_filter = 1
 script = ExtResource("3_mh03t")
 
 [node name="Keys" type="VBoxContainer" parent="PianoRoll/Piano"]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -120,12 +122,14 @@ theme_override_constants/separation = 0
 script = ExtResource("3_132ml")
 
 [node name="Button" type="Button" parent="PianoRoll/Piano"]
+layout_mode = 0
 offset_right = 8.0
 offset_bottom = 8.0
 text = "> <"
 
 [node name="ChartView" type="ScrollContainer" parent="PianoRoll"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 144.0
 offset_right = 1280.0
 offset_bottom = 396.0
@@ -137,7 +141,7 @@ script = ExtResource("4_rrlxc")
 [node name="Chart" type="Control" parent="PianoRoll/ChartView"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(300, 0)
-layout_mode = 3
+layout_mode = 2
 anchors_preset = 0
 offset_right = 300.0
 offset_bottom = 388.0
@@ -147,7 +151,7 @@ script = ExtResource("5_yhpph")
 [node name="LyricsEditor" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -159,12 +163,14 @@ script = ExtResource("9_srvtg")
 unique_name_in_owner = true
 clip_contents = true
 custom_minimum_size = Vector2i(0, 144)
+layout_mode = 2
 offset_top = 396.0
 offset_right = 1280.0
 offset_bottom = 540.0
 script = ExtResource("6_2cfeh")
 
 [node name="MarginC" type="MarginContainer" parent="Settings"]
+layout_mode = 2
 offset_right = 1280.0
 offset_bottom = 144.0
 theme_override_constants/margin_left = 5
@@ -173,36 +179,42 @@ theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 5
 
 [node name="HBoxC" type="HBoxContainer" parent="Settings/MarginC"]
+layout_mode = 2
 offset_left = 5.0
 offset_top = 5.0
 offset_right = 1275.0
 offset_bottom = 139.0
 
 [node name="Buttons" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
+layout_mode = 2
 offset_right = 110.0
 offset_bottom = 134.0
 
 [node name="ViewSwitcher" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(110, 0)
+layout_mode = 2
 offset_right = 110.0
 offset_bottom = 28.0
 size_flags_vertical = 2
 text = "Editor Settings"
 
 [node name="LoadChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
+layout_mode = 2
 offset_top = 42.0
 offset_right = 110.0
 offset_bottom = 70.0
 text = "Load Chart"
 
 [node name="SaveChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
+layout_mode = 2
 offset_top = 74.0
 offset_right = 110.0
 offset_bottom = 102.0
 text = "Save Chart"
 
 [node name="NewChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
+layout_mode = 2
 offset_top = 106.0
 offset_right = 110.0
 offset_bottom = 134.0
@@ -211,6 +223,7 @@ text = "New Chart"
 [node name="ChartInfo" type="HBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
 visible = false
+layout_mode = 2
 offset_left = 114.0
 offset_right = 1229.0
 offset_bottom = 134.0
@@ -218,6 +231,7 @@ size_flags_horizontal = 3
 
 [node name="SongInfo" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 11.0
 offset_right = 489.0
 offset_bottom = 134.0
@@ -226,12 +240,14 @@ grow_vertical = 2
 size_flags_horizontal = 6
 
 [node name="Title" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
 offset_left = 40.0
 offset_right = 234.0
 json_key = "name"
 field_name = "Title"
 
 [node name="ShortTitle" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
 offset_top = 49.0
 offset_right = 234.0
 offset_bottom = 85.0
@@ -240,6 +256,7 @@ json_key = "shortName"
 field_name = "Short Title"
 
 [node name="Author" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
 offset_left = 22.0
 offset_top = 98.0
 offset_right = 234.0
@@ -248,6 +265,7 @@ json_key = "author"
 field_name = "Author"
 
 [node name="Genre" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
 offset_left = 272.0
 offset_right = 478.0
 json_key = "genre"
@@ -256,6 +274,7 @@ field_name = "Genre"
 [node name="Description" type="TextEdit" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(240, 0)
+layout_mode = 2
 offset_left = 238.0
 offset_top = 40.0
 offset_right = 478.0
@@ -266,6 +285,7 @@ wrap_mode = 1
 
 [node name="SongInfo2" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 504.0
 offset_right = 857.0
 offset_bottom = 134.0
@@ -273,6 +293,7 @@ size_flags_horizontal = 2
 theme_override_constants/v_separation = 8
 
 [node name="Length" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_left = 5.0
 offset_right = 181.0
 offset_bottom = 39.0
@@ -282,6 +303,7 @@ min_value = 0
 max_value = 9999
 
 [node name="Tempo" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_left = 55.0
 offset_top = 47.0
 offset_right = 181.0
@@ -292,6 +314,7 @@ min_value = 0
 max_value = 999
 
 [node name="TimeSig" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_top = 94.0
 offset_right = 181.0
 offset_bottom = 133.0
@@ -301,6 +324,7 @@ min_value = 0
 max_value = 16
 
 [node name="Year" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_left = 243.0
 offset_right = 353.0
 offset_bottom = 39.0
@@ -310,6 +334,7 @@ min_value = -9999
 max_value = 9999
 
 [node name="Diff" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_left = 213.0
 offset_top = 47.0
 offset_right = 353.0
@@ -320,6 +345,7 @@ min_value = 0
 max_value = 10
 
 [node name="NoteSpacing" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
+layout_mode = 2
 offset_left = 185.0
 offset_top = 94.0
 offset_right = 353.0
@@ -330,17 +356,20 @@ min_value = 0
 max_value = 480
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
+layout_mode = 2
 offset_left = 1008.0
 offset_right = 1115.0
 offset_bottom = 134.0
 
 [node name="Colors" type="HBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo/ColorSettings"]
+layout_mode = 2
 offset_right = 107.0
 offset_bottom = 32.0
 
 [node name="StartColor" type="ColorPickerButton" parent="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(32, 32)
+layout_mode = 2
 offset_right = 32.0
 offset_bottom = 32.0
 color = Color(0.913725, 0.188235, 0.270588, 1)
@@ -349,6 +378,7 @@ edit_alpha = false
 [node name="EndColor" type="ColorPickerButton" parent="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(32, 32)
+layout_mode = 2
 offset_left = 36.0
 offset_right = 68.0
 offset_bottom = 32.0
@@ -357,6 +387,7 @@ edit_alpha = false
 
 [node name="UseColors" type="CheckBox" parent="Settings/MarginC/HBoxC/ChartInfo/ColorSettings"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_top = 36.0
 offset_right = 107.0
 offset_bottom = 84.0
@@ -364,7 +395,7 @@ text = "Use custom
 note colors"
 
 [node name="ColorPreview" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/ColorSettings"]
-layout_mode = 3
+layout_mode = 2
 anchors_preset = 0
 offset_top = 88.0
 offset_right = 107.0
@@ -374,16 +405,19 @@ script = ExtResource("10_14v0o")
 
 [node name="EditSettings" type="VFlowContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 114.0
 offset_right = 565.0
 offset_bottom = 134.0
 size_flags_horizontal = 3
 
 [node name="ZoomEntry" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
 offset_right = 232.0
 offset_bottom = 28.0
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings/ZoomEntry"]
+layout_mode = 2
 offset_top = 2.0
 offset_right = 43.0
 offset_bottom = 25.0
@@ -391,6 +425,7 @@ text = "Zoom:"
 
 [node name="ZoomLevel" type="HSlider" parent="Settings/MarginC/HBoxC/EditSettings/ZoomEntry"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 47.0
 offset_top = 6.0
 offset_right = 182.0
@@ -404,18 +439,21 @@ step = 0.05
 value = 1.0
 
 [node name="ResetButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/ZoomEntry"]
+layout_mode = 2
 offset_left = 186.0
 offset_right = 232.0
 offset_bottom = 28.0
 text = "Reset"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
 offset_top = 32.0
 offset_right = 232.0
 offset_bottom = 60.0
 
 [node name="TimeSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_right = 24.0
 offset_bottom = 28.0
 button_pressed = true
@@ -423,6 +461,7 @@ button_pressed = true
 [node name="TimingSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(204, 0)
+layout_mode = 2
 offset_left = 28.0
 offset_right = 232.0
 offset_bottom = 28.0
@@ -434,12 +473,14 @@ prefix = "Timing snap: 1/"
 suffix = "beats"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
 offset_top = 64.0
 offset_right = 232.0
 offset_bottom = 92.0
 
 [node name="PitchSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_right = 24.0
 offset_bottom = 28.0
 button_pressed = true
@@ -447,6 +488,7 @@ button_pressed = true
 [node name="PitchSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2i(204, 0)
+layout_mode = 2
 offset_left = 28.0
 offset_right = 232.0
 offset_bottom = 28.0
@@ -459,6 +501,7 @@ suffix = "semitones"
 
 [node name="DrawMicrotones" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_top = 96.0
 offset_right = 232.0
 offset_bottom = 124.0
@@ -466,6 +509,7 @@ text = "Draw Microtones"
 
 [node name="DootToggle" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 236.0
 offset_right = 451.0
 offset_bottom = 28.0
@@ -474,6 +518,7 @@ text = "Doot on pitch change"
 
 [node name="PropagateChanges" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 236.0
 offset_top = 32.0
 offset_right = 451.0
@@ -483,6 +528,7 @@ text = "Propagate changes in slides"
 
 [node name="ShowMouseTargets" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 236.0
 offset_top = 64.0
 offset_right = 451.0
@@ -491,6 +537,7 @@ text = "Outline mouse targets"
 
 [node name="RefreshButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
 visible = false
+layout_mode = 2
 offset_left = 236.0
 offset_top = 106.0
 offset_right = 451.0
@@ -500,17 +547,20 @@ text = "Force note refresh"
 
 [node name="SectionSelection" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 641.0
 offset_right = 824.0
 offset_bottom = 134.0
 size_flags_horizontal = 6
 
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
 offset_right = 183.0
 offset_bottom = 28.0
 alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+layout_mode = 2
 offset_left = 14.0
 offset_top = 2.0
 offset_right = 104.0
@@ -519,17 +569,20 @@ text = "Section Start:"
 
 [node name="SectionStart" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 108.0
 offset_right = 183.0
 offset_bottom = 28.0
 
 [node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
 offset_top = 32.0
 offset_right = 183.0
 offset_bottom = 60.0
 alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+layout_mode = 2
 offset_top = 2.0
 offset_right = 104.0
 offset_bottom = 25.0
@@ -537,6 +590,7 @@ text = "Section Length:"
 
 [node name="SectionLength" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 108.0
 offset_right = 183.0
 offset_bottom = 28.0
@@ -544,6 +598,7 @@ min_value = 1.0
 value = 1.0
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
 offset_top = 68.0
 offset_right = 183.0
 offset_bottom = 98.0
@@ -551,6 +606,7 @@ size_flags_vertical = 6
 alignment = 2
 
 [node name="MetroIcon" type="TextureRect" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+layout_mode = 2
 offset_right = 30.0
 offset_bottom = 30.0
 texture = ExtResource("11_maqbd")
@@ -558,24 +614,28 @@ stretch_mode = 2
 
 [node name="MetroChk" type="CheckBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 34.0
 offset_right = 117.0
 offset_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+layout_mode = 2
 offset_left = 121.0
 offset_right = 183.0
 offset_bottom = 30.0
 text = "Preview"
 
 [node name="HBox3" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
 offset_top = 106.0
 offset_right = 183.0
 offset_bottom = 134.0
 alignment = 2
 
 [node name="CopyButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
+layout_mode = 2
 offset_left = 40.0
 offset_right = 104.0
 offset_bottom = 28.0
@@ -583,12 +643,14 @@ text = "Copy to:"
 
 [node name="CopyTarget" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 108.0
 offset_right = 183.0
 offset_bottom = 28.0
 
 [node name="LyricsTools" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 901.0
 offset_right = 1229.0
 offset_bottom = 134.0
@@ -596,6 +658,7 @@ size_flags_horizontal = 3
 
 [node name="ShowLyrics" type="CheckBox" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 180.0
 offset_right = 328.0
 offset_bottom = 28.0
@@ -605,6 +668,7 @@ text = "Show lyrics editor"
 
 [node name="AddLyric" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 200.0
 offset_top = 37.0
 offset_right = 328.0
@@ -614,6 +678,7 @@ text = "Add new lyric at..."
 
 [node name="LyricBar" type="SpinBox" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_left = 252.313
 offset_top = 69.0
 offset_right = 328.0
@@ -624,6 +689,7 @@ prefix = "Beat"
 
 [node name="CopyLyrics" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
+layout_mode = 2
 offset_top = 106.0
 offset_right = 133.0
 offset_bottom = 134.0
@@ -632,6 +698,7 @@ size_flags_vertical = 10
 text = "Copy section lyrics"
 
 [node name="HelpButton" type="Button" parent="Settings/MarginC/HBoxC"]
+layout_mode = 2
 offset_left = 1233.0
 offset_right = 1270.0
 offset_bottom = 134.0

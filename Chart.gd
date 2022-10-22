@@ -1,6 +1,10 @@
 extends Control
 
 const scrollbar_height : float = 8
+var scroll_position : float:
+	get: return %ChartView.scroll_horizontal
+var scroll_end : float:
+	get: return scroll_position + %ChartView.size.x
 var bar_spacing : int:
 	get: return tmb.savednotespacing * %ZoomLevel.value
 @onready var tmb : TMBInfo:
@@ -29,6 +33,7 @@ var draw_targets : bool:
 	get: return %ShowMouseTargets.button_pressed
 var doot_enabled : bool = true
 var _update_queued := false
+var clearing_notes := false
 
 
 func doot(pitch:float):
@@ -44,6 +49,17 @@ func _ready():
 	main.chart_loaded.connect(_on_tmb_loaded)
 	Global.tmb_updated.connect(_on_tmb_updated)
 	%TimingSnap.value_changed.connect(timing_snap_changed)
+
+
+func _on_scroll_change():
+	await(get_tree().process_frame)
+	for child in get_children():
+		if child is Note:
+			if child.is_in_view:
+				child.show()
+				print(child.bar)
+				child.queue_redraw()
+			else: child.hide()
 
 
 func _process(_delta):
@@ -95,12 +111,12 @@ func timing_snap_changed(_value:float): queue_redraw()
 
 func _on_tmb_loaded():
 	var children := get_children()
-	var front = children.front()
-	print(children.size() * 7)
+	clearing_notes = true
 	for i in children.size():
 		var child = children[-(i + 1)]
 		if child is Note: child.queue_free()
-	print("done freeing notes")
+	await(get_tree().process_frame)
+	clearing_notes = false
 	
 	doot_enabled = false
 	for note in tmb.notes:
@@ -110,7 +126,6 @@ func _on_tmb_loaded():
 				note[TMBInfo.NOTE_PITCH_START],
 				note[TMBInfo.NOTE_PITCH_DELTA]
 		)
-	print("done adding notes")
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
@@ -199,8 +214,8 @@ func _draw():
 
 func _gui_input(event):
 	event = event as InputEventMouseButton
-	if event == null || %PreviewController.is_playing: return
-	if event.pressed && event.button_index == MOUSE_BUTTON_LEFT:
+	if event == null || !event.pressed: return
+	if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
 		@warning_ignore(unassigned_variable)
 		var new_note_pos : Vector2
 		
@@ -214,6 +229,9 @@ func _gui_input(event):
 				Global.SEMITONE * -13, Global.SEMITONE * 13)
 		
 		add_note(true, new_note_pos.x, current_subdiv, new_note_pos.y)
+	elif (event.button_index == MOUSE_BUTTON_WHEEL_DOWN) \
+			|| event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		_on_scroll_change()
 
 
 func _notification(what):
