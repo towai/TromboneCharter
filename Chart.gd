@@ -28,8 +28,7 @@ var bar_font : Font
 var draw_targets : bool:
 	get: return %ShowMouseTargets.button_pressed
 var doot_enabled : bool = true
-var updated_this_frame := 0
-var clearing_notes := false
+var _update_queued := false
 
 
 func doot(pitch:float):
@@ -48,9 +47,25 @@ func _ready():
 
 
 func _process(_delta):
-	if updated_this_frame: print("chart: updated %d times in one frame" % updated_this_frame)
-	updated_this_frame = 0
+	if _update_queued: _do_tmb_update()
 	if %PreviewController.is_playing: queue_redraw()
+
+
+func _on_tmb_updated(): _update_queued = true
+
+func _do_tmb_update():
+	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
+	%SectionStart.max_value = tmb.endpoint - 1
+	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
+	%LyricBar.max_value = tmb.endpoint - 1
+	%LyricsEditor._update_lyrics()
+	for note in get_children():
+		if !(note is Note) \
+				|| note.is_queued_for_deletion():
+			continue
+		note.position.x = note.bar * bar_spacing
+	queue_redraw()
+	_update_queued = false
 
 
 func to_snapped(pos:Vector2):
@@ -81,7 +96,6 @@ func timing_snap_changed(_value:float): queue_redraw()
 func _on_tmb_loaded():
 	var children := get_children()
 	var front = children.front()
-	print(front.name)
 	print(children.size() * 7)
 	for i in children.size():
 		var child = children[-(i + 1)]
@@ -121,21 +135,6 @@ func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bo
 		var step_time = step_length * step
 		if Global.overlaps_any_note(time + step_time, exclude): return true
 	return false
-
-
-func _on_tmb_updated():
-	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
-	%SectionStart.max_value = tmb.endpoint - 1
-	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
-	%LyricBar.max_value = tmb.endpoint - 1
-	%LyricsEditor._update_lyrics()
-	for note in get_children():
-		if !(note is Note) \
-				|| note.is_queued_for_deletion():
-			continue
-		note.position.x = note.bar * bar_spacing
-	queue_redraw()
-	updated_this_frame += 1
 
 
 func find_touching_notes(the_note:Note) -> Dictionary:

@@ -46,8 +46,7 @@ func _update_lyrics():
 func _refresh_lyrics():
 	
 	var children = get_children()
-	var front = children.front()
-	print(front.name)
+	
 	for i in children.size():
 		var child = children[-(i + 1)]
 		if child is Lyric && !child.is_queued_for_deletion():

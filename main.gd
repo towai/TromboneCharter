@@ -1,10 +1,6 @@
 extends Control
 
 
-###FEATURES TO IMPLEMENT
-# lyrics editor
-
-
 var tmb : TMBInfo:
 	get: return Global.working_tmb
 	set(value): Global.working_tmb = value
@@ -27,12 +23,17 @@ func _ready():
 	_on_new_chart_confirmed()
 
 
+func _on_description_text_changed(): tmb.description = %Description.text
+
+func _on_refresh_button_pressed(): emit_signal("chart_loaded")
+
+func _on_help_button_pressed(): show_popup($Instructions)
+
+
 func show_popup(window:Window):
 	window.position = popup_location
 	window.show()
 
-
-func _on_help_button_pressed(): show_popup($Instructions)
 
 func _on_new_chart_pressed(): show_popup($NewChartConfirm)
 func _on_new_chart_confirmed():
@@ -74,9 +75,6 @@ func try_cfg_save():
 			print(error_string(err))
 
 
-func _on_description_text_changed(): tmb.description = %Description.text
-
-
 func _on_copy_button_pressed():
 	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint: return
 	if Input.is_key_pressed(KEY_SHIFT):
@@ -103,8 +101,4 @@ func _on_copy_confirmed():
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
-	emit_signal("chart_loaded")
-
-
-func _on_refresh_button_pressed():
 	emit_signal("chart_loaded")

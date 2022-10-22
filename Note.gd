@@ -36,6 +36,8 @@ var end_height : float:
 	get: return -((pitch_delta / Global.SEMITONE) * chart.key_height)
 var visual_height : float:
 	get: return abs(end_height)
+var is_slide: bool:
+	get: return pitch_delta != 0
 var dragging := 0
 enum {
 	DRAG_NONE,
@@ -55,8 +57,10 @@ var doot_enabled : bool = false
 
 @onready var chart = get_parent()
 @onready var bar_handle = $BarHandle
+var show_bar_handle := true
 @onready var pitch_handle = $PitchHandle
 @onready var end_handle = $EndHandle
+var show_end_handle := true
 @onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
 
 # Called when the node enters the scene tree for the first time.
@@ -78,7 +82,7 @@ func _process(_delta):
 
 
 func _on_handle_input(event, which):
-	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 3
+	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 0
 	move_child(pitch_handle, pitch_handle_position)
 	
 	event = event as InputEventMouseButton
@@ -96,13 +100,6 @@ func _on_handle_input(event, which):
 			chart.update_note_array()
 
 
-#func _gui_input(_event):
-#	var pitch_handle_position = 3 if Input.is_key_pressed(KEY_SHIFT) else -1
-#	print(pitch_handle_position)
-#	move_child(pitch_handle, pitch_handle_position)
-	
-
-
 func _process_drag():
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
 		_end_drag()
@@ -114,7 +111,8 @@ func _process_drag():
 			if Global.settings.snap_time:
 				new_time = chart.to_snapped(chart.get_local_mouse_position()).x
 			else: new_time = chart.to_unsnapped(chart.get_local_mouse_position()).x
-			if new_time + length >= chart.tmb.endpoint: new_time -= length
+			if new_time + length >= chart.tmb.endpoint:
+				new_time = chart.tmb.endpoint - length
 			
 			var exclude = [old_bar]
 			if !Input.is_key_pressed(KEY_ALT):
@@ -124,7 +122,8 @@ func _process_drag():
 				if has_slide_neighbor(Global.START_IS_TOUCHING, pitch_start):
 					exclude.append(touching_notes[Global.START_IS_TOUCHING].bar)
 			
-			if chart.stepped_note_overlaps(new_time,length,exclude): return
+			if chart.stepped_note_overlaps(new_time,length,exclude):
+				return
 			
 			bar = new_time
 			_update()
@@ -144,8 +143,10 @@ func _process_drag():
 			var new_end : Vector2 = chart.to_unsnapped(chart.get_local_mouse_position()) \
 							- Vector2(bar, pitch_start)
 			
-			new_end.x = new_end.x if !Global.settings.snap_time \
+			new_end.x = min(chart.tmb.endpoint,
+					new_end.x if !Global.settings.snap_time \
 					else snapped(new_end.x, 1.0 / Global.settings.timing_snap)
+					)
 			
 			var exclude = [old_bar]
 			if has_slide_neighbor(Global.END_IS_TOUCHING, old_end_pitch) \
@@ -157,7 +158,6 @@ func _process_drag():
 					|| new_end.x + bar > chart.tmb.endpoint:
 				return
 			
-			if new_end.x + bar > chart.tmb.endpoint: return
 			new_end.y = new_end.y if !Global.settings.snap_pitch \
 					else snapped(new_end.y, Global.SEMITONE / Global.settings.pitch_snap)
 			new_end.y = clamp(new_end.y, (-13 * Global.SEMITONE) - pitch_start,
@@ -268,20 +268,19 @@ func receive_slide_propagation(from:int):
 
 
 func update_handle_visibility():
-	if touching_notes.has(Global.START_IS_TOUCHING):
-		$NoteOn.hide()
+	show_bar_handle = !touching_notes.has(Global.START_IS_TOUCHING)
+	show_end_handle = !touching_notes.has(Global.END_IS_TOUCHING)
+	
+	if !show_bar_handle:
 		bar_handle.size.x = BARHANDLE_SIZE.x / 2
 		bar_handle.position.x = 0
 	else: 
-		$NoteOn.show()
 		bar_handle.size.x = BARHANDLE_SIZE.x
 		bar_handle.position.x = -BARHANDLE_SIZE.x / 2
 	
-	if touching_notes.has(Global.END_IS_TOUCHING):
-		$NoteOff.hide()
+	if !show_end_handle:
 		end_handle.size.x = ENDHANDLE_SIZE.x / 2
-	else: 
-		$NoteOff.show()
+	else:
 		end_handle.size.x = ENDHANDLE_SIZE.x
 	
 	queue_redraw()
@@ -292,15 +291,10 @@ func _update():
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
 	
-	$NoteOff.position = Vector2(scaled_length, end_height) - ENDHANDLE_SIZE / 2
-	end_handle.position = $NoteOff.position
+	end_handle.position = Vector2(scaled_length, end_height) - ENDHANDLE_SIZE / 2
 	
-	$NoteTail.size.x = scaled_length
 	pitch_handle.size = Vector2(scaled_length, visual_height + TAIL_HEIGHT)
 	pitch_handle.position = Vector2(0, higher_pitch - (TAIL_HEIGHT / 2) )
-	
-	if pitch_delta != 0: $NoteTail.hide()
-	else: $NoteTail.show()
 	
 	size.x = scaled_length
 	queue_redraw()
@@ -311,26 +305,44 @@ func _draw():
 		draw_rect(Rect2(bar_handle.position,bar_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(pitch_handle.position,pitch_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(end_handle.position,end_handle.size),Color.WHITE,false)
+	var fill_color = Color("FF6DB4")
 	
-	# handle drawing curve if is a slide
-	if pitch_delta == 0: return
-	var points = PackedVector2Array()
-	var y_array := []
-	var num_points = 24
-	for i in num_points:
-		y_array.insert(i, smoothstep(0, 1, float(i) / (num_points - 1)))
-	y_array.push_front(0.0)
-	y_array.push_back(1.0)
-	for idx in y_array.size():
-		points.append(Vector2(
-				(scaled_length * (float(idx) / (y_array.size() - 1))),
-				end_height * y_array[idx])
-		)
-	for i in 3: # outline, field, core
-		draw_polyline(points,
-		Color.BLACK if i == 0 else Color.WHITE if i == 1 else Color("FF6DB4"),
-		16 if i == 0 else 14 if i == 1 else 8,
-		true)
+	var _draw_bar_handle := func():
+		var radius = BARHANDLE_SIZE.x / 2
+		draw_circle(Vector2.ZERO, radius - 1.0, fill_color)
+		draw_arc(Vector2.ZERO, radius - 3.0, 0.0, TAU, 36, Color.WHITE, 2.0, true)
+		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 36, Color.BLACK, 1.0,true)
+	
+	var _draw_end_handle := func():
+		var radius = ENDHANDLE_SIZE.x / 2
+		var endhandle_position := Vector2(size.x,end_height)
+		draw_circle(endhandle_position, radius - 1.0, fill_color)
+		draw_arc(endhandle_position, radius - 2.0, 0.0, TAU, 36, Color.WHITE, 2.0, true)
+		draw_arc(endhandle_position, radius, 0.0, TAU, 36, Color.BLACK, 1.0,true)
+	
+	var _draw_tail := func():
+		var points = PackedVector2Array()
+		var y_array := []
+		var num_points = 24
+		for i in num_points:
+			y_array.insert(i, smoothstep(0, 1, float(i) / (num_points - 1)))
+		y_array.push_front(0.0)
+		y_array.push_back(1.0)
+		for idx in y_array.size():
+			points.append(Vector2(
+					(scaled_length * (float(idx) / (y_array.size() - 1))),
+					end_height * y_array[idx])
+			)
+		for i in 3: # outline, field, core
+			draw_polyline(points,
+			Color.BLACK if i == 0 else Color.WHITE if i == 1 else fill_color,
+			16 if i == 0 else 12 if i == 1 else 6,
+			true)
+	
+	_draw_tail.call()
+	if show_bar_handle: _draw_bar_handle.call()
+	if show_end_handle: _draw_end_handle.call()
+	
 
 
 func _exit_tree():
