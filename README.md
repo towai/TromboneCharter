@@ -19,7 +19,7 @@
  * Two notes, one beginning where the other ends, will form a slide if the pitches are the same. Changes to one of them will affect the other.
     * If you want to break a slide, hold Alt while editing one of its members.
 #### Lyric editing
- * Use the button in Edit Settings to add a lyric.
+ * Use the button in "Editor Settings" to add a lyric.
  * The little handle right below the label can be used to drag it around.
  * The trashcan deletes the note.
  * This is all pretty much self-explanatory, right
