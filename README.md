@@ -24,6 +24,8 @@
  * The trashcan deletes the note.
  * This is all pretty much self-explanatory, right
 #### Everything else
+ * Hit "Preview" in Editor Settings to preview the selected section, with a metronome if the metronome checkbox is ticked.
+    * Hitting Escape will end the preview early.
  * You can hold Shift when saving to bypass the Save As dialog.
     * Shift also bypasses the confirmation popup on section copy.
  * `trackRef` will automatically be populated with the name of the folder the chart is saved to.
