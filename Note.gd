@@ -142,6 +142,13 @@ func _process_drag():
 						).y
 			pitch_start = new_pitch
 			
+			doot_enabled = false
+			if end_pitch > 13 * Global.SEMITONE:
+				pitch_delta = (13 * Global.SEMITONE) - pitch_start
+			if end_pitch < -13 * Global.SEMITONE:
+				pitch_delta = -(13 * Global.SEMITONE) - pitch_start
+			doot_enabled = true
+			
 		DRAG_END:
 			var new_end : Vector2 = chart.to_unsnapped(chart.get_local_mouse_position()) \
 							- Vector2(bar, pitch_start)
@@ -265,7 +272,7 @@ func receive_slide_propagation(from:int):
 			length -= length_change
 			pitch_delta -= pitch_change
 		_: print("?????")
-	if length == 0: queue_free()
+	if length <= 0: queue_free()
 	doot_enabled = true
 
 
