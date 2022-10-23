@@ -10,7 +10,24 @@
  * Lyrics editor.
 
 ### Usage
-Filling this out later. Click the "?" button in the UI.
+#### Note editing
+ * Click anywhere in the chart to add a note.
+ * Click on a note's start to move it in time.
+ * Click on a note's middle to change its pitch.
+    * If a note is too small to easily grab its pitch handle, hold Shift to bring it to the front.
+ * Click on a note's end to change its length and ending pitch.
+ * Two notes, one beginning where the other ends, will form a slide if the pitches are the same. Changes to one of them will affect the other.
+    * If you want to break a slide, hold Alt while editing one of its members.
+#### Lyric editing
+ * Use the button in Edit Settings to add a lyric.
+ * The little handle right below the label can be used to drag it around.
+ * The trashcan deletes the note.
+ * This is all pretty much self-explanatory, right
+#### Everything else
+ * You can hold Shift when saving to bypass the Save As dialog.
+    * Shift also bypasses the confirmation popup on section copy.
+ * `trackRef` will automatically be populated with the name of the folder the chart is saved to.
+ * `note_color_start` and `note_color_end` will be populated iff "Use custom note colors" is checked.
 
 ### Acknowledgements:
 No copyrighted assets were used in making this. Trombone sample from GM.DLS.
