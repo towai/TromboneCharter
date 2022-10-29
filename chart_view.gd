@@ -3,10 +3,9 @@ extends ScrollContainer
 
 func _ready(): get_h_scroll_bar().scrolling.connect(_on_scroll_change)
 
+func _on_scroll_change(): %Chart._on_scroll_change()
 
-func _on_scroll_change():
-	print("What the fuck")
-	%Chart._on_scroll_change()
+func _on_pitch_snap_value_changed(_value): queue_redraw()
 
 
 func _draw():
@@ -34,6 +33,3 @@ func _draw():
 				draw_line(Vector2(0,key_center + (key_height / %PitchSnap.value * subtone)),
 						Vector2(size.x,key_center + (key_height / %PitchSnap.value * subtone)),
 						Color(1,1,1,0.1) )
-
-
-func _on_pitch_snap_value_changed(_value): queue_redraw()

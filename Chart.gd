@@ -26,7 +26,7 @@ var note_scn = preload("res://note.tscn")
 var settings : Settings:
 	get: return Global.settings
 @onready var main = get_tree().get_current_scene()
-@onready var player : AudioStreamPlayer = main.find_child("AudioStreamPlayer")
+@onready var player : AudioStreamPlayer = %TrombPlayer
 @onready var measure_font : Font = ThemeDB.get_fallback_font()
 var bar_font : Font
 var draw_targets : bool:
@@ -53,11 +53,14 @@ func _ready():
 
 func _on_scroll_change():
 	await(get_tree().process_frame)
+	redraw_notes()
+
+
+func redraw_notes():
 	for child in get_children():
 		if child is Note:
 			if child.is_in_view:
 				child.show()
-				print(child.bar)
 				child.queue_redraw()
 			else: child.hide()
 
@@ -73,6 +76,7 @@ func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
 	%SectionStart.max_value = tmb.endpoint - 1
 	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
+	%CopyTarget.max_value = tmb.endpoint - 1
 	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
 	for note in get_children():
@@ -210,6 +214,7 @@ func _draw():
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
 				Color.ORANGE_RED, 2.0)
+	redraw_notes()
 
 
 func _gui_input(event):

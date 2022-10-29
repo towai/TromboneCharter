@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dkihd4wfh4uih"
-path="res://.godot/imported/note_tail.png-7fa2a7d4fea2a932c21138da340d6cef.ctex"
+uid="uid://ca0siccuqmqat"
+path="res://.godot/imported/resetbutton-thick.svg-a40bd65885c78113a7f978b8e0310ade.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://note_tail.png"
-dest_files=["res://.godot/imported/note_tail.png-7fa2a7d4fea2a932c21138da340d6cef.ctex"]
+source_file="res://resetbutton-thick.svg"
+dest_files=["res://.godot/imported/resetbutton-thick.svg-a40bd65885c78113a7f978b8e0310ade.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

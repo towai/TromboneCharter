@@ -11,15 +11,28 @@ var popup_location : Vector2i:
 
 
 func _ready():
-	DisplayServer.window_set_min_size(Vector2(1120,540))
+	DisplayServer.window_set_min_size(Vector2(1256,540))
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
 	var err = cfg.load("user://config.cfg")
 	if err:
-		print(error_string(err))
+		print("Couldn't load config: %s" % error_string(err))
+		show_popup($Instructions) # probably first load
 		return
+	
+	var argv : PackedStringArray = OS.get_cmdline_args()
+	if !argv.is_empty() && argv[0].ends_with(".tmb"):
+		var path = argv[0]
+		var dir = argv[0].substr(0,argv[0].rfind("/"))
+		if dir == path: dir = argv[0].substr(0,argv[0].rfind("\\"))
+		print("%s passed in as tmb" % path)
+		$LoadDialog.current_dir = dir
+		_on_load_dialog_file_selected(path)
+		return
+	
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir")
-	print($SaveDialog.current_path)
+	
 	_on_new_chart_confirmed()
 
 
@@ -38,6 +51,8 @@ func show_popup(window:Window):
 func _on_new_chart_pressed(): show_popup($NewChartConfirm)
 func _on_new_chart_confirmed():
 	tmb = TMBInfo.new()
+	%Settings.use_custom_colors = false
+	%WavPlayer.stream = null
 	print("new tmb")
 	emit_signal("chart_loaded")
 
@@ -47,24 +62,91 @@ func _on_load_dialog_file_selected(path):
 	print("Load tmb from %s" % path)
 	var err = tmb.load_from_file(path)
 	if err:
-		print("Chart load failed")
+		$ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
+		show_popup($ErrorPopup)
 		return
-	cfg.set_value("Config","saved_dir",$LoadDialog.current_dir)
+	
 	$SaveDialog.current_dir = $LoadDialog.current_dir
 	$SaveDialog.current_path = $LoadDialog.current_path
+	cfg.set_value("Config","saved_dir",$LoadDialog.current_dir)
 	try_cfg_save()
+	
+	%WavPlayer.stream = null
 	emit_signal("chart_loaded")
+	if %Settings.load_wav_on_chart_load:
+		err = try_to_load_wav($SaveDialog.current_dir + "/song.wav")
+		if err:
+			print("No wav loaded -- %s" % error_string(err))
+			if %Settings.convert_ogg:
+				print("Try to convert song.ogg")
+				var dir = path.substr(0,path.rfind("/"))
+				if dir == path: dir = path.substr(0,path.rfind("\\"))
+				DirAccess.open(dir)
+				err = DirAccess.get_open_error()
+				if err:
+					print("DirAccess error : %s" % error_string(err))
+					return
+				err = try_to_convert_ogg(dir + "/song.ogg")
+				if !err:
+					var wav_err = try_to_load_wav(dir + "/song.wav")
+					if wav_err: print("no ffmpeg error but couldn't load wav??")
+				else: print("ogg->wav conversion result %d (-1 means ffmpeg was not found)"
+						% err)
+	
+	%WAVLoadedLabel.text = "song.wav loaded!" if %WavPlayer.stream != null \
+			else "no ffmpeg!" if err == -1 else "no song.wav loaded!"
+	
+
+
+func try_to_load_wav(path:String) -> int:
+	print("Try load wav from %s" % path)
+	var f = FileAccess.open(path,FileAccess.READ)
+	if f == null:
+		var err = FileAccess.get_open_error()
+		return err
+	
+	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
+	if stream == null :
+		print("stream null?")
+		return ERR_FILE_CANT_READ
+	elif stream.data == null || stream.data.is_empty():
+		print("no data?")
+		return ERR_FILE_CANT_READ
+	
+	%WavPlayer.stream = stream
+	return OK
+
+
+func try_to_convert_ogg(path:String) -> int:
+	var dir = path.substr(0,path.rfind("/"))
+	if dir == path: dir = path.substr(0,path.rfind("\\"))
+	var args = PackedStringArray([
+			"-i",
+			'%s' % path,
+			'%s' % (dir + "/song.wav")
+			])
+	print(args)
+	var output = []
+	var err = OS.execute("ffmpeg",args,output,true,true)
+	print(output[0].c_unescape())
+	print(output.size())
+	return err
 
 
 func _on_save_chart_pressed():
 	tmb.lyrics = %LyricsEditor.package_lyrics()
 	if Input.is_key_pressed(KEY_SHIFT):
-		tmb.save_to_file($SaveDialog.current_path,$SaveDialog.current_dir)
+		_on_save_dialog_file_selected($SaveDialog.current_path)
 	else: show_popup($SaveDialog)
 func _on_save_dialog_file_selected(path):
 	tmb.save_to_file(path,$SaveDialog.current_dir)
 	cfg.set_value("Config","saved_dir",$SaveDialog.current_dir)
 	try_cfg_save()
+	
+	if !%Settings.load_wav_on_chart_load: return
+	var err = try_to_load_wav($SaveDialog.current_dir + "/song.wav")
+	if err:
+		print("No wav loaded -- %s" % error_string(err))
 
 
 func try_cfg_save():
@@ -102,3 +184,7 @@ func _on_copy_confirmed():
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
 	emit_signal("chart_loaded")
+
+
+func _on_convert_button_pressed():
+	pass # Replace with function body.

@@ -14,7 +14,6 @@ func _process(_delta): if _update_queued: _update_lyrics()
 
 
 func package_lyrics() -> Array:
-	print("Packagesd")
 	var result := []
 	for lyric in get_children():
 		if !(lyric is Lyric) || lyric.is_queued_for_deletion(): continue
@@ -24,7 +23,6 @@ func package_lyrics() -> Array:
 		}
 		result.append(dict)
 	result.sort_custom(func(a, b): return (a.bar < b.bar))
-	print("Packagesd")
 	return result
 
 
@@ -69,19 +67,21 @@ func _on_chart_loaded():
 
 func _on_add_lyric_pressed(): _add_lyric(%LyricBar.value,"")
 
-
-func _on_lyric_bar_value_changed(_value): queue_redraw()
+func _on_lyric_bar_value_changed(_value):
+	%Settings._force_decimals(%LyricBar)
+	queue_redraw()
 
 
 func _draw():
 	draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))
 	var lyric_add_bar = chart.bar_to_x(%LyricBar.value)
 	draw_line(Vector2.RIGHT * lyric_add_bar, Vector2(lyric_add_bar,size.y),
-			Color(0.627451, 0.12549, 0.941176, 0.5), 8.0
+			Color(0.627451, 0.12549, 0.941176, 0.35), 8.0
 			)
 
 
 func _on_copy_lyrics_pressed():
+	Global.working_tmb.lyrics = package_lyrics()
 	var lyrics_array : Array = Global.working_tmb.lyrics.duplicate(true)
 	var copied_lyrics := []
 	var section_start = Global.settings.section_start

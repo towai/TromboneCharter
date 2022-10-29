@@ -1,6 +1,6 @@
 extends VBoxContainer
 
-@onready var player : AudioStreamPlayer = %AudioStreamPlayer
+@onready var player : AudioStreamPlayer = %TrombPlayer
 var current_key : int = 69
 signal redraw_board
 

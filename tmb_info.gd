@@ -27,8 +27,15 @@ var savednotespacing : int = 120
 enum LoadResult {
 	SUCCESS,
 	TMB_INVALID,
-	FILE_ACCESS_ERROR
+	FILE_ACCESS_ERROR,
 }
+
+static func load_result_string(result:int) -> String:
+	match result:
+		LoadResult.SUCCESS: return "Loaded successfully"
+		LoadResult.TMB_INVALID: return "Invalid TMB"
+		LoadResult.FILE_ACCESS_ERROR: return "File access error (see console)"
+		_: return "Unknown error %d" % result
 
 func find_all_notes_in_section(start:float,length:float) -> Array:
 	var result := []
@@ -126,6 +133,8 @@ func save_to_file(filename : String, dir : String):
 	for value in Global.settings.values:
 		if !(value is TextField || value is NumField): continue
 		dict[value.json_key] = value.value
+	for note in notes: if (note[NOTE_BAR] + note[NOTE_LENGTH]) > endpoint: notes.erase(note)
+	for lyric in lyrics: if lyric.bar > endpoint: lyrics.erase(lyric)
 	dict["notes"] = notes
 	dict["description"] = description
 	dict["lyrics"] = lyrics

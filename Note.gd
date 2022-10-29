@@ -315,39 +315,45 @@ func _draw():
 		draw_rect(Rect2(bar_handle.position,bar_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(pitch_handle.position,pitch_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(end_handle.position,end_handle.size),Color.WHITE,false)
-	var fill_color = Color("FF6DB4")
+	var start_color = chart.settings.start_color
+	var end_color = chart.settings.end_color
 	
 	var _draw_bar_handle := func():
 		var radius = BARHANDLE_SIZE.x / 2
-		draw_circle(Vector2.ZERO, radius - 1.0, fill_color)
+		draw_circle(Vector2.ZERO, radius - 1.0, start_color)
 		draw_arc(Vector2.ZERO, radius - 3.0, 0.0, TAU, 36, Color.WHITE, 2.0, true)
 		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 36, Color.BLACK, 1.0,true)
 	
 	var _draw_end_handle := func():
 		var radius = ENDHANDLE_SIZE.x / 2
 		var endhandle_position := Vector2(size.x,end_height)
-		draw_circle(endhandle_position, radius - 1.0, fill_color)
+		draw_circle(endhandle_position, radius - 1.0, end_color)
 		draw_arc(endhandle_position, radius - 2.0, 0.0, TAU, 36, Color.WHITE, 2.0, true)
 		draw_arc(endhandle_position, radius, 0.0, TAU, 36, Color.BLACK, 1.0,true)
 	
 	var _draw_tail := func():
-		var points = PackedVector2Array()
 		var y_array := []
+		var col_array := []
 		var num_points = 24
 		for i in num_points:
-			y_array.insert(i, smoothstep(0, 1, float(i) / (num_points - 1)))
+			var weight := smoothstep(0, 1, float(i) / (num_points - 1))
+			y_array.insert(i, weight)
+			col_array.append(start_color.lerp(end_color,
+			smoothstep(0, 1, smoothstep(0, 1, weight))))
+		col_array.push_front(start_color)
+		col_array.push_back(end_color)
+		var colors = PackedColorArray(col_array)
 		y_array.push_front(0.0)
 		y_array.push_back(1.0)
+		var points = PackedVector2Array()
 		for idx in y_array.size():
 			points.append(Vector2(
 					(scaled_length * (float(idx) / (y_array.size() - 1))),
 					end_height * y_array[idx])
 			)
-		for i in 3: # outline, field, core
-			draw_polyline(points,
-			Color.BLACK if i == 0 else Color.WHITE if i == 1 else fill_color,
-			16 if i == 0 else 12 if i == 1 else 6,
-			true)
+		draw_polyline(points, Color.BLACK, 16, true)
+		draw_polyline(points, Color.WHITE, 12, true)
+		draw_polyline_colors(points, colors, 6, true)
 	
 	_draw_tail.call()
 	if show_bar_handle: _draw_bar_handle.call()

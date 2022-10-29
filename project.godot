@@ -9,6 +9,11 @@
 config_version=5
 
 _global_script_classes=[{
+"base": "RefCounted",
+"class": &"AudioLoader",
+"language": &"GDScript",
+"path": "res://addons/GDScriptAudioImport/GDScriptAudioImport.gd"
+}, {
 "base": "Control",
 "class": &"Lyric",
 "language": &"GDScript",
@@ -40,6 +45,7 @@ _global_script_classes=[{
 "path": "res://text_field.gd"
 }]
 _global_script_class_icons={
+"AudioLoader": "",
 "Lyric": "",
 "Note": "",
 "NumField": "",

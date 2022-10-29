@@ -30,6 +30,10 @@ var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
 var propagate_changes : bool:
 	get: return %PropagateChanges.button_pressed
+var load_wav_on_chart_load: bool:
+	get: return %TryAutoloadWAV.button_pressed
+var convert_ogg: bool:
+	get: return %ConvertOgg.button_pressed
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -41,6 +45,8 @@ var start_color : Color:
 var end_color : Color:
 	get: return %EndColor.color
 	set(value): %EndColor.color = value
+var default_start_color = Color("#FF3600")
+var default_end_color = Color("#FDCA4B")
 
 var section_start : float:
 	get: return %SectionStart.value
@@ -61,9 +67,20 @@ var snap_time : bool:
 
 
 func _ready():
+	start_color = default_start_color
+	end_color = default_end_color
+	_on_volume_changed(0.0)
+	
 	Global.settings = self
 	get_tree().get_current_scene().chart_loaded.connect(_update_values)
 	_update_view()
+	_on_timing_snap_value_changed(timing_snap)
+
+
+func _process(delta):
+	# ugly ugly ugly
+	for spinbox in [ %SectionStart, %SectionLength, %CopyTarget, %LyricBar ]:
+		_force_decimals(spinbox)
 
 
 func _update_values():
@@ -80,6 +97,10 @@ func _update_values():
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
 	%CopyTarget.max_value = tmb.endpoint - 1
+	
+	if !use_custom_colors:
+		start_color = default_start_color
+		end_color = default_end_color
 
 
 func _on_view_switcher_pressed():
@@ -106,10 +127,13 @@ func _update_view():
 
 func _on_zoom_level_changed(value:float):
 	%ZoomLevel.tooltip_text = str(value)
-	%Chart._on_tmb_updated()
 	var zoom_change = value / zoom
 	%ChartView.scroll_horizontal *= zoom_change
+	%Chart._on_tmb_updated()
+	await(get_tree().process_frame)
+	%Chart._on_scroll_change()
 	zoom = value
+# _on_zoom_level_changed is called automatically
 func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
 
@@ -117,5 +141,41 @@ func _on_section_start_value_changed(value):
 	%SectionLength.max_value = max(1,tmb.endpoint - value)
 	%Chart.queue_redraw()
 
+
+func _force_decimals(box:SpinBox):
+	if box.value == int(box.value): return
+	var lineedit = box.get_line_edit()
+	lineedit.text = ("%.4f" % box.value).rstrip('0')
+
+
 func _on_section_length_value_changed(_value): %Chart.queue_redraw()
 func _on_copy_target_value_changed(_value): %Chart.queue_redraw()
+
+
+func _on_volume_changed(value:float):
+	%VolSlider.tooltip_text = str(value)
+	%WavPlayer.volume_db = value
+
+
+func _on_timing_snap_value_changed(value):
+	if !snap_time: return
+	var snap = 1.0 / timing_snap
+	%SectionStart.step = snap
+	%SectionLength.step = snap
+	%CopyTarget.step = snap
+	%LyricBar.step = snap
+
+
+func _on_time_snap_toggled(button_pressed):
+	var snap = 1.0 / timing_snap
+	match snap_time:
+		true: 
+			%SectionStart.step	= snap
+			%SectionLength.step = snap
+			%CopyTarget.step	= snap
+			%LyricBar.step		= snap
+		false:
+			%SectionStart.step = 0.0001
+			%SectionLength.step = 0.0001
+			%CopyTarget.step = 0.0001
+			%LyricBar.step = 0.0001
