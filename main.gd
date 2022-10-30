@@ -60,27 +60,30 @@ func _on_new_chart_confirmed():
 func _on_load_chart_pressed(): show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path):
 	print("Load tmb from %s" % path)
+	print("%s --- %s" % [$LoadDialog.current_path,$LoadDialog.current_dir])
+	var dir = path.substr(0,path.rfind("/"))
+	if dir == path: dir = path.substr(0,path.rfind("\\"))
 	var err = tmb.load_from_file(path)
 	if err:
 		$ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
 		show_popup($ErrorPopup)
 		return
 	
-	$SaveDialog.current_dir = $LoadDialog.current_dir
-	$SaveDialog.current_path = $LoadDialog.current_path
-	cfg.set_value("Config","saved_dir",$LoadDialog.current_dir)
+#	$SaveDialog.current_dir = $LoadDialog.current_dir
+#	$SaveDialog.current_path = $LoadDialog.current_path
+	$SaveDialog.current_dir = dir
+	$SaveDialog.current_path = path
+	cfg.set_value("Config","saved_dir", dir)
 	try_cfg_save()
 	
 	%WavPlayer.stream = null
 	emit_signal("chart_loaded")
 	if %Settings.load_wav_on_chart_load:
-		err = try_to_load_wav($SaveDialog.current_dir + "/song.wav")
+		err = try_to_load_wav(dir + "/song.wav")
 		if err:
 			print("No wav loaded -- %s" % error_string(err))
 			if %Settings.convert_ogg:
 				print("Try to convert song.ogg")
-				var dir = path.substr(0,path.rfind("/"))
-				if dir == path: dir = path.substr(0,path.rfind("\\"))
 				DirAccess.open(dir)
 				err = DirAccess.get_open_error()
 				if err:
@@ -150,11 +153,12 @@ func _on_save_dialog_file_selected(path):
 
 
 func try_cfg_save():
-		if !cfg.has_section("Config"): return
-		var err = cfg.save("user://config.cfg")
-		if err:
-			print("Oh noes")
-			print(error_string(err))
+	print("try cfg save")
+	if !cfg.has_section("Config"): return
+	var err = cfg.save("user://config.cfg")
+	if err:
+		print("Oh noes")
+		print(error_string(err))
 
 
 func _on_copy_button_pressed():

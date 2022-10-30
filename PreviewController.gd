@@ -66,6 +66,9 @@ func _do_preview():
 
 
 func _find_note_overlapping_bar(time:float):
+	# TODO  ( optimization )
+	#	If we ensure that notes are always in the array in chronological order,
+	#	we can break early the first time we encounter a note that starts after `time`
 	for note in chart.tmb.notes:
 		var end_bar = note[TMBInfo.NOTE_BAR] + note[TMBInfo.NOTE_LENGTH]
 		if time >= note[TMBInfo.NOTE_BAR] && time <= end_bar:

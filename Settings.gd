@@ -77,12 +77,6 @@ func _ready():
 	_on_timing_snap_value_changed(timing_snap)
 
 
-func _process(delta):
-	# ugly ugly ugly
-	for spinbox in [ %SectionStart, %SectionLength, %CopyTarget, %LyricBar ]:
-		_force_decimals(spinbox)
-
-
 func _update_values():
 	title.value = tmb.title
 	short_name.value = tmb.shortName
@@ -139,6 +133,7 @@ func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
 func _on_section_start_value_changed(value):
 	%SectionLength.max_value = max(1,tmb.endpoint - value)
+	_force_decimals(%SectionStart)
 	%Chart.queue_redraw()
 
 
@@ -148,8 +143,12 @@ func _force_decimals(box:SpinBox):
 	lineedit.text = ("%.4f" % box.value).rstrip('0')
 
 
-func _on_section_length_value_changed(_value): %Chart.queue_redraw()
-func _on_copy_target_value_changed(_value): %Chart.queue_redraw()
+func _on_section_length_value_changed(_value):
+	_force_decimals(%SectionLength)
+	%Chart.queue_redraw()
+func _on_copy_target_value_changed(_value):
+	_force_decimals(%CopyTarget)
+	%Chart.queue_redraw()
 
 
 func _on_volume_changed(value:float):
