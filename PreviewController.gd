@@ -52,7 +52,7 @@ func _do_preview():
 		var pos_in_note = (song_position - note[TMBInfo.NOTE_BAR]) / note[TMBInfo.NOTE_LENGTH]
 		# i don't know why, but using smoothstep in setting pitch_scale doesn't work
 		# so we do it out here
-		pos_in_note = smoothstep(0, 1, pos_in_note)
+		pos_in_note = Global.smootherstep(0, 1, pos_in_note)
 		
 		player.pitch_scale = lerp(pitch,end_pitch,pos_in_note)
 		if !player.playing: player.play()
