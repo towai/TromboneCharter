@@ -34,7 +34,13 @@ func overlaps_any_note(time:float, exclude : Array = []) -> bool:
 		if bar in exclude:
 			continue
 		note_end = bar + note[TMBInfo.NOTE_LENGTH]
-		if time > bar && time < note_end: return true
+		var bar_difference = abs(time - bar)
+		var end_difference = abs(time - note_end)
+		
+		if (time > bar && time < note_end) \
+				&& !(bar_difference < 0.01 || end_difference < 0.01):
+#			print("start: +/-%.9f -- end: +/-%.9f" % [bar_difference, end_difference])
+			return true
 	return false
 
 
