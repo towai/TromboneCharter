@@ -97,7 +97,7 @@ func _on_copy_lyrics_pressed():
 		if new_lyric.bar >= Global.working_tmb.endpoint: continue
 		copied_lyrics.append(new_lyric)
 	
-	var any_collisions = true
+	var any_collisions = !lyrics_array.is_empty() && !copied_lyrics.is_empty()
 	while any_collisions:
 		for lyric in lyrics_array:
 			var bar = lyric.bar
