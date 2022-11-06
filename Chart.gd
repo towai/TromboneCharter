@@ -199,6 +199,7 @@ func update_note_array():
 
 
 func _draw():
+	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
 	var section_rect = Rect2(bar_to_x(settings.section_start), 1,
 			bar_to_x(settings.section_length), size.y)
@@ -207,23 +208,21 @@ func _draw():
 	if %PreviewController.is_playing:
 		draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
 				Vector2(bar_to_x(%PreviewController.song_position),size.y),
-				Color.CORNFLOWER_BLUE, 2)
+				Color.CORNFLOWER_BLUE, 2 )
 	for i in tmb.endpoint + 1:
 		draw_line(Vector2(i * bar_spacing, 0), Vector2(i * bar_spacing, size.y),
-				Color(1,1,1,0.4) if i % tmb.timesig else Color.WHITE,
-				1 if i % tmb.timesig else 2
-		)
+				Color(1,1,1,0.33) if i % tmb.timesig else Color.WHITE, 2
+				)
 		var subdiv = %TimingSnap.value
 		for j in subdiv:
 			var k = 1.0 / subdiv
 			var line = i + (k * j)
 			draw_line(Vector2(line * bar_spacing, 0), Vector2(line * bar_spacing, size.y),
-					Color(0.7,1,1,0.2)
-			)
+					Color(0.7,1,1,0.2), 1 )
 		if !(i % tmb.timesig):
-			draw_string(ThemeDB.get_fallback_font(), Vector2(i * bar_spacing, 0) + Vector2(8, 16),
+			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 16),
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
-			draw_string(ThemeDB.get_fallback_font(), Vector2(i * bar_spacing, 0) + Vector2(8, 32),
+			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
 					str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
