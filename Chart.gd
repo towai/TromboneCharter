@@ -158,14 +158,30 @@ func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bo
 
 func find_touching_notes(the_note:Note) -> Dictionary:
 	var result := {}
+	
+	var prev_note = get_matching_note_off(the_note.bar,[the_note])
+	if prev_note: result[Global.START_IS_TOUCHING] = prev_note
+	
+	var next_note = get_matching_note_on(the_note.end,[the_note])
+	if next_note: result[Global.END_IS_TOUCHING] = next_note
+	
+	return result
+
+
+func get_matching_note_on(time:float, exclude:Array = []): # -> Note or null
 	for note in get_children():
 		if !(note is Note): continue
-		if note == the_note: continue
-		if the_note.bar == note.bar + note.length:
-			result[Global.START_IS_TOUCHING] = note
-		if the_note.bar + the_note.length == note.bar:
-			result[Global.END_IS_TOUCHING] = note
-	return result
+		if note in exclude: continue
+		if abs(note.bar - time) < 0.05: return note
+	return null
+
+
+func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
+	for note in get_children():
+		if !(note is Note): continue
+		if note in exclude: continue
+		if abs(note.end - time) < 0.05: return note
+	return null
 
 
 func update_note_array():
@@ -180,7 +196,7 @@ func update_note_array():
 			note.pitch_start + note.pitch_delta
 		]
 		new_array.append(note_array)
-	new_array.sort_custom(func(a,b): return a[0] < b[0])
+	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
 
 
