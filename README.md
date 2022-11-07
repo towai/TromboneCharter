@@ -31,6 +31,10 @@
  * `trackRef` will automatically be populated with the name of the folder the chart is saved to.
  * `note_color_start` and `note_color_end` will be populated iff "Use custom note colors" is checked.
 
+### Contributing
+IDK, just clone the thing and edit it using the latest 4.0 editor.
+#### NOTE: The GDScriptAudioImport submodule must be [my own fork](https://github.com/towai/GDScriptAudioImport). It's not linked properly in the repo for Github to point to at the moment.
+
 ### Acknowledgements:
 No copyrighted assets were used in making this. Trombone sample from GM.DLS.
 Metronome click from a Roland TR-808. SVG icons created by me.
