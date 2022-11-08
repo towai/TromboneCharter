@@ -19,7 +19,7 @@ var genre		:= ""
 var description := ""
 var year		: int = 1999
 var tempo		: int = 120
-var endpoint	: int = 0
+var endpoint	: int = 1
 var timesig 	: int = 2
 var difficulty	: int = 5
 var savednotespacing : int = 120
@@ -41,10 +41,11 @@ func find_all_notes_in_section(start:float,length:float) -> Array:
 	var result := []
 	var note_array = notes.duplicate(true)
 	var is_in_section := func(bar:float) -> bool:
-		return (bar >= start && bar <= start + length)
+		return (bar > start && bar < start + length)
 	for note in note_array:
 		var bar = note[NOTE_BAR]
-		if !is_in_section.call(bar): continue
+		var end = bar + note[NOTE_LENGTH]
+		if !is_in_section.call(bar) && !is_in_section.call(end): continue
 		note[NOTE_BAR] -= start
 		result.append(note)
 	return result
@@ -52,7 +53,7 @@ func find_all_notes_in_section(start:float,length:float) -> Array:
 
 func clear_section(start:float,length:float):
 	var is_in_section := func(bar:float) -> bool:
-		return (bar >= start && bar <= start + length)
+		return (bar > start && bar < start + length)
 	print("Clear section %d - %d" % [start,length + start])
 	var note_array = notes.duplicate(true)
 	
@@ -60,10 +61,12 @@ func clear_section(start:float,length:float):
 	while any_notes_left:
 		for note in note_array:
 			var bar = note[NOTE_BAR]
-			
-			if is_in_section.call(bar):
+			var end = bar + note[NOTE_LENGTH]
+			print("%d notes left" % note_array.size())
+			if is_in_section.call(bar) || is_in_section.call(end):
 				print("Erase note @ %.3f" % bar)
 				note_array.erase(note)
+				if note_array.is_empty(): any_notes_left = false
 				break # start from the beginning of the array
 			
 			if note == note_array.back(): any_notes_left = false
