@@ -50,7 +50,10 @@ func _do_preview():
 			continue
 		
 		var pitch = Global.pitch_to_scale(note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE)
-		var end_pitch = note[TMBInfo.NOTE_PITCH_START] + note[TMBInfo.NOTE_PITCH_DELTA]
+		# Clamp to mimic the max audible slide ingame.
+		# Inaccurate when it comes to multi-notes but good enough for now
+		var end_pitch = note[TMBInfo.NOTE_PITCH_START] + \
+				clamp(note[TMBInfo.NOTE_PITCH_DELTA], -12 * Global.SEMITONE, 12 * Global.SEMITONE)
 		end_pitch = Global.pitch_to_scale(end_pitch / Global.SEMITONE)
 		
 		var pos_in_note = (song_position - note[TMBInfo.NOTE_BAR]) / note[TMBInfo.NOTE_LENGTH]
