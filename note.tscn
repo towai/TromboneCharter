@@ -5,28 +5,32 @@
 [node name="Note" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+focus_mode = 1
 script = ExtResource("1_4pqog")
 
 [node name="PitchHandle" type="Control" parent="."]
 show_behind_parent = true
-layout_mode = 1
+layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+focus_mode = 1
 mouse_default_cursor_shape = 14
 
 [node name="EndHandle" type="Control" parent="."]
-layout_mode = 1
+layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+focus_mode = 1
 mouse_default_cursor_shape = 6
 
 [node name="BarHandle" type="Control" parent="."]
-layout_mode = 1
+layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+focus_mode = 1
 mouse_default_cursor_shape = 15
 
 [connection signal="gui_input" from="PitchHandle" to="." method="_on_handle_input" binds= [2]]

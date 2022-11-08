@@ -73,6 +73,9 @@ var show_end_handle : bool:
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	for handle in [bar_handle, pitch_handle, end_handle]:
+		handle.focus_entered.connect(grab_focus)
+	
 	bar_handle.size = BARHANDLE_SIZE
 	bar_handle.position = -BARHANDLE_SIZE / 2
 	
@@ -89,6 +92,18 @@ func _process(_delta):
 	if dragging: _process_drag()
 
 
+func _gui_input(event):
+	var key = event as InputEventKey
+	
+	if key != null && key.pressed:
+		match key.keycode:
+			KEY_DELETE:
+				queue_free()
+		return
+	
+	_on_handle_input(event,pitch_handle)
+
+
 func _on_handle_input(event, which):
 	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 0
 	move_child(pitch_handle, pitch_handle_position)
@@ -103,9 +118,8 @@ func _on_handle_input(event, which):
 			dragging = which
 			drag_start = get_local_mouse_position()
 			chart.doot(pitch_start if which != DRAG_END else end_pitch)
-		MOUSE_BUTTON_MIDDLE:
+		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
 			queue_free()
-			chart.update_note_array()
 
 
 func _process_drag():
@@ -362,6 +376,9 @@ func _draw():
 					(scaled_length * (float(idx) / (y_array.size() - 1))),
 					end_height * y_array[idx])
 			)
+		if has_focus():
+			for i in 8: # it's fine, only one of these has focus at a time
+				draw_polyline(points, Color(0.5, 0.9, 1, 0.01 * i * i), 32 - (2 * i), true)
 		draw_polyline(points, Color.BLACK, 16, true)
 		draw_polyline(points, Color.WHITE, 12, true)
 		draw_polyline_colors(points, colors, 6, true)
@@ -372,7 +389,13 @@ func _draw():
 	
 
 
+func grab_focus():
+	super()
+	queue_redraw()
+
+
 func _exit_tree():
 	bar = -69420.0
 	if chart.clearing_notes: return
 	update_touching_notes()
+	chart.update_note_array()
