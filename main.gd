@@ -219,4 +219,5 @@ func _on_copy_confirmed():
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
+	tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	emit_signal("chart_loaded")
