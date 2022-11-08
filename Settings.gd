@@ -138,9 +138,12 @@ func _on_section_start_value_changed(value):
 
 
 func _force_decimals(box:SpinBox):
-	if box.value == int(box.value): return
+	if box.value == int(box.value):
+		box.tooltip_text = str(box.value)
+		return
 	var lineedit = box.get_line_edit()
 	lineedit.text = ("%.4f" % box.value).rstrip('0')
+	box.tooltip_text = lineedit.text
 
 
 func _on_section_length_value_changed(_value):
