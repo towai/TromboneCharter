@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=20 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://PreviewController.gd" id="2_rsc0c"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
 [ext_resource type="Script" path="res://LyricsEditor.gd" id="9_srvtg"]
 [ext_resource type="Script" path="res://ColorPreview.gd" id="10_14v0o"]
+[ext_resource type="Script" path="res://SectionHandle.gd" id="10_fs4d4"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
 [ext_resource type="Script" path="res://Alert.gd" id="16_yl2q4"]
@@ -166,6 +167,36 @@ offset_bottom = 382.0
 size_flags_vertical = 3
 script = ExtResource("5_yhpph")
 
+[node name="SectStartHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+script = ExtResource("10_fs4d4")
+
+[node name="SectEndHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+script = ExtResource("10_fs4d4")
+
+[node name="SectTargetHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+script = ExtResource("10_fs4d4")
+
 [node name="LyricsEditor" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 visible = false
@@ -176,6 +207,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("9_srvtg")
+
+[node name="AddLyricHandle" type="Control" parent="PianoRoll/ChartView/Chart/LyricsEditor"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+script = ExtResource("10_fs4d4")
 
 [node name="Settings" type="PanelContainer" parent="."]
 unique_name_in_owner = true
@@ -823,7 +864,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.266667, 0.4, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
-text = "Pee nis"
+text = "toot toot lol"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
 [connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]

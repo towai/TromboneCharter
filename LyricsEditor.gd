@@ -7,6 +7,7 @@ var _update_queued := false
 
 func _ready():
 	Global.tmb_updated.connect(_on_tmb_update)
+	%AddLyricHandle.double_clicked.connect(_add_lyric.bind(""))
 
 func _on_tmb_update(): _update_queued = true
 
@@ -67,8 +68,10 @@ func _on_chart_loaded():
 
 func _on_add_lyric_pressed(): _add_lyric(%LyricBar.value,"")
 
-func _on_lyric_bar_value_changed(_value):
+func _on_lyric_bar_value_changed(value):
+	%LyricBar.value = value
 	%Settings._force_decimals(%LyricBar)
+	%AddLyricHandle.position.x = %Chart.bar_to_x(%LyricBar.value) - 3
 	queue_redraw()
 
 
@@ -76,7 +79,7 @@ func _draw():
 	draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))
 	var lyric_add_bar = chart.bar_to_x(%LyricBar.value)
 	draw_line(Vector2.RIGHT * lyric_add_bar, Vector2(lyric_add_bar,size.y),
-			Color(0.627451, 0.12549, 0.941176, 0.35), 8.0
+			Color(0.7, 0.15, 1, 0.35), 8.0
 			)
 
 

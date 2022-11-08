@@ -35,7 +35,6 @@ var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
 
-
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
 	player.pitch_scale = Global.pitch_to_scale(pitch / Global.SEMITONE)
@@ -79,9 +78,9 @@ func _do_tmb_update():
 	%CopyTarget.max_value = tmb.endpoint - 1
 	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
+	%Settings._update_handles()
 	for note in get_children():
-		if !(note is Note) \
-				|| note.is_queued_for_deletion():
+		if !(note is Note) || note.is_queued_for_deletion():
 			continue
 		note.position.x = note.bar * bar_spacing
 	queue_redraw()
@@ -135,7 +134,7 @@ func _on_tmb_loaded():
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-	var new_note = note_scn.instantiate()
+	var new_note : Note = note_scn.instantiate()
 	new_note.bar = bar
 	new_note.length = length
 	new_note.pitch_start = pitch
@@ -145,6 +144,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
 	add_child(new_note)
+	new_note.grab_focus()
 
 
 func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -185,9 +185,7 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 func update_note_array():
 	var new_array := []
 	for note in get_children():
-		if !(note is Note):
-			continue
-		if note.is_queued_for_deletion():
+		if !(note is Note) || note.is_queued_for_deletion():
 			continue
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
@@ -215,6 +213,7 @@ func _draw():
 				)
 		var subdiv = %TimingSnap.value
 		for j in subdiv:
+			if i == tmb.endpoint: break
 			var k = 1.0 / subdiv
 			var line = i + (k * j)
 			draw_line(Vector2(line * bar_spacing, 0), Vector2(line * bar_spacing, size.y),

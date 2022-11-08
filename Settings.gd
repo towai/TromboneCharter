@@ -54,6 +54,8 @@ var section_length : float:
 	get: return %SectionLength.value
 var section_target : float:
 	get: return %CopyTarget.value
+@onready var sect_start_handle = %SectStartHandle
+
 
 var pitch_snap : int:
 	get: return %PitchSnap.value
@@ -91,6 +93,7 @@ func _update_values():
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
 	%CopyTarget.max_value = tmb.endpoint - 1
+	_update_handles()
 	
 	if !use_custom_colors:
 		start_color = default_start_color
@@ -130,12 +133,11 @@ func _on_zoom_level_changed(value:float):
 # _on_zoom_level_changed is called automatically
 func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
-
-func _on_section_start_value_changed(value):
-	%SectionLength.max_value = max(1,tmb.endpoint - value)
-	_force_decimals(%SectionStart)
-	%Chart.queue_redraw()
-
+func _update_handles():
+		%SectStartHandle.update_pos(section_start)
+		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
+		%SectTargetHandle.update_pos(section_target)
+		%AddLyricHandle.update_pos(%LyricBar.value)
 
 func _force_decimals(box:SpinBox):
 	if box.value == int(box.value):
@@ -145,13 +147,38 @@ func _force_decimals(box:SpinBox):
 	lineedit.text = ("%.4f" % box.value).rstrip('0')
 	box.tooltip_text = lineedit.text
 
+const SECT_HANDLE_RADIUS = 3.0
 
-func _on_section_length_value_changed(_value):
+func _on_section_start_value_changed(value):
+	%SectionStart.value = value
+	%SectionLength.max_value = max(1,tmb.endpoint - value)
+	_force_decimals(%SectionStart)
+	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
+	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
+	%Chart.queue_redraw()
+
+func _on_section_length_value_changed(value):
+	%SectionLength.value = value
 	_force_decimals(%SectionLength)
+	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
-func _on_copy_target_value_changed(_value):
+
+func _on_copy_target_value_changed(value):
+	%CopyTarget.value = value
 	_force_decimals(%CopyTarget)
+	%SectTargetHandle.position.x = %Chart.bar_to_x(section_target) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
+
+
+func section_handle_dragged(value:float,which:Node):
+	if which == %SectStartHandle:
+		_on_section_start_value_changed(value)
+	elif which == %SectEndHandle: 
+		_on_section_length_value_changed(value - section_start)
+	elif which == %SectTargetHandle: 
+		_on_copy_target_value_changed(value)
+	if which == %AddLyricHandle:
+		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 
 func _on_volume_changed(value:float):
