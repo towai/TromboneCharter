@@ -38,9 +38,4 @@ func _gui_input(event):
 		set_bar(bar)
 
 
-func set_bar(bar:float):
-	print(bar)
-	emit_signal("bar_changed",bar,self)
-
-
-func _process(delta): pass
+func set_bar(bar:float): emit_signal("bar_changed",bar,self)
