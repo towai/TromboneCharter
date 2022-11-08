@@ -17,8 +17,11 @@ func _do_preview():
 	if chart.tmb == null:
 		print("null tmb")
 		return
+	if is_playing:
+		is_playing = false
+		await(get_tree().process_frame) # wait for the existing preview to kill itself
 	is_playing = true
-	# actually an int but i don't want weird shit happening when i try to do math on it
+	
 	var bpm : float = chart.tmb.tempo
 	var time : float
 	@warning_ignore(unused_variable)
@@ -26,12 +29,13 @@ func _do_preview():
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
 	var startpoint_in_stream : float = settings.section_start / (bpm / 60.0)
+	var start_beat = settings.section_start
 	wavplayer.play(startpoint_in_stream)
 	while is_playing:
 		time = Time.get_ticks_msec() / 1000.0
 		var elapsed_time = time - initial_time
 		
-		song_position = elapsed_time * (bpm / 60.0) + settings.section_start
+		song_position = elapsed_time * (bpm / 60.0) + start_beat
 		if song_position > settings.section_start + settings.section_length \
 				|| Input.is_key_pressed(KEY_ESCAPE): break
 		
@@ -59,8 +63,10 @@ func _do_preview():
 		previous_time = time
 		await(get_tree().process_frame)
 	is_playing = false
+	
 	wavplayer.stop()
 	player.stop()
+	
 	song_position = -1.0
 	chart.queue_redraw()
 
