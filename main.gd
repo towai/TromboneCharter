@@ -133,6 +133,13 @@ func try_to_convert_ogg(path:String) -> int:
 	return err
 
 
+func _input(event):
+	event = event as InputEventKey
+	if event == null: return
+	if event.pressed && event.keycode == KEY_S && Input.is_key_pressed(KEY_CTRL):
+		_on_save_chart_pressed()
+
+
 func _on_save_chart_pressed():
 	tmb.lyrics = %LyricsEditor.package_lyrics()
 	if Input.is_key_pressed(KEY_SHIFT):
