@@ -60,7 +60,6 @@ func _on_new_chart_confirmed():
 func _on_load_chart_pressed(): show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path):
 	print("Load tmb from %s" % path)
-	print("%s --- %s" % [$LoadDialog.current_path,$LoadDialog.current_dir])
 	var dir = path.substr(0,path.rfind("/"))
 	if dir == path: dir = path.substr(0,path.rfind("\\"))
 	var err = tmb.load_from_file(path)
@@ -69,8 +68,6 @@ func _on_load_dialog_file_selected(path):
 		show_popup($ErrorPopup)
 		return
 	
-#	$SaveDialog.current_dir = $LoadDialog.current_dir
-#	$SaveDialog.current_path = $LoadDialog.current_path
 	$SaveDialog.current_dir = dir
 	$SaveDialog.current_path = path
 	cfg.set_value("Config","saved_dir", dir)
@@ -141,14 +138,42 @@ func _on_save_chart_pressed():
 	if Input.is_key_pressed(KEY_SHIFT):
 		_on_save_dialog_file_selected($SaveDialog.current_path)
 	else: show_popup($SaveDialog)
-func _on_save_dialog_file_selected(path):
-	tmb.save_to_file(path,$SaveDialog.current_dir)
-	cfg.set_value("Config","saved_dir",$SaveDialog.current_dir)
+
+func _on_save_dialog_file_selected(path:String):
+	if path[1] != ':':
+		print("driveless path %s" % path)
+		var drive : String
+		var saved_dir = cfg.get_value("Config","saved_dir")
+		if saved_dir == null:
+			$Alert.alert("couldn't save! you tried to break it on purpose didn't you",
+					Vector2(12, %ViewSwitcher.global_position.y + 38),
+					Alert.LV_ERROR)
+			return
+			
+		if saved_dir[1] != ':':
+			print("Fuck shit!!")
+			return
+		drive = saved_dir.substr(0,saved_dir.find('/'))
+		if drive == saved_dir:
+			print("Cock backslash")
+			drive = saved_dir.substr(0,saved_dir.find('\\'))
+		path = drive + path
+	var err = tmb.save_to_file(path,$SaveDialog.current_dir)
+	if err == OK:
+		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
+				Alert.LV_SUCCESS)
+	else: 
+		$Alert.alert("couldn't save to %s! %s" % [path, error_string(err)],
+				Vector2(72, %NewChart.global_position.y + 20),
+				Alert.LV_ERROR, 2)
+		return
+	var dir = path.substr(0,path.rfind("/"))
+	cfg.set_value("Config", "saved_dir", dir)
 	try_cfg_save()
 	
 	if !%Settings.load_wav_on_chart_load: return
-	var err = try_to_load_wav($SaveDialog.current_dir + "/song.wav")
-	if err:
+	err = try_to_load_wav(dir + "/song.wav")
+	if err != OK:
 		print("No wav loaded -- %s" % error_string(err))
 
 
@@ -162,7 +187,11 @@ func try_cfg_save():
 
 
 func _on_copy_button_pressed():
-	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint: return
+	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint:
+		$Alert.alert("Can't copy -- would run past the chart endpoint!",
+				Vector2(%SectionSelection.position.x - 12, %Settings.position.y - 12),
+				Alert.LV_ERROR)
+		return
 	if Input.is_key_pressed(KEY_SHIFT):
 		_on_copy_confirmed()
 		return
@@ -179,16 +208,8 @@ func _on_copy_confirmed():
 	
 	var copy_target = Global.settings.section_target
 	
-	# now checked when you hit the button, so shouldn't be possible to reach this
-	# keeping it anyway
-	if copy_target + length > tmb.endpoint: return
-	
 	tmb.clear_section(copy_target,length)
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += copy_target
 		tmb.notes.append(note)
 	emit_signal("chart_loaded")
-
-
-func _on_convert_button_pressed():
-	pass # Replace with function body.

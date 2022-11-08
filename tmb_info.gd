@@ -122,12 +122,13 @@ func load_from_file(filename:String) -> int:
 	return LoadResult.SUCCESS
 
 
-func save_to_file(filename : String, dir : String):
+func save_to_file(filename : String, dir : String) -> int:
 	print("try save tmb to %s" % filename)
 	var f = FileAccess.open(filename,FileAccess.WRITE)
 	if f == null:
-		print(error_string(f.get_open_error()))
-		return
+		var err = FileAccess.get_open_error()
+		print(error_string(err))
+		return err
 	
 	var dict := {}
 	for value in Global.settings.values:
@@ -155,3 +156,4 @@ func save_to_file(filename : String, dir : String):
 		]
 	f.store_string(JSON.stringify(dict))
 	print("finished saving")
+	return OK

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=19 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://PreviewController.gd" id="2_rsc0c"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Piano.gd" id="3_mh03t"]
 [ext_resource type="Script" path="res://chart_view.gd" id="4_rrlxc"]
 [ext_resource type="AudioStream" uid="uid://bbf50lmoh3a53" path="res://RS.WAV" id="4_wfwxx"]
+[ext_resource type="AudioStream" uid="uid://7p2oa4q0h23t" path="res://chord.wav" id="5_vqfbf"]
 [ext_resource type="Script" path="res://Chart.gd" id="5_yhpph"]
 [ext_resource type="Script" path="res://Settings.gd" id="6_2cfeh"]
 [ext_resource type="PackedScene" uid="uid://u1i3jv8qhy1e" path="res://text_field.tscn" id="6_hqpqp"]
@@ -15,6 +16,7 @@
 [ext_resource type="Script" path="res://ColorPreview.gd" id="10_14v0o"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
+[ext_resource type="Script" path="res://Alert.gd" id="16_yl2q4"]
 
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
@@ -46,6 +48,10 @@ stream = ExtResource("4_wfwxx")
 [node name="WavPlayer" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
 volume_db = -5.0
+
+[node name="Chord" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("5_vqfbf")
 
 [node name="NewChartConfirm" type="ConfirmationDialog" parent="."]
 title = "You Sure?"
@@ -227,6 +233,7 @@ tooltip_text = "Hold Shift to bypass Save As dialog."
 text = "Save Chart"
 
 [node name="NewChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
+unique_name_in_owner = true
 layout_mode = 2
 offset_top = 112.0
 offset_right = 110.0
@@ -801,6 +808,22 @@ offset_bottom = 140.0
 size_flags_horizontal = 8
 tooltip_text = "Info & Usage"
 text = "   ?   "
+
+[node name="Alert" type="Node2D" parent="."]
+script = ExtResource("16_yl2q4")
+
+[node name="Label" type="Label" parent="Alert"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -13.0
+offset_right = 55.0
+offset_bottom = 13.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.266667, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+text = "Pee nis"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
 [connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]

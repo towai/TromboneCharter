@@ -9,6 +9,11 @@
 config_version=5
 
 _global_script_classes=[{
+"base": "Node2D",
+"class": &"Alert",
+"language": &"GDScript",
+"path": "res://Alert.gd"
+}, {
 "base": "RefCounted",
 "class": &"AudioLoader",
 "language": &"GDScript",
@@ -45,6 +50,7 @@ _global_script_classes=[{
 "path": "res://text_field.gd"
 }]
 _global_script_class_icons={
+"Alert": "",
 "AudioLoader": "",
 "Lyric": "",
 "Note": "",
