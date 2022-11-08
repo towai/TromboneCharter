@@ -30,6 +30,8 @@ func _do_preview():
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
 	var startpoint_in_stream : float = settings.section_start / (bpm / 60.0)
 	var start_beat = settings.section_start
+	var slide_start : float
+	
 	wavplayer.play(startpoint_in_stream)
 	while is_playing:
 		time = Time.get_ticks_msec() / 1000.0
@@ -50,10 +52,7 @@ func _do_preview():
 			continue
 		
 		var pitch = Global.pitch_to_scale(note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE)
-		# Clamp to mimic the max audible slide ingame.
-		# Inaccurate when it comes to multi-notes but good enough for now
-		var end_pitch = note[TMBInfo.NOTE_PITCH_START] + \
-				clamp(note[TMBInfo.NOTE_PITCH_DELTA], -12 * Global.SEMITONE, 12 * Global.SEMITONE)
+		var end_pitch = note[TMBInfo.NOTE_PITCH_START] + note[TMBInfo.NOTE_PITCH_DELTA]
 		end_pitch = Global.pitch_to_scale(end_pitch / Global.SEMITONE)
 		
 		var pos_in_note = (song_position - note[TMBInfo.NOTE_BAR]) / note[TMBInfo.NOTE_LENGTH]
@@ -61,8 +60,14 @@ func _do_preview():
 		# so we do it out here
 		pos_in_note = Global.smootherstep(0, 1, pos_in_note)
 		
-		player.pitch_scale = lerp(pitch,end_pitch,pos_in_note)
-		if !player.playing: player.play()
+		player.pitch_scale = clamp(lerp(pitch,end_pitch,pos_in_note),
+				Global.pitch_to_scale(slide_start - 12.0),
+				Global.pitch_to_scale(slide_start + 12.0)
+				)
+		if !player.playing:
+			player.play()
+			slide_start = note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE
+			print(slide_start)
 		previous_time = time
 		await(get_tree().process_frame)
 	is_playing = false
