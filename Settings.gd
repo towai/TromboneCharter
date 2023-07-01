@@ -112,13 +112,13 @@ func _update_view():
 			%EditSettings.hide()
 			%SectionSelection.hide()
 			%ChartInfo.show()
-			%ViewSwitcher.text = "Editor Settings"
+			%ViewSwitcher.text = "Go to Info"
 		VIEW_EDIT_SETTINGS:
 			%ChartInfo.hide()
 			%LyricsTools.show()
 			%EditSettings.show()
 			%SectionSelection.show()
-			%ViewSwitcher.text = "Chart Info"
+			%ViewSwitcher.text = "Go to Editor"
 		_: print("oh no!! what the fuck. settings view set to a wrong value")
 
 

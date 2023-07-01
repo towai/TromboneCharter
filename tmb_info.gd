@@ -19,8 +19,8 @@ var genre		:= ""
 var description := ""
 var year		: int = 1999
 var tempo		: int = 120
-var endpoint	: int = 1
-var timesig 	: int = 2
+var endpoint	: int = 4
+var timesig 	: int = 4
 var difficulty	: int = 5
 var savednotespacing : int = 120
 
