@@ -16,9 +16,9 @@ dest_files=["res://.godot/imported/paw_closed.svg-9ed7ce7e065a33bbdfe7f5c878d282
 [params]
 
 compress/mode=0
-compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
+compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=false
