@@ -23,6 +23,10 @@ func x_to_bar(x:float): return x / bar_spacing
 func bar_to_x(bar:float): return bar * bar_spacing
 var note_scn = preload("res://note.tscn")
 # IDK why i gave this and Global both a ref but now i gotta live with it
+var revision = -1
+var deleted_note := []
+var added_note := []
+var ratio := ["L","L","L","L","L"] # + skill issue
 var settings : Settings:
 	get: return Global.settings
 @onready var main = get_tree().get_current_scene()
@@ -180,7 +184,7 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 		if !(note is Note) || (note in exclude): continue
 		if abs(note.end - time) < 0.01: return note
 	return null
-
+	
 
 func update_note_array():
 	var new_array := []
@@ -191,6 +195,13 @@ func update_note_array():
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
+		if note.is_queued_for_deletion():#deletes note
+			deleted_note.append(["L","L","L","L","L"]) # + L's to start
+			added_note.append(note_array) 
+		if !note.is_queued_for_deletion() || ratio[1] == "F": #creates note
+			deleted_note.append(note_array)
+			added_note.append(ratio) # + L's or F's
+		revision += 1
 		new_array.append(note_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array

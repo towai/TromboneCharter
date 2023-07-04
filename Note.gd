@@ -119,14 +119,19 @@ func _on_handle_input(event, which):
 			drag_start = get_local_mouse_position()
 			chart.doot(pitch_start if which != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
+			get_parent().ratio = ["L","L","L","L","L"]
 			queue_free()
 
 
+#note creation
 func _process_drag():
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
+		get_parent().ratio = ["L","L","L","L","L"]
 		_end_drag()
 		return
 	
+#note drag
+	get_parent().ratio = ["F","F","F","F","F"]
 	match dragging:
 		DRAG_BAR:
 			var new_time : float
@@ -214,9 +219,8 @@ func _process_drag():
 		_: print("Drag == %d You fucked up somewhere!!" % dragging)
 
 
-func _end_drag():
+func _end_drag(): #this may be where we create our undo stack
 	dragging = DRAG_NONE
-	
 	_snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		if has_slide_neighbor(Global.START_IS_TOUCHING, old_pitch):
@@ -321,7 +325,7 @@ func update_handle_visibility():
 	queue_redraw()
 
 
-func _update():
+func _update(): #update visuals
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
