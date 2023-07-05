@@ -202,7 +202,7 @@ func _process_drag():
 			length = new_end.x
 			pitch_delta = new_end.y
 		DRAG_INITIAL:
-			@warning_ignore(unassigned_variable)
+			@warning_ignore("unassigned_variable")
 			var new_pos : Vector2
 			
 			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
@@ -392,15 +392,13 @@ func _draw():
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
 	
-
-
-func grab_focus():
+"func grab_focus():
 	super()
-	queue_redraw()
+	queue_redraw()"
 
 
 func _exit_tree():
-	bar = -69420.0
+	#bar = -69420.0 we need the bar number for our undo/redo
 	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()

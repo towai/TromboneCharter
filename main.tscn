@@ -80,6 +80,7 @@ mode_overrides_title = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.tmb")
+show_hidden_files = true
 
 [node name="SaveDialog" type="FileDialog" parent="."]
 title = "Save Chart"
@@ -88,6 +89,7 @@ ok_button_text = "Save"
 mode_overrides_title = false
 access = 2
 filters = PackedStringArray("*.tmb")
+show_hidden_files = true
 
 [node name="ErrorPopup" type="AcceptDialog" parent="."]
 title = "Error"
