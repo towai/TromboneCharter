@@ -98,6 +98,7 @@ func _gui_input(event):
 	if key != null && key.pressed:
 		match key.keycode:
 			KEY_DELETE:
+				get_parent().ratio = ["L","L","L","L","L"]
 				queue_free()
 		return
 	
