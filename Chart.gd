@@ -198,6 +198,7 @@ func update_note_array():
 		if note.is_queued_for_deletion():#deletes note
 			deleted_note.append(["L","L","L","L","L"]) # + L's to start
 			added_note.append(note_array) 
+			revision += 1
 		if !note.is_queued_for_deletion() || ratio[1] == "F": #creates note
 			deleted_note.append(note_array)
 			added_note.append(ratio) # + L's or F's
