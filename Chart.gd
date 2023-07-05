@@ -38,6 +38,9 @@ var draw_targets : bool:
 var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
+var counter = 0
+var new_array := []
+var old_array := []
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -187,30 +190,40 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	
 
 func update_note_array():
-	var new_array := []
+	counter = 0
+	old_array = new_array
+	new_array = []
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
+		counter += 1
+		print("counter: ",counter)
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
-		print("added note: ",note_array)
-		if note.is_queued_for_deletion():#deletes note
-			deleted_note.append(["L","L","L","L","L"]) # + L's to start
-			added_note.append(note_array) 
-			revision += 1
-		if !note.is_queued_for_deletion() || ratio[1] == "F": #creates note
-			deleted_note.append(note_array)
-			added_note.append(ratio) # + L's or F's
-		revision += 1
+		#print("added note: ",note_array)
+		if counter == (old_array.size()):
+			if note.is_queued_for_deletion():#deletes note
+				deleted_note.append(["L","L","L","L","L"]) # + L's to start
+				added_note.append(note_array) 
+				print("deleted!")
+				revision += 1
+			if !note.is_queued_for_deletion() || ratio[1] == "F": #creates note
+				deleted_note.append(note_array)
+				added_note.append(ratio) # + L's or F's
+				print("added!")
+				revision += 1
 		new_array.append(note_array)
+	print("new_array: ",new_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
+	#print("tmb.notes: ",tmb.notes)
 	print("revision count: ",revision)
-	print("sorted array: ",new_array)
-	print("unsorted additions: ",added_note)
-	print("unsorted deletions: ",deleted_note)
+	#print("counter: ",counter)
+	#print("sorted array: ",new_array)
+	#print("unsorted additions: ",added_note)
+	#print("unsorted deletions: ",deleted_note)
 
 
 func _draw():
@@ -250,7 +263,7 @@ func _gui_input(event):
 	event = event as InputEventMouseButton
 	if event == null || !event.pressed: return
 	if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-		@warning_ignore(unassigned_variable)
+		@warning_ignore("unassigned_variable")
 		var new_note_pos : Vector2
 		
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x

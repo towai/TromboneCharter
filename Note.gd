@@ -126,13 +126,12 @@ func _on_handle_input(event, which):
 
 #note creation
 func _process_drag():
+	get_parent().ratio = ["F","F","F","F","F"]
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
-		get_parent().ratio = ["L","L","L","L","L"]
 		_end_drag()
 		return
 	
 #note drag
-	get_parent().ratio = ["F","F","F","F","F"]
 	match dragging:
 		DRAG_BAR:
 			var new_time : float
@@ -398,7 +397,7 @@ func _draw():
 
 
 func _exit_tree():
-	#bar = -69420.0 we need the bar number for our undo/redo
+	bar = -69420.0 #but we need the bar number for our undo/redo
 	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()
