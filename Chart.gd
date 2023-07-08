@@ -39,6 +39,7 @@ var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
 var counter = 0
+var new_note : Note
 var new_array := []
 var old_array := []
 
@@ -141,7 +142,7 @@ func _on_tmb_loaded():
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-	var new_note : Note = note_scn.instantiate()
+	new_note = note_scn.instantiate()
 	new_note.bar = bar
 	new_note.length = length
 	new_note.pitch_start = pitch
@@ -190,20 +191,22 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	
 
 func update_note_array():
-	counter = 0
+	counter = -1
 	old_array = new_array
 	new_array = []
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
-		counter += 1
-		print("counter: ",counter)
+		
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
+		"""counter += 1
+		print("counter: ",counter," ",old_array.size())
 		#print("added note: ",note_array)
-		if counter == (old_array.size()):
+		if (counter == (old_array.size())) && (note == new_note):
+			print("let through")
 			if note.is_queued_for_deletion():#deletes note
 				deleted_note.append(["L","L","L","L","L"]) # + L's to start
 				added_note.append(note_array) 
@@ -213,13 +216,13 @@ func update_note_array():
 				deleted_note.append(note_array)
 				added_note.append(ratio) # + L's or F's
 				print("added!")
-				revision += 1
+				revision += 1"""
 		new_array.append(note_array)
-	print("new_array: ",new_array)
+	#print("new_array: ",new_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
 	#print("tmb.notes: ",tmb.notes)
-	print("revision count: ",revision)
+	#print("revision count: ",revision)
 	#print("counter: ",counter)
 	#print("sorted array: ",new_array)
 	#print("unsorted additions: ",added_note)

@@ -68,11 +68,20 @@ var show_bar_handle : bool:
 	get: return (touching_notes.get(Global.START_IS_TOUCHING) == null)
 var show_end_handle : bool:
 	get: return (touching_notes.get(Global.END_IS_TOUCHING) == null)
+	
+var starting_note : Array
+var added : bool
+var a_array := []
+var deleted : bool
+var d_array := []
+var dragged : bool
+
 
 @onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
 	
@@ -98,7 +107,10 @@ func _gui_input(event):
 	if key != null && key.pressed:
 		match key.keycode:
 			KEY_DELETE:
-				get_parent().ratio = ["L","L","L","L","L"]
+				Global.revision += 1
+				print("revision: ",Global.revision)
+				a_array.append(Global.ratio)
+				d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
 				queue_free()
 		return
 	
@@ -108,11 +120,12 @@ func _gui_input(event):
 func _on_handle_input(event, which):
 	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 0
 	move_child(pitch_handle, pitch_handle_position)
-	
 	event = event as InputEventMouseButton
 	if event == null: return
+	print(starting_note)
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
+			starting_note = [old_bar,]
 			old_bar = bar
 			old_pitch = pitch_start
 			old_end_pitch = end_pitch
@@ -120,13 +133,16 @@ func _on_handle_input(event, which):
 			drag_start = get_local_mouse_position()
 			chart.doot(pitch_start if which != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
-			get_parent().ratio = ["L","L","L","L","L"]
+			deleted = true
+			print("that's deleting")
+			Global.revision += 1
+			print("revision: ",Global.revision)
+			a_array.append(Global.ratio)
+			d_array.append(starting_note)
 			queue_free()
 
 
-#note creation
 func _process_drag():
-	get_parent().ratio = ["F","F","F","F","F"]
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
 		_end_drag()
 		return
@@ -134,6 +150,8 @@ func _process_drag():
 #note drag
 	match dragging:
 		DRAG_BAR:
+			dragged = true
+			print("that bar's dragging")
 			var new_time : float
 			if Global.settings.snap_time:
 				new_time = chart.to_snapped(chart.get_local_mouse_position()).x
@@ -156,6 +174,8 @@ func _process_drag():
 			_update()
 			
 		DRAG_PITCH:
+			dragged = true
+			print("that pitch's dragging")
 			var new_pitch : float
 			if Global.settings.snap_pitch:
 				new_pitch = chart.to_snapped(
@@ -174,6 +194,8 @@ func _process_drag():
 			doot_enabled = true
 			
 		DRAG_END:
+			dragged = true
+			print("that end's dragging")
 			var new_end : Vector2 = chart.to_unsnapped(chart.get_local_mouse_position()) \
 							- Vector2(bar, pitch_start)
 			
@@ -203,7 +225,8 @@ func _process_drag():
 		DRAG_INITIAL:
 			@warning_ignore("unassigned_variable")
 			var new_pos : Vector2
-			
+			added = true
+			print("that's a new note")
 			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
 			else: new_pos.x = chart.to_unsnapped(chart.get_local_mouse_position()).x
 			
@@ -215,12 +238,40 @@ func _process_drag():
 			
 			if chart.stepped_note_overlaps(new_pos.x,length,[old_bar]): return
 			bar = new_pos.x
+			
 		DRAG_NONE: print("Not actually dragging? How tf was this reached")
 		_: print("Drag == %d You fucked up somewhere!!" % dragging)
 
 
 func _end_drag(): #this may be where we create our undo stack
 	dragging = DRAG_NONE
+	print("prior revision: ",Global.revision)
+	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
+	print(starting_note)
+	print(proper_note)
+	if added || dragged :
+		Global.revision += 1
+		a_array.append(proper_note)
+		d_array.append(Global.ratio)
+		if dragged && starting_note != proper_note:
+			Global.revision += 1
+			a_array.append(Global.respect)
+			d_array.append(starting_note)
+	print("current revision: ",Global.revision)
+	"""if starting_note == proper_note:
+		Global.revision -= 1
+		print("revision: ",Global.revision)
+	else :
+		if starting_note == null :
+			a_array.append(proper_note)
+			d_array.append(Global.ratio)
+			print("that was added!")
+		else :
+			Global.revision += 1
+			print("revision: ",Global.revision)
+			print("that was dragged!")
+			a_array.append(Global.respect)
+			d_array.append(starting_note)"""
 	_snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		if has_slide_neighbor(Global.START_IS_TOUCHING, old_pitch):
@@ -397,7 +448,9 @@ func _draw():
 
 
 func _exit_tree():
-	bar = -69420.0 #but we need the bar number for our undo/redo
+	print("exited tree!")
+	bar = -69420.0
+	#we need the bar number for our undo/redo, so we just grab the entire note earlier, in the two places that Note calls queue.free()
 	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()

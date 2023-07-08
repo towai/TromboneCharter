@@ -20,6 +20,11 @@ enum {
 	START_IS_TOUCHING,
 }
 
+var starting_note : Array
+var ratio := ["L","L","L","L","L"]
+var respect := ["F","F","F","F","F"]
+var revision = 0
+
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
