@@ -112,6 +112,10 @@ func _gui_input(event):
 				a_array.append(Global.ratio)
 				d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
 				queue_free()
+			KEY_CTRL && KEY_Z:
+				Global.UR = 1
+			KEY_CTRL && ((KEY_SHIFT && KEY_Z) || KEY_Y):
+				Global.UR = 2
 		return
 	
 	_on_handle_input(event,pitch_handle)

@@ -202,21 +202,6 @@ func update_note_array():
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
-		"""counter += 1
-		print("counter: ",counter," ",old_array.size())
-		#print("added note: ",note_array)
-		if (counter == (old_array.size())) && (note == new_note):
-			print("let through")
-			if note.is_queued_for_deletion():#deletes note
-				deleted_note.append(["L","L","L","L","L"]) # + L's to start
-				added_note.append(note_array) 
-				print("deleted!")
-				revision += 1
-			if !note.is_queued_for_deletion() || ratio[1] == "F": #creates note
-				deleted_note.append(note_array)
-				added_note.append(ratio) # + L's or F's
-				print("added!")
-				revision += 1"""
 		new_array.append(note_array)
 	#print("new_array: ",new_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])

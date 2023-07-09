@@ -19,7 +19,11 @@ enum {
 	END_IS_TOUCHING,
 	START_IS_TOUCHING,
 }
-
+###Dew's variables###
+var UR = 0
+	#  0 => normal operation
+	#  1 => undo last action
+	#  2 => redo last action
 var starting_note : Array
 var ratio := ["L","L","L","L","L"]
 var respect := ["F","F","F","F","F"]
