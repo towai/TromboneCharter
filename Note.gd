@@ -71,9 +71,7 @@ var show_end_handle : bool:
 ### Dew's variables ###
 var starting_note : Array
 var added : bool
-var a_array := []
 var deleted : bool
-var d_array := []
 var dragged : bool
 var click := false
 
@@ -100,7 +98,6 @@ func _ready():
 func _process(_delta):
 	if dragging: _process_drag()
 
-
 func _gui_input(event):
 	var key = event as InputEventKey
 	
@@ -109,13 +106,9 @@ func _gui_input(event):
 			KEY_DELETE:
 				Global.revision += 1
 				print("revision: ",Global.revision)
-				a_array.append(Global.ratio)
-				d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
+				Global.a_array.append(Global.ratio)
+				Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
 				queue_free()
-			KEY_CTRL && KEY_Z:
-				Global.UR = 1
-			KEY_CTRL && ((KEY_SHIFT && KEY_Z) || KEY_Y):
-				Global.UR = 2
 		return
 	
 	_on_handle_input(event,pitch_handle)
@@ -143,8 +136,8 @@ func _on_handle_input(event, which):
 			print("that's deleting")
 			Global.revision += 1
 			print("revision: ",Global.revision)
-			a_array.append(Global.ratio)
-			d_array.append(starting_note)
+			Global.a_array.append(Global.ratio)
+			Global.d_array.append(starting_note)
 			queue_free()
 
 
@@ -258,12 +251,12 @@ func _end_drag(): #this may be where we create our undo stack
 	if starting_note != proper_note :
 		if added || dragged :
 			Global.revision += 1
-			a_array.append(proper_note)
-			d_array.append(Global.ratio)
+			Global.a_array.append(proper_note)
+			Global.d_array.append(Global.ratio)
 			if dragged:
 				Global.revision += 1
-				a_array.append(Global.respect)
-				d_array.append(starting_note)
+				Global.a_array.append(Global.respects)
+				Global.d_array.append(starting_note)
 	print("current revision: ",Global.revision)
 	
 	_snap_near_pitches()

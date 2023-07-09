@@ -40,7 +40,7 @@ var _update_queued := false
 var clearing_notes := false
 var counter = 0
 var new_note : Note
-var new_array := []
+var main_stack := []
 var old_array := []
 
 func doot(pitch:float):
@@ -62,6 +62,18 @@ func _on_scroll_change():
 	await(get_tree().process_frame)
 	redraw_notes()
 
+func _unhandled_key_input(event):
+	var shortcut = event as InputEventWithModifiers
+	print(event.is_action_type())
+	if shortcut != null :
+		if event.ctrl_pressed && shortcut.keycode == KEY_Z :
+				Global.UR[0] = 1
+				update_note_array()
+		if (event.ctrl_pressed && ((event.shift_pressed && shortcut.keycode == KEY_Z) || shortcut.keycode == KEY_Y)):
+				Global.UR[0] = 2
+				update_note_array()
+		return
+		
 
 func redraw_notes():
 	for child in get_children():
@@ -191,25 +203,65 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	
 
 func update_note_array():
-	counter = -1
-	old_array = new_array
-	new_array = []
+	main_stack = []
+	print("in update")
+	print(Global.UR[0])
 	for note in get_children():
-		if !(note is Note) || note.is_queued_for_deletion():
+		if !(note is Note) || note.is_queued_for_deletion() || Global.UR[0] > 0:
 			continue
 		
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
-		new_array.append(note_array)
-	#print("new_array: ",new_array)
-	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-	tmb.notes = new_array
+		if revision > -1 :
+			print("past revision check")
+			if Global.UR[0] == 1 :
+				#undo
+				if Global.a_array[revision] == Global.respects :
+					"dragged"
+					note_array = Global.d_array[revision]
+					main_stack.remove_at(main_stack.find(Global.a_array[revision-1]))
+					revision -= 2
+				
+				if Global.d_array[revision] == Global.ratio :
+					"added"
+					main_stack.remove_at(main_stack.find(Global.a_array[revision]))
+					revision -= 1
+				
+				if Global.a_array[revision] == Global.ratio :
+					"deleted"
+					note_array = Global.d_array[revision]
+					revision -= 1
+				
+				
+				
+			if Global.UR[0] == 2 :
+				#redo
+				if Global.a_array[revision+2] == Global.respects :
+					"dragged"
+					note_array = Global.a_array[revision+1]
+					main_stack.remove_at(main_stack.find(Global.d_array[revision+2]))
+					revision += 2
+				
+				elif Global.d_array[revision+1] == Global.ratio :
+					"added"
+					note_array = Global.a_array[revision+1]
+					revision += 1
+				
+				if Global.a_array[revision+1] == Global.ratio :
+					"deleted"
+					main_stack.remove_at(main_stack.find(Global.d_array[revision+1]))
+					revision += 1
+			
+		main_stack.append(note_array)
+	#print("main_stack: ",main_stack)
+	main_stack.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+	tmb.notes = main_stack
 	#print("tmb.notes: ",tmb.notes)
 	#print("revision count: ",revision)
 	#print("counter: ",counter)
-	#print("sorted array: ",new_array)
+	#print("sorted array: ",main_stack)
 	#print("unsorted additions: ",added_note)
 	#print("unsorted deletions: ",deleted_note)
 

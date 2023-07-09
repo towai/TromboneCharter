@@ -20,14 +20,20 @@ enum {
 	START_IS_TOUCHING,
 }
 ###Dew's variables###
-var UR = 0
-	#  0 => normal operation
-	#  1 => undo last action
-	#  2 => redo last action
+var UR := [0,0]
+	# 0   => normal operation
+	# 1   => undo last action
+	# 2   => redo last action
+	#  ,0 => fix w/ drag
+	#  ,1 => fix w/ addition
+	#  ,2 => fix w/ deletion
 var starting_note : Array
 var ratio := ["L","L","L","L","L"]
-var respect := ["F","F","F","F","F"]
-var revision = 0
+var respects := ["F","F","F","F","F"]
+var revision = -1
+
+var a_array := []
+var d_array := []
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
