@@ -68,20 +68,20 @@ var show_bar_handle : bool:
 	get: return (touching_notes.get(Global.START_IS_TOUCHING) == null)
 var show_end_handle : bool:
 	get: return (touching_notes.get(Global.END_IS_TOUCHING) == null)
-	
+### Dew's variables ###
 var starting_note : Array
 var added : bool
 var a_array := []
 var deleted : bool
 var d_array := []
 var dragged : bool
+var click := false
 
 
 @onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
 	
@@ -125,7 +125,9 @@ func _on_handle_input(event, which):
 	print(starting_note)
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
-			starting_note = [old_bar,]
+			if !click :
+				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
+				click = true
 			old_bar = bar
 			old_pitch = pitch_start
 			old_end_pitch = end_pitch
@@ -146,8 +148,7 @@ func _process_drag():
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
 		_end_drag()
 		return
-	
-#note drag
+		
 	match dragging:
 		DRAG_BAR:
 			dragged = true
@@ -245,33 +246,22 @@ func _process_drag():
 
 func _end_drag(): #this may be where we create our undo stack
 	dragging = DRAG_NONE
+	click = false
 	print("prior revision: ",Global.revision)
 	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 	print(starting_note)
 	print(proper_note)
-	if added || dragged :
-		Global.revision += 1
-		a_array.append(proper_note)
-		d_array.append(Global.ratio)
-		if dragged && starting_note != proper_note:
+	if starting_note != proper_note :
+		if added || dragged :
 			Global.revision += 1
-			a_array.append(Global.respect)
-			d_array.append(starting_note)
-	print("current revision: ",Global.revision)
-	"""if starting_note == proper_note:
-		Global.revision -= 1
-		print("revision: ",Global.revision)
-	else :
-		if starting_note == null :
 			a_array.append(proper_note)
 			d_array.append(Global.ratio)
-			print("that was added!")
-		else :
-			Global.revision += 1
-			print("revision: ",Global.revision)
-			print("that was dragged!")
-			a_array.append(Global.respect)
-			d_array.append(starting_note)"""
+			if dragged:
+				Global.revision += 1
+				a_array.append(Global.respect)
+				d_array.append(starting_note)
+	print("current revision: ",Global.revision)
+	
 	_snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		if has_slide_neighbor(Global.START_IS_TOUCHING, old_pitch):
