@@ -31,6 +31,7 @@ var starting_note : Array
 var ratio := ["L","L","L","L","L"]
 var respects := ["F","F","F","F","F"]
 var revision = -1
+var active_revision = -1
 
 var a_array := []
 var d_array := []

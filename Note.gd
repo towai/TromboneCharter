@@ -119,7 +119,7 @@ func _on_handle_input(event, which):
 	move_child(pitch_handle, pitch_handle_position)
 	event = event as InputEventMouseButton
 	if event == null: return
-	print(starting_note)
+	#print(starting_note)
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
 			if !click :
@@ -135,7 +135,7 @@ func _on_handle_input(event, which):
 			deleted = true
 			print("that's deleting")
 			Global.revision += 1
-			print("revision: ",Global.revision)
+			#print("revision: ",Global.revision)
 			Global.a_array.append(Global.ratio)
 			Global.d_array.append(starting_note)
 			queue_free()
@@ -244,10 +244,10 @@ func _process_drag():
 func _end_drag(): #this may be where we create our undo stack
 	dragging = DRAG_NONE
 	click = false
-	print("prior revision: ",Global.revision)
+	#print("prior revision: ",Global.revision)
 	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
-	print(starting_note)
-	print(proper_note)
+	#print(starting_note)
+	#print(proper_note)
 	if starting_note != proper_note :
 		if added || dragged :
 			Global.revision += 1
@@ -435,7 +435,7 @@ func _draw():
 
 
 func _exit_tree():
-	print("exited tree!")
+	#print("exited tree!")
 	bar = -69420.0
 	#we need the bar number for our undo/redo, so we just grab the entire note earlier, in the two places that Note calls queue.free()
 	if chart.clearing_notes: return
