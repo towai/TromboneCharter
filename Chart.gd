@@ -65,6 +65,7 @@ func _unhandled_key_input(event):
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > -1:
 		Global.UR[0] = 1
 		print("undo!")
+		
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.revision + 1 > tmb.notes.size():
 		Global.UR[0] = 2
@@ -199,18 +200,19 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 
 func update_note_array():
 	new_array = []
-	print("in update_note_array()")
+	print("Hi, I'm Tom Scott, and today I'm here in func update_note_array()")
 	print(get_children())
 	for note in get_children():
-		'''if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0):
-			continue'''
+		if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0):
+			continue
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
+		print(note_array)
 		print("UR!!! ",Global.UR[0])
 		if Global.UR[0] == 1 :
-			print("UR=====> ",Global.UR[0])
+			print("UR Undo! ",Global.UR[0])
 			
 			if Global.a_array[Global.revision] == Global.respects :
 				print("undo dragged")
@@ -231,7 +233,7 @@ func update_note_array():
 			
 			
 		if Global.UR[0] == 2 :
-			print("UR=> ",Global.UR[0])
+			print("UR Redo! ",Global.UR[0])
 			if Global.a_array[Global.revision+2] == Global.respects :
 				print("redo dragged")
 				note_array = Global.a_array[Global.revision+1]
@@ -253,10 +255,10 @@ func update_note_array():
 	print("deleted notes: ",Global.d_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	if Global.UR[0] == 0 :
-		print("normal")
+		#print("normal")
 		tmb.notes = new_array
 	else :
-		print("funky mode")
+		#print("funky mode")
 		tmb.notes = main_stack.slice(0,Global.revision + 1)
 	print("tmb.notes: ",tmb.notes)
 	
