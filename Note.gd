@@ -132,12 +132,13 @@ func _on_handle_input(event, which):
 			drag_start = get_local_mouse_position()
 			chart.doot(pitch_start if which != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
+			starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 			deleted = true
 			print("that's deleting")
 			Global.revision += 1
 			#print("revision: ",Global.revision)
 			Global.a_array.append(Global.ratio)
-			Global.d_array.append(starting_note)
+			Global.d_array.append(starting_note.duplicate())
 			queue_free()
 
 
@@ -256,7 +257,7 @@ func _end_drag(): #this may be where we create our undo stack
 			if dragged:
 				Global.revision += 1
 				Global.a_array.append(Global.respects)
-				Global.d_array.append(starting_note)
+				Global.d_array.append(starting_note.duplicate())
 	print("current revision: ",Global.revision)
 	
 	_snap_near_pitches()
