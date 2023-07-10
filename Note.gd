@@ -132,7 +132,6 @@ func _on_handle_input(event, which):
 			drag_start = get_local_mouse_position()
 			chart.doot(pitch_start if which != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
-			starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 			deleted = true
 			print("that's deleting")
 			Global.revision += 1

@@ -37,11 +37,12 @@ var _update_queued := false
 var clearing_notes := false
 var counter = 0
 var new_note : Note
+var new_array := []
 var main_stack := []
-var old_array := []
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
+	@warning_ignore("static_called_on_instance")
 	player.pitch_scale = Global.pitch_to_scale(pitch / Global.SEMITONE)
 	player.play()
 	await(get_tree().create_timer(0.1).timeout)
@@ -63,11 +64,11 @@ func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > -1:
 		Global.UR[0] = 1
-		print("undo?")
+		print("undo!")
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.revision + 1 > tmb.notes.size():
 		Global.UR[0] = 2
-		print("redo?")
+		print("redo!")
 		update_note_array()
 
 func redraw_notes():
@@ -197,19 +198,20 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	
 
 func update_note_array():
-	main_stack = []
+	new_array = []
 	print("in update_note_array()")
-	print("UR: ",Global.UR[0])
+	print(get_children())
 	for note in get_children():
-		if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0):
-			continue
-		
+		'''if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0):
+			continue'''
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
+		print("UR!!! ",Global.UR[0])
 		if Global.UR[0] == 1 :
-			#1 = undo
+			print("UR=====> ",Global.UR[0])
+			
 			if Global.a_array[Global.revision] == Global.respects :
 				print("undo dragged")
 				note_array = Global.d_array[Global.revision]
@@ -229,12 +231,11 @@ func update_note_array():
 			
 			
 		if Global.UR[0] == 2 :
-			#2 = redo
-			
+			print("UR=> ",Global.UR[0])
 			if Global.a_array[Global.revision+2] == Global.respects :
 				print("redo dragged")
 				note_array = Global.a_array[Global.revision+1]
-				main_stack.remove_at(main_stack.find(Global.d_array[Global.revision+2]))
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+2]))
 				Global.revision += 2
 			
 			elif Global.d_array[Global.revision+1] == Global.ratio :
@@ -244,20 +245,24 @@ func update_note_array():
 			
 			if Global.a_array[Global.revision+1] == Global.ratio :
 				print("redo deleted")
-				main_stack.remove_at(main_stack.find(Global.d_array[Global.revision+1]))
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+1]))
 				Global.revision += 1
+		new_array.append(note_array)
 		main_stack.append(note_array)
-	#print("main_stack: ",main_stack)
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
-	main_stack.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-	tmb.notes = main_stack
+	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+	if Global.UR[0] == 0 :
+		print("normal")
+		tmb.notes = new_array
+	else :
+		print("funky mode")
+		tmb.notes = main_stack.slice(0,Global.revision + 1)
 	print("tmb.notes: ",tmb.notes)
 	
 	if Global.UR[0] > 0 :
 		Global.UR[0] = 0
 		_on_tmb_loaded()
-	#print("tmb.notes: ",tmb.notes)
 
 
 func _draw():
@@ -283,6 +288,7 @@ func _draw():
 			draw_line(Vector2(line * bar_spacing, 0), Vector2(line * bar_spacing, size.y),
 					Color(0.7,1,1,0.2), 1 )
 		if !(i % tmb.timesig):
+			@warning_ignore("integer_division")
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 16),
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
