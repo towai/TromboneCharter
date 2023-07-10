@@ -201,7 +201,7 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 func update_note_array():
 	new_array = []
 	print("Hi, I'm Tom Scott, and today I'm here in func update_note_array()")
-	print(get_children())
+	#print(get_children())
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0):
 			continue
@@ -210,6 +210,7 @@ func update_note_array():
 			note.pitch_start + note.pitch_delta
 		]
 		print(note_array)
+		print("revision: ",Global.revision)
 		print("UR!!! ",Global.UR[0])
 		if Global.UR[0] == 1 :
 			print("UR Undo! ",Global.UR[0])
