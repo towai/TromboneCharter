@@ -39,6 +39,7 @@ var counter = 0
 var new_note : Note
 var new_array := []
 var main_stack := []
+var drag_available := false
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -65,11 +66,18 @@ func _unhandled_key_input(event):
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > -1:
 		Global.UR[0] = 1
 		print("undo!")
-		
 		update_note_array()
-	if Input.is_action_just_pressed("ui_redo") && Global.revision + 1 > tmb.notes.size():
-		Global.UR[0] = 2
+	if Input.is_action_just_pressed("ui_redo"):
 		print("redo!")
+		Global.UR[0] = 2
+		Global.UR[1] = 0
+		if Global.revision + 3 <= Global.a_array.size() :
+			Global.UR[1] = 2
+		elif Global.revision + 2 <= Global.a_array.size() :
+			Global.UR[1] = 1
+		else :
+			Global.UR[0] = 0
+			print("wait, don't redo.")
 		update_note_array()
 
 func redraw_notes():
@@ -140,10 +148,10 @@ func _on_tmb_loaded():
 	doot_enabled = false
 	for note in tmb.notes:
 		add_note(false,
-				note[TMBInfo.NOTE_BAR],
-				note[TMBInfo.NOTE_LENGTH],
-				note[TMBInfo.NOTE_PITCH_START],
-				note[TMBInfo.NOTE_PITCH_DELTA]
+			note[TMBInfo.NOTE_BAR],
+			note[TMBInfo.NOTE_LENGTH],
+			note[TMBInfo.NOTE_PITCH_START],
+			note[TMBInfo.NOTE_PITCH_DELTA]
 		)
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
@@ -160,7 +168,6 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
 	add_child(new_note)
-	new_note.grab_focus()
 
 
 func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -210,95 +217,105 @@ func update_note_array():
 			note.pitch_start + note.pitch_delta
 		]
 		print(note_array)
-		print("revision: ",Global.revision)
-		print("UR!!! ",Global.UR[0])
-		if Global.UR[0] == 1 :
-			print("UR Undo! ",Global.UR[0])
-			
-			if Global.a_array[Global.revision] == Global.respects :
-				print("undo dragged")
-				note_array = Global.d_array[Global.revision]
-				main_stack.remove_at(main_stack.find(Global.a_array[Global.revision-1]))
-				Global.revision -= 2
-			
-			if Global.d_array[Global.revision] == Global.ratio :
-				print("undo added")
-				main_stack.remove_at(main_stack.find(Global.a_array[Global.revision]))
-				Global.revision -= 1
-			
-			if Global.a_array[Global.revision] == Global.ratio :
-				print("undo deleted")
-				note_array = Global.d_array[Global.revision]
-				Global.revision -= 1
-			
-			
-			
-		if Global.UR[0] == 2 :
-			print("UR Redo! ",Global.UR[0])
-			if Global.a_array[Global.revision+2] == Global.respects :
-				print("redo dragged")
-				note_array = Global.a_array[Global.revision+1]
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+2]))
-				Global.revision += 2
-			
-			elif Global.d_array[Global.revision+1] == Global.ratio :
-				print("redo added")
-				note_array = Global.a_array[Global.revision+1]
-				Global.revision += 1
-			
-			if Global.a_array[Global.revision+1] == Global.ratio :
-				print("redo deleted")
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+1]))
-				Global.revision += 1
 		new_array.append(note_array)
 		main_stack.append(note_array)
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
+	print("new_array: ",new_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-	if Global.UR[0] == 0 :
-		#print("normal")
-		tmb.notes = new_array
-	else :
-		#print("funky mode")
-		tmb.notes = main_stack.slice(0,Global.revision + 1)
+	tmb.notes = new_array
 	print("tmb.notes: ",tmb.notes)
 	
 	if Global.UR[0] > 0 :
-		Global.UR[0] = 0
-		_on_tmb_loaded()
+		UR_handler()
 
+func UR_handler():
+	print("UR!!! ",Global.UR[0])
+	var passed_note = []
+	
+	
+	
+	if Global.UR[0] == 1 :
+		print("UR Undo! ",Global.UR[0])
+		
+		if Global.a_array[Global.revision] == Global.respects :
+			print("undo dragged")
+			passed_note = Global.d_array[Global.revision]
+			main_stack.remove_at(main_stack.find(Global.a_array[Global.revision-1]))
+			Global.revision -= 2
+			Global.UR[0] = 0
+		
+		elif Global.d_array[Global.revision] == Global.ratio :
+			print("undo added")
+			main_stack.remove_at(main_stack.find(Global.a_array[Global.revision]))
+			Global.revision -= 1
+			Global.UR[0] = 0
+		
+		elif Global.a_array[Global.revision] == Global.ratio :
+			print("undo deleted")
+			passed_note = Global.d_array[Global.revision]
+			Global.revision -= 1
+			Global.UR[0] = 0
+		
+		
+		
+	if Global.UR[0] == 2 :
+		print("UR Redo! ",Global.UR[0])
+		if Global.UR[1] == 2 :
+			if Global.a_array[Global.revision+2] == Global.respects :
+				print("redo dragged")
+				passed_note = Global.a_array[Global.revision+1]
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+2]))
+				Global.revision += 2
+		
+		if Global.UR[1] == 1:
+			if Global.d_array[Global.revision+1] == Global.ratio :
+				print("redo added")
+				passed_note = Global.a_array[Global.revision+1]
+				Global.revision += 1
+		
+			elif Global.a_array[Global.revision+1] == Global.ratio :
+				print("redo deleted")
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+1]))
+				Global.revision += 1
+		Global.UR[0] = 0
+		Global.UR[1] = 0
+		update_note_array()
+	print("main_stack: ",main_stack)
+	Global.UR[0] = 0
+	_on_tmb_updated()
 
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
 	var section_rect = Rect2(bar_to_x(settings.section_start), 1,
-			bar_to_x(settings.section_length), size.y)
+		bar_to_x(settings.section_length), size.y)
 	draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
 	draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
 	if %PreviewController.is_playing:
 		draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
-				Vector2(bar_to_x(%PreviewController.song_position),size.y),
-				Color.CORNFLOWER_BLUE, 2 )
+			Vector2(bar_to_x(%PreviewController.song_position),size.y),
+			Color.CORNFLOWER_BLUE, 2 )
 	for i in tmb.endpoint + 1:
 		draw_line(Vector2(i * bar_spacing, 0), Vector2(i * bar_spacing, size.y),
-				Color(1,1,1,0.33) if i % tmb.timesig else Color.WHITE, 2
-				)
+			Color(1,1,1,0.33) if i % tmb.timesig else Color.WHITE, 2
+			)
 		var subdiv = %TimingSnap.value
 		for j in subdiv:
 			if i == tmb.endpoint: break
 			var k = 1.0 / subdiv
 			var line = i + (k * j)
 			draw_line(Vector2(line * bar_spacing, 0), Vector2(line * bar_spacing, size.y),
-					Color(0.7,1,1,0.2), 1 )
+				Color(0.7,1,1,0.2), 1 )
 		if !(i % tmb.timesig):
 			@warning_ignore("integer_division")
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 16),
-					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
+				str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
-					str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+				str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
-				Vector2(bar_to_x(%CopyTarget.value), size.y),
-				Color.ORANGE_RED, 2.0)
+			Vector2(bar_to_x(%CopyTarget.value), size.y),
+			Color.ORANGE_RED, 2.0)
 	redraw_notes()
 
 
@@ -316,11 +333,11 @@ func _gui_input(event):
 		
 		if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 		else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
-				Global.SEMITONE * -13, Global.SEMITONE * 13)
+			Global.SEMITONE * -13, Global.SEMITONE * 13)
 		
 		add_note(true, new_note_pos.x, current_subdiv, new_note_pos.y)
 	elif (event.button_index == MOUSE_BUTTON_WHEEL_DOWN) \
-			|| event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		|| event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		_on_scroll_change()
 
 

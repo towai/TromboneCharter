@@ -104,7 +104,7 @@ func _gui_input(event):
 	if key != null && key.pressed:
 		match key.keycode:
 			KEY_DELETE:
-				#Global.revision += 1
+				Global.revision += 1
 				#print("revision: ",Global.revision)
 				Global.a_array.append(Global.ratio)
 				Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
@@ -134,7 +134,7 @@ func _on_handle_input(event, which):
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
 			deleted = true
 			print("that's deleting")
-			#Global.revision += 1
+			Global.revision += 1
 			#print("revision: ",Global.revision)
 			Global.a_array.append(Global.ratio)
 			Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
@@ -250,11 +250,11 @@ func _end_drag(): #this may be where we create our undo stack
 	#print(proper_note)
 	if starting_note != proper_note :
 		if added || dragged :
-			#Global.revision += 1
-			Global.a_array.append(proper_note)
+			Global.revision += 1
+			Global.a_array.append(proper_note.duplicate())
 			Global.d_array.append(Global.ratio)
 			if dragged:
-				#Global.revision += 1
+				Global.revision += 1
 				Global.a_array.append(Global.respects)
 				Global.d_array.append(starting_note.duplicate())
 	#print("current revision: ",Global.revision)
