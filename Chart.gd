@@ -165,6 +165,9 @@ func _on_tmb_loaded():
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
+	if Global.UR[2] > 0 :
+		Global.a_array = Global.a_array.slice(0,Global.revision,1,true)
+		Global.d_array = Global.d_array.slice(0,Global.revision,1,true)
 	new_note = note_scn.instantiate()
 	new_note.bar = bar
 	new_note.length = length
