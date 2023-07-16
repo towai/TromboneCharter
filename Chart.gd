@@ -35,11 +35,19 @@ var draw_targets : bool:
 var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
-var counter = 0
 var new_note : Note
+
+#Dew's variables#
 var new_array := []
 var main_stack := []
+var target_note := []
+var dumb_copy := []
+var bar_array := [] #list of bars
+var redoability = 0
 var drag_available := false
+var short_stack = 0
+var prev_bar #bar of clearable note
+
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -63,21 +71,19 @@ func _on_scroll_change():
 
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
-	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > -1:
+	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
+		short_stack = Global.a_array.size() + Global.initial_size - main_stack.size()
 		Global.UR[0] = 1
 		print("undo!")
 		update_note_array()
-	if Input.is_action_just_pressed("ui_redo"):
-		print("redo!")
+	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
 		Global.UR[0] = 2
-		Global.UR[1] = 0
-		if Global.revision + 3 <= Global.a_array.size() :
-			Global.UR[1] = 2
-		elif Global.revision + 2 <= Global.a_array.size() :
+		Global.UR[1] = 2
+		short_stack = Global.a_array.size() + Global.initial_size - main_stack.size()
+		print("redo!")
+		if short_stack == 1 :
 			Global.UR[1] = 1
-		else :
-			Global.UR[0] = 0
-			print("wait, don't redo.")
+		
 		update_note_array()
 
 func redraw_notes():
@@ -106,6 +112,7 @@ func _do_tmb_update():
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
+		print(note)
 		note.position.x = note.bar * bar_spacing
 	queue_redraw()
 	_update_queued = false
@@ -218,70 +225,115 @@ func update_note_array():
 		]
 		print(note_array)
 		new_array.append(note_array)
-		main_stack.append(note_array)
+		bar_array.append(note_array[0])
+		main_stack = new_array
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
-	print("new_array: ",new_array)
+	print("main_stack: ",main_stack)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+	bar_array.sort()
 	tmb.notes = new_array
 	print("tmb.notes: ",tmb.notes)
 	
 	if Global.UR[0] > 0 :
 		UR_handler()
+	else :
+		_do_tmb_update()
 
+func recoome_eraser_gun() : 
+	return
+	var erase_me := []
+	match Global.UR[0]:
+		#neither???
+		0 : print("no, that's wrong!")
+		#undo
+		1 : erase_me = main_stack[main_stack.bsearch(Global.a_array[Global.revision-1])]
+		#redo
+		2 : erase_me = main_stack[main_stack.bsearch(Global.d_array[Global.revision])]
+	get_children()[tmb.notes.bsearch(erase_me)].queue_free()
+	#throws error when trying to access %Settings
+	
+	
 func UR_handler():
 	print("UR!!! ",Global.UR[0])
 	var passed_note = []
-	
-	
-	
+	var drag_UR = false
 	if Global.UR[0] == 1 :
-		print("UR Undo! ",Global.UR[0])
-		
-		if Global.a_array[Global.revision] == Global.respects :
-			print("undo dragged")
-			passed_note = Global.d_array[Global.revision]
-			main_stack.remove_at(main_stack.find(Global.a_array[Global.revision-1]))
-			Global.revision -= 2
-			Global.UR[0] = 0
-		
-		elif Global.d_array[Global.revision] == Global.ratio :
-			print("undo added")
-			main_stack.remove_at(main_stack.find(Global.a_array[Global.revision]))
-			Global.revision -= 1
-			Global.UR[0] = 0
-		
-		elif Global.a_array[Global.revision] == Global.ratio :
-			print("undo deleted")
-			passed_note = Global.d_array[Global.revision]
-			Global.revision -= 1
-			Global.UR[0] = 0
-		
-		
+		print("UR Undo! ")
+		if Global.revision > 1:
+			if Global.a_array[Global.revision-2] == Global.respects :
+				print("undo dragged")
+				passed_note = Global.d_array[Global.revision-2]
+				recoome_eraser_gun()
+				main_stack.remove_at(main_stack.bsearch(Global.a_array[Global.revision-1]))
+				main_stack.append(passed_note)
+				Global.revision -= 2
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+				drag_UR = true
+		if !drag_UR :
+			if Global.d_array[Global.revision-1] == Global.ratio:
+				print("undo added")
+				recoome_eraser_gun()
+				main_stack.remove_at(main_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.revision -= 1
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+			
+			elif Global.a_array[Global.revision-1] == Global.ratio:
+				print("undo deleted")
+				passed_note = Global.d_array[Global.revision-1]
+				main_stack.append(passed_note)
+				Global.revision -= 1
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+		print(main_stack)
+		dumb_copy = main_stack
+		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = dumb_copy
 		
 	if Global.UR[0] == 2 :
-		print("UR Redo! ",Global.UR[0])
+		print("UR Redo! ",Global.UR[1])
 		if Global.UR[1] == 2 :
-			if Global.a_array[Global.revision+2] == Global.respects :
+			if Global.a_array[Global.revision] == Global.respects :
 				print("redo dragged")
+				recoome_eraser_gun()
 				passed_note = Global.a_array[Global.revision+1]
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+2]))
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision]))
+				main_stack.append(passed_note)
 				Global.revision += 2
-		
-		if Global.UR[1] == 1:
-			if Global.d_array[Global.revision+1] == Global.ratio :
+				Global.UR[2] -= 1
+				drag_UR = true
+			
+		if Global.UR[1] != 0 && !drag_UR :
+			if Global.d_array[Global.revision] == Global.ratio :
 				print("redo added")
-				passed_note = Global.a_array[Global.revision+1]
+				passed_note = Global.a_array[Global.revision]
+				main_stack.append(passed_note)
 				Global.revision += 1
+				Global.UR[2] -= 1
 		
-			elif Global.a_array[Global.revision+1] == Global.ratio :
+			elif Global.a_array[Global.revision] == Global.ratio :
 				print("redo deleted")
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision+1]))
+				recoome_eraser_gun()
+				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision]))
 				Global.revision += 1
-		Global.UR[0] = 0
+				Global.UR[2] -= 1
+				
+
 		Global.UR[1] = 0
-		update_note_array()
+		dumb_copy = main_stack.slice(0,Global.revision)
+		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = dumb_copy
+		
+	print("revision post-UR: ",Global.revision)
 	print("main_stack: ",main_stack)
+	print("tmb.notes: ",tmb.notes)
+	
+	#if erase_me != null :
+	#	get_children()[tmb.notes.find(erase_me) + 4].queue_free()
+	
+	
 	Global.UR[0] = 0
 	_on_tmb_updated()
 

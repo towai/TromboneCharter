@@ -82,7 +82,6 @@ var click := false
 func _ready():
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
-	
 	bar_handle.size = BARHANDLE_SIZE
 	bar_handle.position = -BARHANDLE_SIZE / 2
 	
@@ -94,8 +93,10 @@ func _ready():
 	_update()
 	doot_enabled = true
 
-
 func _process(_delta):
+	if Global.chart_just_loaded:
+		Global.initial_size = chart.get_child_count() - 4
+		Global.chart_just_loaded = false
 	if dragging: _process_drag()
 
 func _gui_input(event):
@@ -104,6 +105,7 @@ func _gui_input(event):
 	if key != null && key.pressed:
 		match key.keycode:
 			KEY_DELETE:
+				deleted = true
 				Global.revision += 1
 				#print("revision: ",Global.revision)
 				Global.a_array.append(Global.ratio)
@@ -135,7 +137,7 @@ func _on_handle_input(event, which):
 			deleted = true
 			print("that's deleting")
 			Global.revision += 1
-			#print("revision: ",Global.revision)
+			print("revision: ",Global.revision)
 			Global.a_array.append(Global.ratio)
 			Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
 			queue_free()
@@ -246,18 +248,18 @@ func _end_drag(): #this may be where we create our undo stack
 	click = false
 	#print("prior revision: ",Global.revision)
 	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
-	#print(starting_note)
-	#print(proper_note)
+	print(starting_note)
+	print(proper_note)
 	if starting_note != proper_note :
-		if added || dragged :
+		if dragged:
 			Global.revision += 1
-			Global.a_array.append(proper_note.duplicate())
+			Global.a_array.append(Global.respects)
+			Global.d_array.append(starting_note.duplicate(true))
+		if added:
+			Global.revision += 1
+			Global.a_array.append(proper_note.duplicate(true))
 			Global.d_array.append(Global.ratio)
-			if dragged:
-				Global.revision += 1
-				Global.a_array.append(Global.respects)
-				Global.d_array.append(starting_note.duplicate())
-	#print("current revision: ",Global.revision)
+	print("current revision: ",Global.revision)
 	
 	_snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
@@ -294,6 +296,7 @@ func has_slide_neighbor(direction:int,pitch:float):
 
 
 func update_touching_notes():
+	
 	var old_prev_note = touching_notes.get(Global.START_IS_TOUCHING)
 	var old_next_note = touching_notes.get(Global.END_IS_TOUCHING)
 	touching_notes = chart.find_touching_notes(self)
@@ -313,7 +316,6 @@ func update_touching_notes():
 			next_note.touching_notes[Global.START_IS_TOUCHING] = self if bar >= 0 else null
 			next_note.bar = end
 			next_note.update_handle_visibility()
-	
 	update_handle_visibility()
 
 
@@ -363,7 +365,7 @@ func update_handle_visibility():
 	queue_redraw()
 
 
-func _update(): #update visuals
+func _update():
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
@@ -436,7 +438,7 @@ func _draw():
 
 func _exit_tree():
 	#print("exited tree!")
-	bar = -69420.0
+	#bar = -69420.0
 	#we need the bar number for our undo/redo, so we just grab the entire note earlier, in the two places that Note calls queue.free()
 	if chart.clearing_notes: return
 	update_touching_notes()

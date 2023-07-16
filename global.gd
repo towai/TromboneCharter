@@ -20,18 +20,20 @@ enum {
 	START_IS_TOUCHING,
 }
 ###Dew's variables###
-var UR := [0,0]
+var UR := [0,0,0]
 	# 0   => normal operation
 	# 1   => undo last action
 	# 2   => redo last action
-	#  ,0 => fix w/ drag
-	#  ,1 => fix w/ addition
-	#  ,2 => fix w/ deletion
+	#  ,0 => run no calculations //with addition of UR[2], should never be reached beyond initial declarations
+	#  ,1 => run A/D calculations only
+	#  ,2 => run any calculation
+	#  ,, => available redos
 var starting_note : Array
 var ratio := ["L","L","L","L","L"]
 var respects := ["F","F","F","F","F"]
-var revision = -1
-var active_revision = -1
+var revision = 0
+var chart_just_loaded : bool
+var initial_size = 0
 
 var a_array := []
 var d_array := []

@@ -72,8 +72,10 @@ func _on_load_dialog_file_selected(path):
 	$SaveDialog.current_path = path
 	cfg.set_value("Config","saved_dir", dir)
 	try_cfg_save()
+	Global.chart_just_loaded = true
 	
 	%WavPlayer.stream = null
+	
 	emit_signal("chart_loaded")
 	if %Settings.load_wav_on_chart_load:
 		err = try_to_load_wav(dir + "/song.wav")
