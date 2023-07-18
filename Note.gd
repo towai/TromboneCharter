@@ -248,8 +248,8 @@ func _end_drag(): #this may be where we create our undo stack
 	click = false
 	#print("prior revision: ",Global.revision)
 	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
-	print(starting_note)
-	print(proper_note)
+	#print(starting_note)
+	#print(proper_note)
 	if starting_note != proper_note :
 		if dragged:
 			Global.revision += 1
