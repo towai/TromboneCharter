@@ -147,7 +147,7 @@ func _on_save_chart_pressed():
 	else: show_popup($SaveDialog)
 
 func _on_save_dialog_file_selected(path:String):
-	if path[1] != ':':
+	if path[1] != ':' && OS.get_name() == "Windows":
 		print("driveless path %s" % path)
 		var drive : String
 		var saved_dir = cfg.get_value("Config","saved_dir")
