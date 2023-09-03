@@ -196,7 +196,7 @@ func _process_drag():
 			length = new_end.x
 			pitch_delta = new_end.y
 		DRAG_INITIAL:
-			@warning_ignore(unassigned_variable)
+			@warning_ignore("unassigned_variable")
 			var new_pos : Vector2
 			
 			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
@@ -389,9 +389,6 @@ func _draw():
 	
 
 
-func grab_focus():
-	super()
-	queue_redraw()
 
 
 func _exit_tree():

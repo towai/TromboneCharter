@@ -233,7 +233,7 @@ func _gui_input(event):
 	event = event as InputEventMouseButton
 	if event == null || !event.pressed: return
 	if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-		@warning_ignore(unassigned_variable)
+		@warning_ignore("unassigned_variable")
 		var new_note_pos : Vector2
 		
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x

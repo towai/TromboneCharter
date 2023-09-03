@@ -24,7 +24,7 @@ func _do_preview():
 	
 	var bpm : float = chart.tmb.tempo
 	var time : float
-	@warning_ignore(unused_variable)
+	@warning_ignore("unused_variable")
 	var previous_time : float
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
