@@ -99,6 +99,8 @@ func _gui_input(event):
 		match key.keycode:
 			KEY_DELETE:
 				queue_free()
+			KEY_BACKSPACE:
+				queue_free()
 		return
 	
 	_on_handle_input(event,pitch_handle)
