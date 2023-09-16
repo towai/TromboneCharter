@@ -9,6 +9,11 @@ enum {
 	NOTE_PITCH_DELTA,
 	NOTE_PITCH_END
 }
+enum LoadResult {
+	SUCCESS,
+	TMB_INVALID,
+	FILE_ACCESS_ERROR,
+}
 var notes := []
 # { bar:float, lyric:string }
 var lyrics := []
@@ -19,16 +24,17 @@ var genre		:= ""
 var description := ""
 var year		: int = 1999
 var tempo		: int = 120
-var endpoint	: int = 1
+var endpoint	: int = 4
 var timesig 	: int = 2
 var difficulty	: int = 5
 var savednotespacing : int = 120
 
-enum LoadResult {
-	SUCCESS,
-	TMB_INVALID,
-	FILE_ACCESS_ERROR,
-}
+
+func has_note_touching_endpoint() -> bool:
+	if notes.is_empty(): return false
+	var last_note = notes[-1]
+	return (last_note[NOTE_BAR] + last_note[NOTE_LENGTH] == endpoint)
+
 
 static func load_result_string(result:int) -> String:
 	match result:
@@ -36,6 +42,7 @@ static func load_result_string(result:int) -> String:
 		LoadResult.TMB_INVALID: return "Invalid TMB"
 		LoadResult.FILE_ACCESS_ERROR: return "File access error (see console)"
 		_: return "Unknown error %d" % result
+
 
 func find_all_notes_in_section(start:float,length:float) -> Array:
 	var result := []
