@@ -232,7 +232,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 size_flags_vertical = 2
-text = "Editor Settings"
+text = "Edit Mode"
 
 [node name="LoadChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 layout_mode = 2
@@ -298,18 +298,21 @@ theme_override_constants/v_separation = 8
 layout_mode = 2
 json_key = "endpoint"
 field_name = "Length (beats)"
+min_value = 2
 max_value = 9999
 
 [node name="Tempo" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "tempo"
 field_name = "Tempo"
-max_value = 999
+min_value = 10
+max_value = 9999
 
 [node name="TimeSig" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "timesig"
 field_name = "Time Signature"
+min_value = 1
 max_value = 16
 
 [node name="Control" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
@@ -332,6 +335,7 @@ max_value = 10
 layout_mode = 2
 json_key = "savednotespacing"
 field_name = "Note Spacing"
+min_value = 10
 max_value = 480
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
@@ -383,8 +387,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 tooltip_text = "1"
-min_value = 0.25
-max_value = 3.0
+min_value = 0.2
+max_value = 4.0
 step = 0.05
 value = 1.0
 
@@ -392,34 +396,34 @@ value = 1.0
 layout_mode = 2
 icon = ExtResource("14_8wa4s")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="TimeSnapping" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
-[node name="TimeSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
+[node name="TimeSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/TimeSnapping"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 
-[node name="TimingSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
+[node name="TimingSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/TimeSnapping"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(204, 0)
 layout_mode = 2
 min_value = 1.0
-max_value = 12.0
+max_value = 16.0
 value = 4.0
 alignment = 2
 prefix = "Timing snap: 1/"
 suffix = "beats"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="PitchSnapping" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
-[node name="PitchSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
+[node name="PitchSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/PitchSnapping"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 
-[node name="PitchSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
+[node name="PitchSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/PitchSnapping"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(204, 0)
 layout_mode = 2
@@ -571,6 +575,7 @@ text = "Copy to:"
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
+value = 2.0
 
 [node name="LyricsTools" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
@@ -643,9 +648,9 @@ text = "toot toot lol"
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomReset" to="Settings" method="_on_zoom_reset_pressed"]
-[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer/TimeSnapChk" to="Settings" method="_on_time_snap_toggled"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer/TimingSnap" to="Settings" method="_on_timing_snap_value_changed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2/PitchSnap" to="PianoRoll/ChartView" method="_on_pitch_snap_value_changed"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/TimeSnapping/TimeSnapChk" to="Settings" method="_on_time_snap_toggled"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/TimeSnapping/TimingSnap" to="Settings" method="_on_timing_snap_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/PitchSnapping/PitchSnap" to="PianoRoll/ChartView" method="_on_pitch_snap_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/DrawMicrotones" to="PianoRoll/ChartView" method="queue_redraw"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]

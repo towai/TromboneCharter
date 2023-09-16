@@ -112,14 +112,17 @@ func _update_view():
 			%EditSettings.hide()
 			%SectionSelection.hide()
 			%ChartInfo.show()
-			%ViewSwitcher.text = "Editor Settings"
+			%ViewSwitcher.text = "Edit Mode"
 		VIEW_EDIT_SETTINGS:
 			%ChartInfo.hide()
 			%LyricsTools.show()
 			%EditSettings.show()
 			%SectionSelection.show()
 			%ViewSwitcher.text = "Chart Info"
-		_: print("oh no!! what the fuck. settings view set to a wrong value")
+		_:
+			print("Somehow tried to set Settings pane view to a wrong value (%d)"
+					% current_view)
+			assert(false)
 
 
 func _on_zoom_level_changed(value:float):
