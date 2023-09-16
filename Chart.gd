@@ -57,11 +57,11 @@ func _on_scroll_change():
 
 func redraw_notes():
 	for child in get_children():
-		if child is Note:
-			if child.is_in_view:
-				child.show()
-				child.queue_redraw()
-			else: child.hide()
+		if !(child is Note): continue
+		if child.is_in_view:
+			child.show()
+			child.queue_redraw()
+		else: child.hide()
 
 
 func _process(_delta):
@@ -241,15 +241,16 @@ func _gui_input(event):
 		
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 		else: new_note_pos.x = to_unsnapped(event.position).x
-		if stepped_note_overlaps(new_note_pos.x, current_subdiv): return
 		
+		if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
+		if stepped_note_overlaps(new_note_pos.x, current_subdiv): return
 		
 		if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 		else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 				Global.SEMITONE * -13, Global.SEMITONE * 13)
 		
 		add_note(true, new_note_pos.x, current_subdiv, new_note_pos.y)
-	elif (event.button_index == MOUSE_BUTTON_WHEEL_DOWN) \
+	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN \
 			|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
 			|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
 			|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:

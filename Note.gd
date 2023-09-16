@@ -97,16 +97,14 @@ func _gui_input(event):
 	
 	if key != null && key.pressed:
 		match key.keycode:
-			KEY_DELETE:
-				queue_free()
-			KEY_BACKSPACE:
+			KEY_DELETE, KEY_BACKSPACE:
 				queue_free()
 		return
 	
 	_on_handle_input(event,pitch_handle)
 
 
-func _on_handle_input(event, which):
+func _on_handle_input(event, which_handle):
 	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 0
 	move_child(pitch_handle, pitch_handle_position)
 	
@@ -117,9 +115,9 @@ func _on_handle_input(event, which):
 			old_bar = bar
 			old_pitch = pitch_start
 			old_end_pitch = end_pitch
-			dragging = which
+			dragging = which_handle
 			drag_start = get_local_mouse_position()
-			chart.doot(pitch_start if which != DRAG_END else end_pitch)
+			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
 			queue_free()
 
@@ -203,6 +201,8 @@ func _process_drag():
 			
 			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
 			else: new_pos.x = chart.to_unsnapped(chart.get_local_mouse_position()).x
+			if new_pos.x + length >= chart.tmb.endpoint:
+				new_pos.x = chart.tmb.endpoint - length
 			
 			if Global.settings.snap_pitch: new_pos.y = chart.to_snapped(chart.get_local_mouse_position()).y
 			else: new_pos.y = chart.to_unsnapped(chart.get_local_mouse_position()).y
@@ -212,8 +212,7 @@ func _process_drag():
 			
 			if chart.stepped_note_overlaps(new_pos.x,length,[old_bar]): return
 			bar = new_pos.x
-		DRAG_NONE: print("Not actually dragging? How tf was this reached")
-		_: print("Drag == %d You fucked up somewhere!!" % dragging)
+		_: print("Tried to drag note by invalid handle # %d !" % dragging)
 
 
 func _end_drag():
