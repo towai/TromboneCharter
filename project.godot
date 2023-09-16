@@ -8,63 +8,11 @@
 
 config_version=5
 
-_global_script_classes=[{
-"base": "Node2D",
-"class": &"Alert",
-"language": &"GDScript",
-"path": "res://Alert.gd"
-}, {
-"base": "RefCounted",
-"class": &"AudioLoader",
-"language": &"GDScript",
-"path": "res://addons/GDScriptAudioImport/GDScriptAudioImport.gd"
-}, {
-"base": "Control",
-"class": &"Lyric",
-"language": &"GDScript",
-"path": "res://lyric.gd"
-}, {
-"base": "Control",
-"class": &"Note",
-"language": &"GDScript",
-"path": "res://Note.gd"
-}, {
-"base": "HBoxContainer",
-"class": &"NumField",
-"language": &"GDScript",
-"path": "res://num_field.gd"
-}, {
-"base": "PanelContainer",
-"class": &"Settings",
-"language": &"GDScript",
-"path": "res://Settings.gd"
-}, {
-"base": "Node",
-"class": &"TMBInfo",
-"language": &"GDScript",
-"path": "res://tmb_info.gd"
-}, {
-"base": "HBoxContainer",
-"class": &"TextField",
-"language": &"GDScript",
-"path": "res://text_field.gd"
-}]
-_global_script_class_icons={
-"Alert": "",
-"AudioLoader": "",
-"Lyric": "",
-"Note": "",
-"NumField": "",
-"Settings": "",
-"TMBInfo": "",
-"TextField": ""
-}
-
 [application]
 
 config/name="Trombone Charter"
 run/main_scene="res://main.tscn"
-config/features=PackedStringArray("4.0", "Forward Plus")
+config/features=PackedStringArray("4.1", "Forward Plus")
 boot_splash/image="res://icon.png"
 boot_splash/fullsize=false
 config/icon="res://icon.svg"
@@ -79,3 +27,4 @@ Global="*res://global.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=540
 window/subwindows/embed_subwindows=false
+window/dpi/allow_hidpi=false

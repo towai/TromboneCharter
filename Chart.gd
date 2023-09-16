@@ -230,10 +230,13 @@ func _draw():
 
 
 func _gui_input(event):
+	if event is InputEventPanGesture:
+		# Used for two finger scrolling on trackpads
+		_on_scroll_change()
 	event = event as InputEventMouseButton
 	if event == null || !event.pressed: return
 	if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-		@warning_ignore(unassigned_variable)
+		@warning_ignore("unassigned_variable")
 		var new_note_pos : Vector2
 		
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
@@ -247,7 +250,9 @@ func _gui_input(event):
 		
 		add_note(true, new_note_pos.x, current_subdiv, new_note_pos.y)
 	elif (event.button_index == MOUSE_BUTTON_WHEEL_DOWN) \
-			|| event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
+			|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
+			|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
 		_on_scroll_change()
 
 
