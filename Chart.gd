@@ -146,13 +146,31 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	add_child(new_note)
 	new_note.grab_focus()
 
-
+# !! unused
 func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
 	var steps : int = ceil(length) * 8
 	var step_length : float = length / steps
 	for step in steps + 1:
 		var step_time = step_length * step
 		if Global.overlaps_any_note(time + step_time, exclude): return true
+	return false
+
+
+func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
+	var is_in_range := func(value: float, range_start:float, range_end:float):
+		return value > range_start && value < range_end
+	
+	for note in Global.working_tmb.notes:
+		var bar = note[TMBInfo.NOTE_BAR]
+		var end = note[TMBInfo.NOTE_BAR] + note[TMBInfo.NOTE_LENGTH]
+		if bar in exclude: continue
+		for value in [bar, end]:
+			if is_in_range.call(value,time,time+length): return true
+		# we need to test the middle of the note so that notes of the same length
+		# don't think it's fine if they start and end at the same time
+		for value in [time, time + length, time + (length / 2.0)]:
+			if is_in_range.call(value,bar,end): return true
+	
 	return false
 
 
@@ -243,7 +261,7 @@ func _gui_input(event):
 		else: new_note_pos.x = to_unsnapped(event.position).x
 		
 		if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
-		if stepped_note_overlaps(new_note_pos.x, current_subdiv): return
+		if continuous_note_overlaps(new_note_pos.x, current_subdiv): return
 		
 		if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 		else: new_note_pos.y = clamp(to_unsnapped(event.position).y,

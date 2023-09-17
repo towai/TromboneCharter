@@ -25,7 +25,7 @@ static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
 	return x * x * x * (x * (x * 6 - 15) + 10)
 
-
+# !! unused
 func overlaps_any_note(time:float, exclude : Array = []) -> bool:
 	var bar : float
 	var note_end : float

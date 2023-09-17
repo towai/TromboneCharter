@@ -144,8 +144,7 @@ func _process_drag():
 				if has_slide_neighbor(Global.START_IS_TOUCHING, pitch_start):
 					exclude.append(touching_notes[Global.START_IS_TOUCHING].bar)
 			
-			if chart.stepped_note_overlaps(new_time,length,exclude):
-				return
+			if chart.continuous_note_overlaps(new_time,length,exclude): return
 			
 			bar = new_time
 			_update()
@@ -182,7 +181,7 @@ func _process_drag():
 					&& !Input.is_key_pressed(KEY_ALT):
 				exclude.append(touching_notes[Global.END_IS_TOUCHING].bar)
 			
-			if chart.stepped_note_overlaps(bar, new_end.x, exclude) \
+			if chart.continuous_note_overlaps(bar, new_end.x, exclude) \
 					|| new_end.x <= 0 \
 					|| new_end.x + bar > chart.tmb.endpoint:
 				return
@@ -210,7 +209,7 @@ func _process_drag():
 			
 			pitch_start = new_pos.y
 			
-			if chart.stepped_note_overlaps(new_pos.x,length,[old_bar]): return
+			if chart.continuous_note_overlaps(new_pos.x,length,[old_bar]): return
 			bar = new_pos.x
 		_: print("Tried to drag note by invalid handle # %d !" % dragging)
 
@@ -388,8 +387,6 @@ func _draw():
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
 	
-
-
 
 
 func _exit_tree():
