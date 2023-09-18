@@ -50,6 +50,10 @@ enum {
 	DRAG_END,
 	DRAG_INITIAL,
 }
+enum { # TODO figure out better names for these
+	END_IS_TOUCHING,
+	START_IS_TOUCHING,
+}
 var drag_start := Vector2.ZERO
 var old_bar : float
 var old_pitch : float
@@ -65,9 +69,9 @@ var doot_enabled : bool = false
 
 var touching_notes : Dictionary
 var show_bar_handle : bool:
-	get: return (touching_notes.get(Global.START_IS_TOUCHING) == null)
+	get: return (touching_notes.get(START_IS_TOUCHING) == null)
 var show_end_handle : bool:
-	get: return (touching_notes.get(Global.END_IS_TOUCHING) == null)
+	get: return (touching_notes.get(END_IS_TOUCHING) == null)
 
 @onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
 
@@ -138,11 +142,11 @@ func _process_drag():
 			
 			var exclude = [old_bar]
 			if !Input.is_key_pressed(KEY_ALT):
-				if has_slide_neighbor(Global.END_IS_TOUCHING, end_pitch):
-					exclude.append(touching_notes[Global.END_IS_TOUCHING].bar)
+				if has_slide_neighbor(END_IS_TOUCHING, end_pitch):
+					exclude.append(touching_notes[END_IS_TOUCHING].bar)
 				
-				if has_slide_neighbor(Global.START_IS_TOUCHING, pitch_start):
-					exclude.append(touching_notes[Global.START_IS_TOUCHING].bar)
+				if has_slide_neighbor(START_IS_TOUCHING, pitch_start):
+					exclude.append(touching_notes[START_IS_TOUCHING].bar)
 			
 			if chart.continuous_note_overlaps(new_time,length,exclude): return
 			
@@ -177,9 +181,9 @@ func _process_drag():
 					)
 			
 			var exclude = [old_bar]
-			if has_slide_neighbor(Global.END_IS_TOUCHING, old_end_pitch) \
+			if has_slide_neighbor(END_IS_TOUCHING, old_end_pitch) \
 					&& !Input.is_key_pressed(KEY_ALT):
-				exclude.append(touching_notes[Global.END_IS_TOUCHING].bar)
+				exclude.append(touching_notes[END_IS_TOUCHING].bar)
 			
 			if chart.continuous_note_overlaps(bar, new_end.x, exclude) \
 					|| new_end.x <= 0 \
@@ -219,11 +223,11 @@ func _end_drag():
 	
 	_snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
-		if has_slide_neighbor(Global.START_IS_TOUCHING, old_pitch):
-			touching_notes[Global.START_IS_TOUCHING].receive_slide_propagation(Global.END_IS_TOUCHING)
+		if has_slide_neighbor(START_IS_TOUCHING, old_pitch):
+			touching_notes[START_IS_TOUCHING].receive_slide_propagation(END_IS_TOUCHING)
 		
-		if has_slide_neighbor(Global.END_IS_TOUCHING, old_end_pitch):
-			touching_notes[Global.END_IS_TOUCHING].receive_slide_propagation(Global.START_IS_TOUCHING)
+		if has_slide_neighbor(END_IS_TOUCHING, old_end_pitch):
+			touching_notes[END_IS_TOUCHING].receive_slide_propagation(START_IS_TOUCHING)
 	
 	update_touching_notes()
 	
@@ -232,43 +236,43 @@ func _end_drag():
 
 func _snap_near_pitches():
 	var near_pitch_threshold = Global.SEMITONE / 12
-	if touching_notes.has(Global.START_IS_TOUCHING):
-		var neighbor : Note = touching_notes[Global.START_IS_TOUCHING]
+	if touching_notes.has(START_IS_TOUCHING):
+		var neighbor : Note = touching_notes[START_IS_TOUCHING]
 		if abs(pitch_start - neighbor.end_pitch) <= near_pitch_threshold:
 			pitch_start = neighbor.end_pitch
-	if touching_notes.has(Global.END_IS_TOUCHING):
-		var neighbor : Note = touching_notes[Global.END_IS_TOUCHING]
+	if touching_notes.has(END_IS_TOUCHING):
+		var neighbor : Note = touching_notes[END_IS_TOUCHING]
 		if abs(end_pitch - neighbor.pitch_start) <= near_pitch_threshold:
 			pitch_delta = neighbor.pitch_start - pitch_start
 
 
 func has_slide_neighbor(direction:int,pitch:float):
 	match direction:
-		Global.START_IS_TOUCHING:
+		START_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].end_pitch == pitch
-		Global.END_IS_TOUCHING:
+		END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
 	
 
 
 func update_touching_notes():
-	var old_prev_note = touching_notes.get(Global.START_IS_TOUCHING)
-	var old_next_note = touching_notes.get(Global.END_IS_TOUCHING)
+	var old_prev_note = touching_notes.get(START_IS_TOUCHING)
+	var old_next_note = touching_notes.get(END_IS_TOUCHING)
 	touching_notes = chart.find_touching_notes(self)
 	
-	var prev_note = touching_notes.get(Global.START_IS_TOUCHING)
+	var prev_note = touching_notes.get(START_IS_TOUCHING)
 	match prev_note:
 		null: if old_prev_note != null: old_prev_note.update_touching_notes()
 		_:
-			prev_note.touching_notes[Global.END_IS_TOUCHING] = self if bar >= 0 else null
+			prev_note.touching_notes[END_IS_TOUCHING] = self if bar >= 0 else null
 			prev_note.end = bar
 			prev_note.update_handle_visibility()
 	
-	var next_note = touching_notes.get(Global.END_IS_TOUCHING)
+	var next_note = touching_notes.get(END_IS_TOUCHING)
 	match next_note:
 		null: if old_next_note != null: old_next_note.update_touching_notes()
 		_: 
-			next_note.touching_notes[Global.START_IS_TOUCHING] = self if bar >= 0 else null
+			next_note.touching_notes[START_IS_TOUCHING] = self if bar >= 0 else null
 			next_note.bar = end
 			next_note.update_handle_visibility()
 	
@@ -276,9 +280,10 @@ func update_touching_notes():
 
 
 func receive_slide_propagation(from:int):
+	print("note #%s: do some slidin" % (get_index() - 3))
 	doot_enabled = false
 	match from:
-		Global.START_IS_TOUCHING:
+		START_IS_TOUCHING:
 			var neighbor = touching_notes[from]
 			var length_change = bar - neighbor.end
 			var pitch_change = pitch_start - neighbor.end_pitch
@@ -286,21 +291,21 @@ func receive_slide_propagation(from:int):
 			length += length_change
 			pitch_start -= pitch_change
 			pitch_delta += pitch_change
-		Global.END_IS_TOUCHING: 
+		END_IS_TOUCHING: 
 			var neighbor = touching_notes[from]
 			var length_change = end - neighbor.bar
 			var pitch_change = end_pitch - neighbor.pitch_start
 			length -= length_change
 			pitch_delta -= pitch_change
-		_: print("?????")
+		_: print("????? %s: Slide propagation from invalid neighbor %d" % [self,from])
 	if length <= 0: queue_free()
 	doot_enabled = true
 
 
 
 func update_handle_visibility():
-	var prev_note = touching_notes.get(Global.START_IS_TOUCHING)
-	var next_note = touching_notes.get(Global.END_IS_TOUCHING)
+	var prev_note = touching_notes.get(START_IS_TOUCHING)
+	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
 	if ((!show_bar_handle && bar != prev_note.end)
 			|| (!show_end_handle && end != next_note.bar)):

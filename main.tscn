@@ -8,14 +8,14 @@
 [ext_resource type="Script" path="res://chart_view.gd" id="4_rrlxc"]
 [ext_resource type="AudioStream" uid="uid://bbf50lmoh3a53" path="res://RS.WAV" id="4_wfwxx"]
 [ext_resource type="AudioStream" uid="uid://7p2oa4q0h23t" path="res://chord.wav" id="5_vqfbf"]
-[ext_resource type="Script" path="res://Chart.gd" id="5_yhpph"]
 [ext_resource type="Script" path="res://Settings.gd" id="6_2cfeh"]
 [ext_resource type="PackedScene" uid="uid://u1i3jv8qhy1e" path="res://text_field.tscn" id="6_hqpqp"]
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
-[ext_resource type="Script" path="res://LyricsEditor.gd" id="9_srvtg"]
+[ext_resource type="Script" path="res://chart.gd" id="9_hls6a"]
 [ext_resource type="Script" path="res://ColorPreview.gd" id="10_14v0o"]
 [ext_resource type="Script" path="res://SectionHandle.gd" id="10_fs4d4"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
+[ext_resource type="Script" path="res://lyrics_Editor.gd" id="11_nxuar"]
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
 [ext_resource type="Script" path="res://Alert.gd" id="16_yl2q4"]
 
@@ -154,7 +154,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
-script = ExtResource("5_yhpph")
+script = ExtResource("9_hls6a")
 
 [node name="SectStartHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
@@ -195,7 +195,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("9_srvtg")
+script = ExtResource("11_nxuar")
 
 [node name="AddLyricHandle" type="Control" parent="PianoRoll/ChartView/Chart/LyricsEditor"]
 unique_name_in_owner = true

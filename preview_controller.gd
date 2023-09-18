@@ -28,7 +28,7 @@ func _do_preview():
 	var previous_time : float
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
-	var startpoint_in_stream : float = settings.section_start / (bpm / 60.0)
+	var startpoint_in_stream : float = Global.beat_to_time(settings.section_start)
 	var start_beat = settings.section_start
 	var slide_start : float
 	

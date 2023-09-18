@@ -15,10 +15,8 @@ const BLACK_KEYS = [
 const NUM_KEYS = 27
 @onready var working_tmb = TMBInfo.new()
 var settings : Settings
-enum {
-	END_IS_TOUCHING,
-	START_IS_TOUCHING,
-}
+func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
+func time_to_beat(time:float) -> float: return time * (working_tmb.tempo / 60.0)
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:

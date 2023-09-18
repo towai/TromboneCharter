@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cd12ht0wdksr0"]
 
-[ext_resource type="Script" path="res://Note.gd" id="1_4pqog"]
+[ext_resource type="Script" path="res://note.gd" id="1_4pqog"]
 
 [node name="Note" type="Control"]
 layout_mode = 3

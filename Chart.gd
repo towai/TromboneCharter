@@ -155,7 +155,7 @@ func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bo
 		if Global.overlaps_any_note(time + step_time, exclude): return true
 	return false
 
-
+# move to ???
 func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
 	var is_in_range := func(value: float, range_start:float, range_end:float):
 		return value > range_start && value < range_end
@@ -173,26 +173,24 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 	
 	return false
 
-
+# TODO move to Note.gd
 func find_touching_notes(the_note:Note) -> Dictionary:
 	var result := {}
 	
 	var prev_note = get_matching_note_off(the_note.bar,[the_note])
-	if prev_note: result[Global.START_IS_TOUCHING] = prev_note
+	if prev_note: result[Note.START_IS_TOUCHING] = prev_note
 	
 	var next_note = get_matching_note_on(the_note.end,[the_note])
-	if next_note: result[Global.END_IS_TOUCHING] = next_note
+	if next_note: result[Note.END_IS_TOUCHING] = next_note
 	
 	return result
 
-
+# TODO move to Note.gd?
 func get_matching_note_on(time:float, exclude:Array = []): # -> Note or null
 	for note in get_children():
 		if !(note is Note) || (note in exclude): continue
 		if abs(note.bar - time) < 0.01: return note
 	return null
-
-
 func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	for note in get_children():
 		if !(note is Note) || (note in exclude): continue
