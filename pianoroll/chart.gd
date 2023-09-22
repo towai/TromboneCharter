@@ -7,33 +7,33 @@ var scroll_end : float:
 	get: return scroll_position + %ChartView.size.x
 var bar_spacing : int:
 	get: return tmb.savednotespacing * %ZoomLevel.value
-@onready var tmb : TMBInfo:
-	get: return Global.working_tmb
 var middle_c_y : float:
 	get: return (key_height * 13.0) + (key_height / 2.0)
 var key_height : float:
 	get: return (size.y + scrollbar_height) / Global.NUM_KEYS
 var current_subdiv : float:
 	get: return 1.0 / %TimingSnap.value
-func height_to_pitch(height:float):
-	return ((height - middle_c_y) / key_height) * Global.SEMITONE
-func pitch_to_height(pitch:float):
-	return middle_c_y - ((pitch / Global.SEMITONE) * key_height)
-func x_to_bar(x:float): return x / bar_spacing
-func bar_to_x(bar:float): return bar * bar_spacing
-var note_scn = preload("res://note.tscn")
-# IDK why i gave this and Global both a ref but now i gotta live with it
+var note_scn = preload("res://note/note.tscn")
 var settings : Settings:
 	get: return Global.settings
-@onready var main = get_tree().get_current_scene()
-@onready var player : AudioStreamPlayer = %TrombPlayer
-@onready var measure_font : Font = ThemeDB.get_fallback_font()
 var bar_font : Font
 var draw_targets : bool:
 	get: return %ShowMouseTargets.button_pressed
 var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
+func height_to_pitch(height:float):
+	return ((height - middle_c_y) / key_height) * Global.SEMITONE
+func pitch_to_height(pitch:float):
+	return middle_c_y - ((pitch / Global.SEMITONE) * key_height)
+func x_to_bar(x:float): return x / bar_spacing
+func bar_to_x(bar:float): return bar * bar_spacing
+@onready var main = get_tree().get_current_scene()
+@onready var player : AudioStreamPlayer = %TrombPlayer
+@onready var measure_font : Font = ThemeDB.get_fallback_font()
+@onready var tmb : TMBInfo:
+	get: return Global.working_tmb
+
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -50,9 +50,15 @@ func _ready():
 	%TimingSnap.value_changed.connect(timing_snap_changed)
 
 
+func _process(_delta):
+	if _update_queued: _do_tmb_update()
+	if %PreviewController.is_playing: queue_redraw()
+
+
 func _on_scroll_change():
 	await(get_tree().process_frame)
 	redraw_notes()
+	%WavePreview.calculate_width()
 
 
 func redraw_notes():
@@ -62,11 +68,6 @@ func redraw_notes():
 			child.show()
 			child.queue_redraw()
 		else: child.hide()
-
-
-func _process(_delta):
-	if _update_queued: _do_tmb_update()
-	if %PreviewController.is_playing: queue_redraw()
 
 
 func _on_tmb_updated(): _update_queued = true
@@ -131,6 +132,7 @@ func _on_tmb_loaded():
 		)
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
+	%WavePreview.fuck()
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
@@ -172,30 +174,6 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 			if is_in_range.call(value,bar,end): return true
 	
 	return false
-
-# TODO move to Note.gd
-func find_touching_notes(the_note:Note) -> Dictionary:
-	var result := {}
-	
-	var prev_note = get_matching_note_off(the_note.bar,[the_note])
-	if prev_note: result[Note.START_IS_TOUCHING] = prev_note
-	
-	var next_note = get_matching_note_on(the_note.end,[the_note])
-	if next_note: result[Note.END_IS_TOUCHING] = next_note
-	
-	return result
-
-# TODO move to Note.gd?
-func get_matching_note_on(time:float, exclude:Array = []): # -> Note or null
-	for note in get_children():
-		if !(note is Note) || (note in exclude): continue
-		if abs(note.bar - time) < 0.01: return note
-	return null
-func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
-	for note in get_children():
-		if !(note is Note) || (note in exclude): continue
-		if abs(note.end - time) < 0.01: return note
-	return null
 
 
 func update_note_array():
@@ -242,6 +220,7 @@ func _draw():
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
 				Color.ORANGE_RED, 2.0)
+		draw_circle(size,4,Color.WHITE)
 	redraw_notes()
 
 

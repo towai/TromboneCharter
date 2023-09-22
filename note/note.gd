@@ -54,10 +54,6 @@ enum { # TODO figure out better names for these
 	END_IS_TOUCHING,
 	START_IS_TOUCHING,
 }
-var drag_start := Vector2.ZERO
-var old_bar : float
-var old_pitch : float
-var old_end_pitch : float
 
 var doot_enabled : bool = false
 
@@ -67,15 +63,21 @@ var doot_enabled : bool = false
 @onready var pitch_handle = $PitchHandle
 @onready var end_handle = $EndHandle
 
-var touching_notes : Dictionary
+@onready var drag_helper = DragHelper.new(self)
+@onready var slide_helper = SlideHelper.new(self)
+
+var touching_notes : Dictionary:
+	get: return slide_helper.touching_notes
+	set(value): slide_helper.touching_notes = value
 var show_bar_handle : bool:
 	get: return (touching_notes.get(START_IS_TOUCHING) == null)
 var show_end_handle : bool:
 	get: return (touching_notes.get(END_IS_TOUCHING) == null)
 
-@onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
+# ???
+#@onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
 
-# Called when the node enters the scene tree for the first time.
+
 func _ready():
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
@@ -101,26 +103,19 @@ func _gui_input(event):
 	
 	if key != null && key.pressed:
 		match key.keycode:
-			KEY_DELETE, KEY_BACKSPACE:
-				queue_free()
-		return
+			KEY_DELETE, KEY_BACKSPACE: queue_free()
 	
-	_on_handle_input(event,pitch_handle)
 
 
 func _on_handle_input(event, which_handle):
-	var pitch_handle_position = -1 if Input.is_key_pressed(KEY_SHIFT) else 0
-	move_child(pitch_handle, pitch_handle_position)
+	move_child(pitch_handle, -1 if Input.is_key_pressed(KEY_SHIFT) else 0)
 	
 	event = event as InputEventMouseButton
 	if event == null: return
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
-			old_bar = bar
-			old_pitch = pitch_start
-			old_end_pitch = end_pitch
 			dragging = which_handle
-			drag_start = get_local_mouse_position()
+			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
 			queue_free()
@@ -131,38 +126,15 @@ func _process_drag():
 		_end_drag()
 		return
 	
+	var drag_result = drag_helper.process_drag(dragging)
+	# drag result will come back null if drag rejected due to note overlap
+	if drag_result == null: return
+	
 	match dragging:
-		DRAG_BAR:
-			var new_time : float
-			if Global.settings.snap_time:
-				new_time = chart.to_snapped(chart.get_local_mouse_position()).x
-			else: new_time = chart.to_unsnapped(chart.get_local_mouse_position()).x
-			if new_time + length >= chart.tmb.endpoint:
-				new_time = chart.tmb.endpoint - length
-			
-			var exclude = [old_bar]
-			if !Input.is_key_pressed(KEY_ALT):
-				if has_slide_neighbor(END_IS_TOUCHING, end_pitch):
-					exclude.append(touching_notes[END_IS_TOUCHING].bar)
-				
-				if has_slide_neighbor(START_IS_TOUCHING, pitch_start):
-					exclude.append(touching_notes[START_IS_TOUCHING].bar)
-			
-			if chart.continuous_note_overlaps(new_time,length,exclude): return
-			
-			bar = new_time
-			_update()
-			
-		DRAG_PITCH:
-			var new_pitch : float
-			if Global.settings.snap_pitch:
-				new_pitch = chart.to_snapped(
-						chart.get_local_mouse_position() - Vector2(0, drag_start.y)
-						).y
-			else: new_pitch = chart.to_unsnapped(
-						chart.get_local_mouse_position() - Vector2(0, drag_start.y)
-						).y
-			pitch_start = new_pitch
+		DRAG_BAR: # → float
+			bar = drag_result
+		DRAG_PITCH:  # → float
+			pitch_start = drag_result
 			
 			doot_enabled = false
 			if end_pitch > 13 * Global.SEMITONE:
@@ -170,80 +142,34 @@ func _process_drag():
 			if end_pitch < -13 * Global.SEMITONE:
 				pitch_delta = -(13 * Global.SEMITONE) - pitch_start
 			doot_enabled = true
-			
-		DRAG_END:
-			var new_end : Vector2 = chart.to_unsnapped(chart.get_local_mouse_position()) \
-							- Vector2(bar, pitch_start)
-			
-			new_end.x = min(chart.tmb.endpoint,
-					new_end.x if !Global.settings.snap_time \
-					else snapped(new_end.x, 1.0 / Global.settings.timing_snap)
-					)
-			
-			var exclude = [old_bar]
-			if has_slide_neighbor(END_IS_TOUCHING, old_end_pitch) \
-					&& !Input.is_key_pressed(KEY_ALT):
-				exclude.append(touching_notes[END_IS_TOUCHING].bar)
-			
-			if chart.continuous_note_overlaps(bar, new_end.x, exclude) \
-					|| new_end.x <= 0 \
-					|| new_end.x + bar > chart.tmb.endpoint:
+		DRAG_END: # → Vector2
+			length = drag_result.x
+			pitch_delta = drag_result.y
+		DRAG_INITIAL: # → Vector2
+			pitch_start = drag_result.y
+			# editing notes butted up against each other would be too annoying
+			# if we did this check first
+			if chart.continuous_note_overlaps(drag_result.x,length,[drag_helper.old_bar]):
 				return
-			
-			new_end.y = new_end.y if !Global.settings.snap_pitch \
-					else snapped(new_end.y, Global.SEMITONE / Global.settings.pitch_snap)
-			new_end.y = clamp(new_end.y, (-13 * Global.SEMITONE) - pitch_start,
-					(13 * Global.SEMITONE) - pitch_start)
-			
-			
-			length = new_end.x
-			pitch_delta = new_end.y
-		DRAG_INITIAL:
-			@warning_ignore("unassigned_variable")
-			var new_pos : Vector2
-			
-			if Global.settings.snap_time: new_pos.x = chart.to_snapped(chart.get_local_mouse_position()).x
-			else: new_pos.x = chart.to_unsnapped(chart.get_local_mouse_position()).x
-			if new_pos.x + length >= chart.tmb.endpoint:
-				new_pos.x = chart.tmb.endpoint - length
-			
-			if Global.settings.snap_pitch: new_pos.y = chart.to_snapped(chart.get_local_mouse_position()).y
-			else: new_pos.y = chart.to_unsnapped(chart.get_local_mouse_position()).y
-			new_pos.y = clamp(new_pos.y, (-13 * Global.SEMITONE), (13 * Global.SEMITONE))
-			
-			pitch_start = new_pos.y
-			
-			if chart.continuous_note_overlaps(new_pos.x,length,[old_bar]): return
-			bar = new_pos.x
-		_: print("Tried to drag note by invalid handle # %d !" % dragging)
+			bar = drag_result.x
+		_: print("Bad drag %d" % dragging)
+	
+	_update()
 
 
 func _end_drag():
 	dragging = DRAG_NONE
 	
-	_snap_near_pitches()
+	slide_helper.snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
-		if has_slide_neighbor(START_IS_TOUCHING, old_pitch):
-			touching_notes[START_IS_TOUCHING].receive_slide_propagation(END_IS_TOUCHING)
-		
-		if has_slide_neighbor(END_IS_TOUCHING, old_end_pitch):
-			touching_notes[END_IS_TOUCHING].receive_slide_propagation(START_IS_TOUCHING)
+		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()
 	
 	chart.update_note_array()
 
 
-func _snap_near_pitches():
-	var near_pitch_threshold = Global.SEMITONE / 12
-	if touching_notes.has(START_IS_TOUCHING):
-		var neighbor : Note = touching_notes[START_IS_TOUCHING]
-		if abs(pitch_start - neighbor.end_pitch) <= near_pitch_threshold:
-			pitch_start = neighbor.end_pitch
-	if touching_notes.has(END_IS_TOUCHING):
-		var neighbor : Note = touching_notes[END_IS_TOUCHING]
-		if abs(end_pitch - neighbor.pitch_start) <= near_pitch_threshold:
-			pitch_delta = neighbor.pitch_start - pitch_start
+func _snap_near_pitches(): slide_helper.snap_near_pitches()
 
 
 func has_slide_neighbor(direction:int,pitch:float):
@@ -256,51 +182,15 @@ func has_slide_neighbor(direction:int,pitch:float):
 
 
 func update_touching_notes():
-	var old_prev_note = touching_notes.get(START_IS_TOUCHING)
-	var old_next_note = touching_notes.get(END_IS_TOUCHING)
-	touching_notes = chart.find_touching_notes(self)
-	
-	var prev_note = touching_notes.get(START_IS_TOUCHING)
-	match prev_note:
-		null: if old_prev_note != null: old_prev_note.update_touching_notes()
-		_:
-			prev_note.touching_notes[END_IS_TOUCHING] = self if bar >= 0 else null
-			prev_note.end = bar
-			prev_note.update_handle_visibility()
-	
-	var next_note = touching_notes.get(END_IS_TOUCHING)
-	match next_note:
-		null: if old_next_note != null: old_next_note.update_touching_notes()
-		_: 
-			next_note.touching_notes[START_IS_TOUCHING] = self if bar >= 0 else null
-			next_note.bar = end
-			next_note.update_handle_visibility()
-	
+	slide_helper.update_touching_notes()
 	update_handle_visibility()
 
 
 func receive_slide_propagation(from:int):
-	print("note #%s: do some slidin" % (get_index() - 3))
 	doot_enabled = false
-	match from:
-		START_IS_TOUCHING:
-			var neighbor = touching_notes[from]
-			var length_change = bar - neighbor.end
-			var pitch_change = pitch_start - neighbor.end_pitch
-			bar -= length_change
-			length += length_change
-			pitch_start -= pitch_change
-			pitch_delta += pitch_change
-		END_IS_TOUCHING: 
-			var neighbor = touching_notes[from]
-			var length_change = end - neighbor.bar
-			var pitch_change = end_pitch - neighbor.pitch_start
-			length -= length_change
-			pitch_delta -= pitch_change
-		_: print("????? %s: Slide propagation from invalid neighbor %d" % [self,from])
+	slide_helper.handle_slide_propagation(from)
 	if length <= 0: queue_free()
 	doot_enabled = true
-
 
 
 func update_handle_visibility():
