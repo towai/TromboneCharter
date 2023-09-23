@@ -60,6 +60,7 @@ func _do_preview():
 		# so we do it out here
 		pos_in_note = Global.smootherstep(0, 1, pos_in_note)
 		
+		# sort of kind of emulate the audible slide limit in the actual game
 		player.pitch_scale = clamp(lerp(pitch,end_pitch,pos_in_note),
 				Global.pitch_to_scale(slide_start - 12.0),
 				Global.pitch_to_scale(slide_start + 12.0)
