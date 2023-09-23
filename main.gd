@@ -13,6 +13,7 @@ var ffmpeg_exists := false
 
 
 func _ready():
+	var ffmpeg_worker = FFmpegWorker.new(self)
 	DisplayServer.window_set_min_size(Vector2(1256,540))
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

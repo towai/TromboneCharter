@@ -59,12 +59,12 @@ func ffmpeg_convert(dir:String,idx:int=0):
 					wavechunkpath
 				]
 	print(command)
-	var out : PackedStringArray = []
+	var out := []
 	
 	var err = OS.execute("ffmpeg",command,out)
-	if !out.is_empty():
-		print("got a out put ?")
-		if !out[0].is_empty(): print(out)
+#	if !out.is_empty():
+#		print("got a out put ?")
+#		if !out[0].is_empty(): print(out)
 	if err: print(error_string(err))
 	
 	err = w_image.load(wavechunkpath)
