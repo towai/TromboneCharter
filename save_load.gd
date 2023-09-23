@@ -42,7 +42,7 @@ func load_wav_or_convert_ogg(dir:String):
 			if !FileAccess.file_exists(dir + "/song.ogg"):
 				print("song.ogg not present in the tmb's folder")
 				return
-			err = main.try_to_convert_ogg(dir + "/song.ogg")
+			err = Global.ffmpeg_worker.try_to_convert_ogg(dir + "/song.ogg")
 			if !err:
 				var wav_err = main.try_to_load_wav(dir + "/song.wav")
 				if wav_err: print("ffmpeg success but couldn't load resulting wav?")

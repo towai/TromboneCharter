@@ -3,17 +3,16 @@ extends Control
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
+@onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
 	get: return Global.working_tmb
 	set(value): Global.working_tmb = value
 var popup_location : Vector2i:
 	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
-var ffmpeg_exists := false
 
 
 func _ready():
-	var ffmpeg_worker = FFmpegWorker.new(self)
 	DisplayServer.window_set_min_size(Vector2(1256,540))
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -51,6 +50,8 @@ func _on_refresh_button_pressed(): emit_signal("chart_loaded")
 
 func _on_help_button_pressed(): show_popup($Instructions)
 
+func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
+
 
 func show_popup(window:Window):
 	window.position = popup_location
@@ -74,22 +75,6 @@ func try_to_load_wav(path:String) -> int:
 	
 	%WavPlayer.stream = stream
 	return OK
-
-
-func try_to_convert_ogg(path:String) -> int:
-	var dir = path.substr(0,path.rfind("/"))
-	if dir == path: dir = path.substr(0,path.rfind("\\"))
-	var args = PackedStringArray([
-			"-i",
-			'%s' % path,
-			'%s' % (dir + "/song.wav")
-			])
-#	print(args)
-	var output = []
-	var err = OS.execute("ffmpeg",args,output,true,true)
-	print(output[0].c_unescape())
-	print(output.size())
-	return err
 
 
 func _on_new_chart_pressed(): show_popup($NewChartConfirm)

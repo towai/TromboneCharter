@@ -281,7 +281,6 @@ func _draw():
 	_draw_tail.call()
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
-	
 
 
 func _exit_tree():

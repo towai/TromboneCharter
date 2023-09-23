@@ -121,6 +121,32 @@ Created with Godot 4 by twi — twitter/@towaii — github/towai
 I'm in the Trombone Champ Modding Discord if you have issues or potential improvements, or you can submit them as a GitHub issue."
 dialog_autowrap = true
 
+[node name="FFmpegInstructions" type="AcceptDialog" parent="."]
+title = "Using Advanced Features with FFmpeg"
+position = Vector2i(200, 48)
+size = Vector2i(720, 468)
+dialog_text = "Install ffmpeg to take advantage of extended Trombone Charter features.
+
+Windows:
+　Type into the Command Prompt: `winget install ffmpeg`
+　Or:
+　　Download ffmpeg from the official site: https://ffmpeg.org/download.html
+　　Then, stick ffmpeg.exe either in the Trombone Charter folder,
+　　　or any folder that exists in your %PATH% variable.
+　　　You can look at your %PATH% by opening the Start menu and typing \"path\"
+　　　　to bring up the search, then selecting \"Edit system environment variables\".
+　　　There's one specific to your user account, and one for the whole system.
+　　　You can add a custom one and put anything you like in it!
+
+Mac:
+　Download the latest static build from the official site.
+	Stick it in Trombone Champ's folder, or find someone online who actually has a Mac
+　　and can show you how to add stuff to your universal path.
+
+Linux:
+　Install ffmpeg using your package manager of choice."
+dialog_autowrap = true
+
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
 layout_mode = 2
@@ -479,19 +505,28 @@ text = "Outline mouse targets
 "
 
 [node name="spacer" type="Control" parent="Settings/MarginC/HBoxC/EditSettings"]
-custom_minimum_size = Vector2(0, 26)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 text = "On chart load:"
 
-[node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+
+[node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 button_pressed = true
 text = "Try to load song.wav"
+
+[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+tooltip_text = "How do I use these features?"
+text = "  ?  "
 
 [node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
@@ -502,7 +537,10 @@ button_pressed = true
 text = "Convert song.ogg if song.wav missing"
 alignment = 2
 
-[node name="BuildWaveform" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+
+[node name="BuildWaveform" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -511,10 +549,13 @@ button_pressed = true
 text = "Build waveform preview"
 alignment = 2
 
-[node name="Button" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="HiResWave" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 8
-text = "  ?  "
+size_flags_horizontal = 6
+tooltip_text = "This might take a while!"
+text = "Hi-Res"
+alignment = 2
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -700,6 +741,7 @@ text = "toot toot lol"
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox2/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]

@@ -77,6 +77,16 @@ func _ready():
 	get_tree().get_current_scene().chart_loaded.connect(_update_values)
 	_update_view()
 	_on_timing_snap_value_changed(timing_snap)
+	_toggle_ffmpeg_features()
+
+
+func _toggle_ffmpeg_features():
+	var disable = !Global.ffmpeg_worker.ffmpeg_exists
+	%TryAutoloadWAV.disabled = disable
+	%ConvertOgg.disabled = disable
+	%BuildWaveform.disabled = disable
+	%HiResWave.disabled = disable
+	%FFmpegHelp.visible = disable
 
 
 func _update_values():

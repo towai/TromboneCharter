@@ -2,9 +2,12 @@ extends Control
 
 @onready var w_image := Image.new()
 @onready var chart : Node = get_parent()
-@onready var cfg : ConfigFile = get_tree().get_current_scene().cfg:
+var cfg : ConfigFile:
 	get: return get_tree().get_current_scene().cfg
-	set(value): assert(false)
+	set(_v): assert(false)
+var ffmpeg_worker : FFmpegWorker:
+	get: return Global.ffmpeg_worker
+	set(_v): assert(false)
 var rects : Array[TextureRect] = []
 var song_length : float:
 	get:
@@ -12,10 +15,10 @@ var song_length : float:
 		return %WavPlayer.stream.get_length()
 var stream_length_in_beats : float:
 	get: return Global.time_to_beat(song_length)
-	set(value): assert(false)
+	set(_v): assert(false)
 var bpm : float:
 	get: return Global.working_tmb.tempo
-	set(value): assert(false)
+	set(_v): assert(false)
 var build_hires_wave := true
 var wave_is_hires := false
 
@@ -29,13 +32,16 @@ func _ready():
 		rects.append(rect)
 
 func build_wave_preview():
+	if !Global.ffmpeg_worker.ffmpeg_exists:
+		print("Hey!! You can't make a waveform preview without ffmpeg!")
+		return
 	print(song_length)
 	wave_is_hires = build_hires_wave
-	for i in rects.size(): ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
+	for i in rects.size(): do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
 	calculate_width()
 
-# give this to ffmpeg worker
-func ffmpeg_convert(dir:String,idx:int=0):
+
+func do_ffmpeg_convert(dir:String,idx:int=0):
 	print("building waveform...%d" % idx)
 	rects[idx].texture = null
 	
@@ -52,20 +58,10 @@ func ffmpeg_convert(dir:String,idx:int=0):
 	
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	
-	var command : PackedStringArray = [ "-ss", '%.3f' % start, "-to", '%.3f' % end,
-					"-i", '%s' % (dir + '/song.wav'),
-					'-lavfi',
-					'showwavespic=s=%dx1024:colors=ff8000|0080ff' % ((end - start) * 100),
-					wavechunkpath
-				]
-	print(command)
-	var out := []
-	
-	var err = OS.execute("ffmpeg",command,out)
-#	if !out.is_empty():
-#		print("got a out put ?")
-#		if !out[0].is_empty(): print(out)
-	if err: print(error_string(err))
+	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,idx)
+	if err:
+		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
+		return
 	
 	err = w_image.load(wavechunkpath)
 	if err:
@@ -76,20 +72,18 @@ func ffmpeg_convert(dir:String,idx:int=0):
 
 
 func calculate_width():
-	# natural size, before scaling.
-	# in effect, aggregate width of all child rects, aka song length in ms
+	# natural size, before scaling, aka song length in ms (*2 if hi-res wave)
 	var width := get_size().x
-	
 	
 	var true_width : float = (song_length * chart.bar_spacing) / (60.0 / bpm)
 	if wave_is_hires: true_width /= 2
-	# this extra number really shouldn't need to be here!
+	
 	var scalefactor : float = (true_width / width)
 	
 	scale.x = max(scalefactor,0.001)
 
 
-func _process(delta): queue_redraw()
+func _process(delta): pass
 func _draw(): pass
 
 
