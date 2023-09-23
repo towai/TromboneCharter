@@ -219,7 +219,6 @@ func _draw():
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
 				Color.ORANGE_RED, 2.0)
-		draw_circle(size,4,Color.WHITE)
 	redraw_notes()
 
 

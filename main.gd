@@ -1,15 +1,15 @@
 extends Control
 
-
-var tmb : TMBInfo:
-	get: return Global.working_tmb
-	set(value): Global.working_tmb = value
-signal chart_loaded
-var popup_location : Vector2i:
-	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
+signal chart_loaded
+var tmb : TMBInfo:
+	get: return Global.working_tmb
+	set(value): Global.working_tmb = value
+var popup_location : Vector2i:
+	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
+var ffmpeg_exists := false
 
 
 func _ready():
@@ -106,7 +106,7 @@ func _on_load_dialog_file_selected(path:String):
 	%WavPlayer.stream = null
 	emit_signal("chart_loaded")
 	if settings.load_wav_on_chart_load: saveload.load_wav_or_convert_ogg(dir)
-	%WavePreview.build_wave_preview()
+	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 
 func _on_save_chart_pressed():
@@ -115,28 +115,11 @@ func _on_save_chart_pressed():
 		_on_save_dialog_file_selected($SaveDialog.current_path)
 	else: show_popup($SaveDialog)
 
-# TODO Figure out if there have been Godot changes to make
-# all the windows-specific stuff unnecessary
+
 func _on_save_dialog_file_selected(path:String):
-	if path[1] != ':' && OS.get_name() == "Windows":
-		print("driveless path %s" % path)
-		var drive : String
-		var saved_dir = cfg.get_value("Config","saved_dir")
-		if saved_dir == null:
-			$Alert.alert("no saved dir in config! did you delete it?",
-					Vector2(12, %ViewSwitcher.global_position.y + 38),
-					Alert.LV_ERROR)
-			return
-			
-		if saved_dir[1] != ':':
-			print("couldn't get drive letter from saved directory in cfg file!")
-			return
-		drive = saved_dir.substr(0,saved_dir.find('/'))
-		if drive == saved_dir:
-			print("Saved dir in cfg uses backslashes -- user manually edited cfg file?")
-			drive = saved_dir.substr(0,saved_dir.find('\\'))
-		path = drive + path
-	var err = tmb.save_to_file(path,$SaveDialog.current_dir)
+	if OS.get_name() == "Windows": saveload.validate_win_path(path)
+	
+	var err = saveload.save_tmb_to_file(path,$SaveDialog.current_dir)
 	if err == OK:
 		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
 				Alert.LV_SUCCESS)
@@ -145,6 +128,7 @@ func _on_save_dialog_file_selected(path:String):
 				Vector2(72, %NewChart.global_position.y + 20),
 				Alert.LV_ERROR, 2)
 		return
+	
 	var dir = path.substr(0,path.rfind("/"))
 	cfg.set_value("Config", "saved_dir", dir)
 	try_cfg_save()

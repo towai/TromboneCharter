@@ -61,7 +61,7 @@ func ffmpeg_convert(dir:String,idx:int=0):
 	print(command)
 	var out : PackedStringArray = []
 	
-	var err = OS.execute("ffmpeg",command,out,false,true)
+	var err = OS.execute("ffmpeg",command,out)
 	if !out.is_empty():
 		print("got a out put ?")
 		if !out[0].is_empty(): print(out)
@@ -88,10 +88,9 @@ func calculate_width():
 	
 	scale.x = max(scalefactor,0.001)
 
+
 func _process(delta): queue_redraw()
-func _draw():
-	draw_line(Vector2.ZERO,size,Color.BLUE)
-	draw_circle(Vector2.ONE * 300,3,Color.RED)
+func _draw(): pass
 
 
 func _input(event):

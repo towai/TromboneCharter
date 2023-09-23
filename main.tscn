@@ -392,6 +392,7 @@ script = ExtResource("10_14v0o")
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/v_separation = 2
 
 [node name="ZoomEntry" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -477,24 +478,47 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
+[node name="spacer" type="Control" parent="Settings/MarginC/HBoxC/EditSettings"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+text = "On chart load:"
+
 [node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 button_pressed = true
-text = "On chart load / save:
-Try to load song.wav"
+text = "Try to load song.wav"
 
 [node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
 button_pressed = true
-text = "Try to convert song.ogg if wav missing"
+text = "Convert song.ogg if song.wav missing"
 alignment = 2
+
+[node name="BuildWaveform" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "Requires ffmpeg."
+button_pressed = true
+text = "Build waveform preview"
+alignment = 2
+
+[node name="Button" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "  ?  "
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
+size_flags_vertical = 10
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
 layout_mode = 2
@@ -517,8 +541,9 @@ icon = ExtResource("14_8wa4s")
 
 [node name="WAVLoadedLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
-size_flags_vertical = 10
+size_flags_vertical = 8
 text = "no song.wav loaded!"
 horizontal_alignment = 1
 vertical_alignment = 2

@@ -140,17 +140,26 @@ func save_to_file(filename : String, dir : String) -> int:
 		print(error_string(err))
 		return err
 	
+	var dict := to_dict( dir.split("/")[-1] )
+	f.store_string(JSON.stringify(dict))
+	print("finished saving")
+	return OK
+
+func to_dict(dir:String) -> Dictionary:
 	var dict := {}
+	
 	for value in Global.settings.values:
 		if !(value is TextField || value is NumField): continue
 		dict[value.json_key] = value.value
+	
 	for note in notes: if (note[NOTE_BAR] + note[NOTE_LENGTH]) > endpoint: notes.erase(note)
 	for lyric in lyrics: if lyric.bar > endpoint: lyrics.erase(lyric)
-	dict["notes"] = notes
 	dict["description"] = description
+	dict["notes"] = notes
 	dict["lyrics"] = lyrics
-	dict["UNK1"] = 0
 	dict["trackRef"] = dir.split("/")[-1]
+	dict["UNK1"] = 0
+	
 	if Global.settings.use_custom_colors:
 		var start_color =  Global.settings.start_color
 		var end_color =  Global.settings.end_color
@@ -164,6 +173,5 @@ func save_to_file(filename : String, dir : String) -> int:
 			end_color[1],
 			end_color[2],
 		]
-	f.store_string(JSON.stringify(dict))
-	print("finished saving")
-	return OK
+	
+	return dict
