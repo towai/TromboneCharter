@@ -132,7 +132,6 @@ func _on_tmb_loaded():
 		)
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
-	%WavePreview.fuck()
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):

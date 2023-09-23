@@ -67,7 +67,7 @@ func _do_preview():
 		if !player.playing:
 			player.play()
 			slide_start = note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE
-			print(slide_start)
+#			print(slide_start)
 		previous_time = time
 		await(get_tree().process_frame)
 	is_playing = false

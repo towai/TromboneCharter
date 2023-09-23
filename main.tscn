@@ -1,6 +1,7 @@
-[gd_scene load_steps=20 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=22 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
+[ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
 [ext_resource type="Script" path="res://preview_controller.gd" id="2_rsc0c"]
 [ext_resource type="AudioStream" uid="uid://bii3beqwflmd" path="res://TRMPT65.wav" id="3_6p5u3"]
 [ext_resource type="Script" path="res://pianoroll/piano_keys.gd" id="3_132ml"]
@@ -12,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
 [ext_resource type="Script" path="res://pianoroll/chart_view.gd" id="8_j823s"]
 [ext_resource type="Script" path="res://pianoroll/chart.gd" id="9_g46yt"]
+[ext_resource type="Script" path="res://pianoroll/wave_preview.gd" id="10_8jxge"]
 [ext_resource type="Script" path="res://color_preview.gd" id="10_14v0o"]
 [ext_resource type="Script" path="res://section_handle.gd" id="10_fs4d4"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
@@ -31,6 +33,9 @@ grow_vertical = 2
 theme = SubResource("Theme_eswg4")
 theme_override_constants/separation = 0
 script = ExtResource("1_4hx5p")
+
+[node name="SaveLoad" type="Node" parent="."]
+script = ExtResource("2_37xub")
 
 [node name="PreviewController" type="Node" parent="."]
 unique_name_in_owner = true
@@ -73,6 +78,7 @@ Notes with tails going into or out of the section might end up overlapping other
 dialog_autowrap = true
 
 [node name="LoadDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
 title = "Load Chart"
 size = Vector2i(600, 360)
 ok_button_text = "Open"
@@ -82,6 +88,7 @@ access = 2
 filters = PackedStringArray("*.tmb")
 
 [node name="SaveDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
 title = "Save Chart"
 size = Vector2i(600, 360)
 ok_button_text = "Save"
@@ -90,6 +97,7 @@ access = 2
 filters = PackedStringArray("*.tmb")
 
 [node name="ErrorPopup" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
 title = "Error"
 
 [node name="Instructions" type="AcceptDialog" parent="."]
@@ -155,6 +163,17 @@ custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("9_g46yt")
+
+[node name="WavePreview" type="HBoxContainer" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.752941)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("10_8jxge")
 
 [node name="SectStartHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
@@ -387,7 +406,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 tooltip_text = "1"
-min_value = 0.2
+min_value = 0.1
 max_value = 4.0
 step = 0.05
 value = 1.0
@@ -618,6 +637,7 @@ tooltip_text = "Info & Usage"
 text = "   ?   "
 
 [node name="Alert" type="Node2D" parent="."]
+unique_name_in_owner = true
 script = ExtResource("16_yl2q4")
 
 [node name="Label" type="Label" parent="Alert"]

@@ -8,6 +8,8 @@ signal chart_loaded
 var popup_location : Vector2i:
 	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
 @onready var cfg = ConfigFile.new()
+@onready var saveload : SaveLoad = $SaveLoad
+@onready var settings : Settings = %Settings
 
 
 func _ready():
@@ -99,46 +101,12 @@ func _on_new_chart_confirmed():
 
 
 func _on_load_chart_pressed(): show_popup($LoadDialog)
-func _on_load_dialog_file_selected(path):
-	print("Load tmb from %s" % path)
-	var dir = path.substr(0,path.rfind("/"))
-	if dir == path: dir = path.substr(0,path.rfind("\\"))
-	var err = tmb.load_from_file(path)
-	if err:
-		$ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
-		show_popup($ErrorPopup)
-		return
-	
-	$SaveDialog.current_dir = dir
-	$SaveDialog.current_path = path
-	cfg.set_value("Config","saved_dir", dir)
-	try_cfg_save()
-	
+func _on_load_dialog_file_selected(path:String):
+	var dir = saveload.on_load_dialog_file_selected(path)
 	%WavPlayer.stream = null
 	emit_signal("chart_loaded")
-	if %Settings.load_wav_on_chart_load:
-		err = try_to_load_wav(dir + "/song.wav")
-		if err:
-			print("No wav loaded -- %s" % error_string(err))
-			if %Settings.convert_ogg:
-				print("try to convert song.ogg to wav")
-				DirAccess.open(dir)
-				err = DirAccess.get_open_error()
-				if err:
-					print("DirAccess error : %s" % error_string(err))
-					return
-				if !FileAccess.file_exists(dir + "/song.ogg"):
-					print("song.ogg not present in the tmb's folder")
-					return
-				err = try_to_convert_ogg(dir + "/song.ogg")
-				if !err:
-					var wav_err = try_to_load_wav(dir + "/song.wav")
-					if wav_err: print("ffmpeg success but couldn't load resulting wav?")
-				else: # redundant to print explanation, label tells us if ffmpeg's missing
-					print("conversion failed: " + error_string(err))
-	
-	%WAVLoadedLabel.text = "song.wav loaded!" if %WavPlayer.stream != null \
-			else "no ffmpeg!" if err == -1 else "no song.wav loaded!"
+	if settings.load_wav_on_chart_load: saveload.load_wav_or_convert_ogg(dir)
+	%WavePreview.build_wave_preview()
 
 
 func _on_save_chart_pressed():
