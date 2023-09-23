@@ -1,7 +1,6 @@
 class_name SlideHelper
 extends Object
 
-
 var owner : Note
 var chart : Control:
 	get: return owner.chart
@@ -106,4 +105,11 @@ func has_slide_neighbor(direction:int,pitch:float):
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
 
 
-
+static func find_slide_neighbors(note:Note) -> Array:
+	var neighbors := []
+	if note.has_slide_neighbor(Note.END_IS_TOUCHING, note.end_pitch):
+		neighbors.append(note.touching_notes[Note.END_IS_TOUCHING].bar)
+	
+	if note.has_slide_neighbor(Note.START_IS_TOUCHING, note.pitch_start):
+		neighbors.append(note.touching_notes[Note.START_IS_TOUCHING].bar)
+	return neighbors

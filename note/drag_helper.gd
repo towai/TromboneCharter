@@ -1,12 +1,10 @@
 class_name DragHelper
 extends Object
 
-
 var owner : Note
 var chart:Control:
 	get: return owner.chart
 	set(_value): assert(false)
-
 var old_bar : float
 var old_end : float
 var old_pitch : float
@@ -35,17 +33,11 @@ func process_drag(drag_type=Note.DRAG_NONE):
 			if new_time + owner.length >= chart.tmb.endpoint:
 				new_time = chart.tmb.endpoint - owner.length
 			
-			# TODO move this shit into slide helper ↓
 			var exclude = [old_bar]
 			if !Input.is_key_pressed(KEY_ALT):
-				if owner.has_slide_neighbor(Note.END_IS_TOUCHING, owner.end_pitch):
-					exclude.append(owner.touching_notes[Note.END_IS_TOUCHING].bar)
-				
-				if owner.has_slide_neighbor(Note.START_IS_TOUCHING, owner.pitch_start):
-					exclude.append(owner.touching_notes[Note.START_IS_TOUCHING].bar)
+				exclude.append_array(SlideHelper.find_slide_neighbors(owner))
 			
 			if chart.continuous_note_overlaps(new_time,owner.length,exclude): return(null)
-			# TODO move this shit into slide helper ↑
 			
 			return(new_time)
 			
@@ -70,7 +62,6 @@ func process_drag(drag_type=Note.DRAG_NONE):
 					else snapped(new_end.x, 1.0 / Global.settings.timing_snap)
 					)
 			
-			# TODO move this shit into slide helper ↓
 			var exclude = [old_bar]
 			if owner.has_slide_neighbor(Note.END_IS_TOUCHING, old_end_pitch) \
 					&& !Input.is_key_pressed(KEY_ALT):
@@ -80,7 +71,6 @@ func process_drag(drag_type=Note.DRAG_NONE):
 					|| new_end.x <= 0 \
 					|| new_end.x + owner.bar > chart.tmb.endpoint:
 				return(null)
-			# TODO move this shit into slide helper ↑
 			
 			new_end.y = new_end.y if !Global.settings.snap_pitch \
 					else snapped(new_end.y, Global.SEMITONE / Global.settings.pitch_snap)
