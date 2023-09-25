@@ -17,6 +17,7 @@ enum LoadResult {
 var notes := []
 # { bar:float, lyric:string }
 var lyrics := []
+var improv_zones := []
 var title		:= ""
 var shortName	:= ""
 var author		:= ""
@@ -157,6 +158,7 @@ func to_dict(dir:String) -> Dictionary:
 	dict["description"] = description
 	dict["notes"] = notes
 	dict["lyrics"] = lyrics
+	dict["improv_zones"] = {}
 	dict["trackRef"] = dir.split("/")[-1]
 	dict["UNK1"] = 0
 	
