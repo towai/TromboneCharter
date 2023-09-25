@@ -36,17 +36,17 @@ static func try_to_convert_ogg(path:String) -> int:
 	return err
 
 
-func draw_wavechunk(start:float,end:float,dir:String,idx:int=0):
+func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,idx:int=0):
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
-	
+	var chunkwidth := int((end - start) * 100) * (2 if hi_res else 1)
 	var command : PackedStringArray = [ "-ss", '%.3f' % start, "-to", '%.3f' % end,
 					"-i", '%s' % (dir + '/song.wav'),
 					'-lavfi',
-					'showwavespic=s=%dx1024:colors=ff8000|0080ff' % ((end - start) * 100),
+					'showwavespic=s=%dx512:colors=ff8000|0080ff' % chunkwidth,
 					wavechunkpath
 				]
 	var out := []
 	
 	var err = OS.execute("ffmpeg",command,out)
-	print(out)
+	print(out[0])
 	return err

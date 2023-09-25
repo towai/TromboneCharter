@@ -19,7 +19,9 @@ var stream_length_in_beats : float:
 var bpm : float:
 	get: return Global.working_tmb.tempo
 	set(_v): assert(false)
-var build_hires_wave := true
+var build_hires_wave : bool:
+	get: return %HiResWave.button_pressed
+	set(_v): assert(false)
 var wave_is_hires := false
 
 
@@ -31,44 +33,53 @@ func _ready():
 		add_child(rect)
 		rects.append(rect)
 
+
 func build_wave_preview():
 	if !Global.ffmpeg_worker.ffmpeg_exists:
 		print("Hey!! You can't make a waveform preview without ffmpeg!")
 		return
 	print(song_length)
 	wave_is_hires = build_hires_wave
-	for i in rects.size(): do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
+	
+	for i in rects.size(): rects[i].texture = null
+	for i in rects.size():
+		var result = do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
+		if !result:
+			print("Done in %d steps" % i)
+			break
+	
+	await(get_tree().process_frame)
 	calculate_width()
 
 
-func do_ffmpeg_convert(dir:String,idx:int=0):
+func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
 	print("building waveform...%d" % idx)
-	rects[idx].texture = null
 	
-	var start := (idx * 163.84) + 0.0
-	var end := (idx * 163.84) + 163.84
-	if song_length < start: return
-	if song_length < end:
-		end = song_length
-		print("end @ %.3f" % end)
-		print(((end - start) * 100))
+	var start := idx * 163.84
+	var end := start + 163.84
+	
 	if build_hires_wave:
 		start /= 2
 		end /= 2
 	
+	if song_length < start: return false
+	if song_length < end: end = song_length
+	
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	
-	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,idx)
+	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,idx)
 	if err:
 		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
-		return
+		return false
 	
-	err = w_image.load(wavechunkpath)
-	if err:
-		print(error_string(err))
-		return
+#	err = w_image.load(wavechunkpath)
+#	if err:
+#		print(error_string(err))
+#		return
+	w_image = Image.load_from_file(wavechunkpath)
 	rects[idx].texture = ImageTexture.create_from_image(w_image)
 	DirAccess.remove_absolute(wavechunkpath)
+	return true
 
 
 func calculate_width():
@@ -76,7 +87,7 @@ func calculate_width():
 	var width := get_size().x
 	
 	var true_width : float = (song_length * chart.bar_spacing) / (60.0 / bpm)
-	if wave_is_hires: true_width /= 2
+#	if wave_is_hires: true_width /= 2
 	
 	var scalefactor : float = (true_width / width)
 	
@@ -85,12 +96,4 @@ func calculate_width():
 
 func _process(delta): pass
 func _draw(): pass
-
-
-func _input(event):
-	if !(event is InputEventKey): return
-	if event.pressed: match event.keycode:
-#		KEY_BRACKETLEFT:  size.x += 64
-#		KEY_BRACKETRIGHT: size.x -= 64
-		_: pass
-	
+func _input(event): pass
