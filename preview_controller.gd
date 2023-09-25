@@ -1,13 +1,14 @@
 extends Node
 
 
-var is_playing : bool = false
-var song_position : float = -1.0
 @onready var chart : Control = %Chart
 @onready var settings : Settings = %Settings
 @onready var player : AudioStreamPlayer = %TrombPlayer
 @onready var metronome : AudioStreamPlayer = %MetronomePlayer
 @onready var wavplayer : AudioStreamPlayer = %WavPlayer
+var is_playing : bool = false
+var song_position : float = -1.0
+var tmb : TMBInfo
 
 
 func _ready(): pass
@@ -17,12 +18,13 @@ func _do_preview():
 	if chart.tmb == null:
 		print("null tmb")
 		return
+	else: tmb = chart.tmb
 	if is_playing:
 		is_playing = false
 		await(get_tree().process_frame) # wait for the existing preview to kill itself
 	is_playing = true
 	
-	var bpm : float = chart.tmb.tempo
+	var bpm : float = tmb.tempo
 	var time : float
 	@warning_ignore("unused_variable")
 	var previous_time : float
@@ -31,6 +33,11 @@ func _do_preview():
 	var startpoint_in_stream : float = Global.beat_to_time(settings.section_start)
 	var start_beat = settings.section_start
 	var slide_start : float
+	var get_note_ons = func() -> Array[float]:
+		var arr : Array[float] = []
+		for note in tmb.notes: arr.append(note[TMBInfo.NOTE_BAR])
+		return arr
+	var note_ons : Array[float] = get_note_ons.call()
 	
 	wavplayer.play(startpoint_in_stream)
 	while is_playing:
@@ -81,10 +88,18 @@ func _do_preview():
 
 
 func _find_note_overlapping_bar(time:float):
-	for note in chart.tmb.notes:
-		var end_bar = note[TMBInfo.NOTE_BAR] + note[TMBInfo.NOTE_LENGTH]
+	for note in tmb.notes:
 		# we sort the array by note-on every time we make an edit, so we can break early
 		if time < note[TMBInfo.NOTE_BAR]: break
-		if time >= note[TMBInfo.NOTE_BAR] && time <= end_bar:
-			return note
+		var end_bar = note[TMBInfo.NOTE_BAR] + note[TMBInfo.NOTE_LENGTH]
+		if time >= note[TMBInfo.NOTE_BAR] && time <= end_bar: return note
+	return []
+
+
+func _find_matching_by_note_on(note_ons:Array[float],time:float):
+	for i in note_ons.size():
+		var on = note_ons[i]
+		if time < on: break
+		var end_bar = on + tmb.notes[i][TMBInfo.NOTE_LENGTH]
+		if time >= on && time <= end_bar: return tmb.notes[i]
 	return []

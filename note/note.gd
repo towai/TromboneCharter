@@ -221,12 +221,15 @@ func _update():
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
 	
-	end_handle.position = Vector2(scaled_length, end_height) - ENDHANDLE_SIZE / 2
+	var scaledlength = scaled_length
+	size.x = scaledlength
+	if !is_in_view: return
 	
-	pitch_handle.size = Vector2(scaled_length, visual_height + TAIL_HEIGHT)
+	end_handle.position = Vector2(scaledlength, end_height) - ENDHANDLE_SIZE / 2
+	
+	pitch_handle.size = Vector2(scaledlength, visual_height + TAIL_HEIGHT)
 	pitch_handle.position = Vector2(0, higher_pitch - (TAIL_HEIGHT / 2) )
 	
-	size.x = scaled_length
 	queue_redraw()
 
 

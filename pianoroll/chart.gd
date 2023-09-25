@@ -5,8 +5,8 @@ var scroll_position : float:
 	get: return %ChartView.scroll_horizontal
 var scroll_end : float:
 	get: return scroll_position + %ChartView.size.x
-var bar_spacing : int:
-	get: return tmb.savednotespacing * %ZoomLevel.value
+var bar_spacing : float = 1.0
+#	get: return tmb.savednotespacing * %ZoomLevel.value
 var middle_c_y : float:
 	get: return (key_height * 13.0) + (key_height / 2.0)
 var key_height : float:
@@ -57,6 +57,7 @@ func _process(_delta):
 
 func _on_scroll_change():
 	await(get_tree().process_frame)
+	queue_redraw()
 	redraw_notes()
 	%WavePreview.calculate_width()
 
@@ -70,7 +71,9 @@ func redraw_notes():
 		else: child.hide()
 
 
-func _on_tmb_updated(): _update_queued = true
+func _on_tmb_updated():
+	bar_spacing = tmb.savednotespacing * %ZoomLevel.value
+	_update_queued = true
 
 func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
@@ -85,6 +88,7 @@ func _do_tmb_update():
 			continue
 		note.position.x = note.bar * bar_spacing
 	queue_redraw()
+	redraw_notes()
 	_update_queued = false
 
 
@@ -201,16 +205,24 @@ func _draw():
 				Vector2(bar_to_x(%PreviewController.song_position),size.y),
 				Color.CORNFLOWER_BLUE, 2 )
 	for i in tmb.endpoint + 1:
-		draw_line(Vector2(i * bar_spacing, 0), Vector2(i * bar_spacing, size.y),
-				Color(1,1,1,0.33) if i % tmb.timesig else Color.WHITE, 2
-				)
+		var line_x = i * bar_spacing
+		if line_x < scroll_position: continue
+		if line_x > scroll_end: break
+		draw_line(Vector2(line_x, 0), Vector2(line_x, size.y),
+				Color.WHITE if !(i % tmb.timesig)
+				else Color(1,1,1,0.33) if bar_spacing > 20.0
+				else Color(1,1,1,0.15), 2
+			)
 		var subdiv = %TimingSnap.value
 		for j in subdiv:
-			if i == tmb.endpoint: break
+			if i == tmb.endpoint || bar_spacing < 20.0: break
+			if j == 0.0: continue
 			var k = 1.0 / subdiv
 			var line = i + (k * j)
 			draw_line(Vector2(line * bar_spacing, 0), Vector2(line * bar_spacing, size.y),
-					Color(0.7,1,1,0.2), 1 )
+					Color(0.7,1,1,0.2) if bar_spacing > 20.0
+					else Color(0.7,1,1,0.1),
+					1 )
 		if !(i % tmb.timesig):
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 16),
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
@@ -219,7 +231,6 @@ func _draw():
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
 				Color.ORANGE_RED, 2.0)
-	redraw_notes()
 
 
 func _gui_input(event):
