@@ -486,6 +486,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Draw Microtones"
 
+[node name="InsertTapNotes" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Insert tap notes"
+
 [node name="DootToggle" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -503,10 +508,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Outline mouse targets
 "
-
-[node name="spacer" type="Control" parent="Settings/MarginC/HBoxC/EditSettings"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -738,6 +739,7 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/TimeSnapping/TimingSnap" to="Settings" method="_on_timing_snap_value_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/PitchSnapping/PitchSnap" to="PianoRoll/ChartView" method="_on_pitch_snap_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/DrawMicrotones" to="PianoRoll/ChartView" method="queue_redraw"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/InsertTapNotes" to="PianoRoll/ChartView" method="queue_redraw"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]

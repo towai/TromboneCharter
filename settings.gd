@@ -67,6 +67,9 @@ var timing_snap : int:
 var snap_time : bool:
 	get: return %TimeSnapChk.button_pressed
 
+var tap_notes : bool:
+	get: return %InsertTapNotes.button_pressed
+
 
 func _ready():
 	start_color = default_start_color
