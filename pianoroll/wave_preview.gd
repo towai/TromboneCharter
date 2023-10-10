@@ -85,6 +85,9 @@ func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
 func calculate_width():
 	# natural size, before scaling, aka song length in ms (*2 if hi-res wave)
 	var width := get_size().x
+	if width == 0: # no preview exists
+		scale.x == 1.0
+		return
 	
 	var true_width : float = (song_length * chart.bar_spacing) / (60.0 / bpm)
 #	if wave_is_hires: true_width /= 2
@@ -94,6 +97,6 @@ func calculate_width():
 	scale.x = max(scalefactor,0.001)
 
 
-func _process(delta): pass
+func _process(_delta): pass
 func _draw(): pass
-func _input(event): pass
+func _input(_event): pass
