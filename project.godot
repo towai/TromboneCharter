@@ -28,3 +28,7 @@ window/size/viewport_width=1280
 window/size/viewport_height=540
 window/subwindows/embed_subwindows=false
 window/dpi/allow_hidpi=false
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
