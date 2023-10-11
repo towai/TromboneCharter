@@ -206,7 +206,8 @@ func _draw():
 				Color.CORNFLOWER_BLUE, 2 )
 	for i in tmb.endpoint + 1:
 		var line_x = i * bar_spacing
-		if line_x < scroll_position: continue
+		var next_line_x = (i + 1) * bar_spacing
+		if (line_x < scroll_position) && (next_line_x < scroll_position): continue
 		if line_x > scroll_end: break
 		draw_line(Vector2(line_x, 0), Vector2(line_x, size.y),
 				Color.WHITE if !(i % tmb.timesig)
