@@ -42,6 +42,15 @@ var is_slide: bool:
 var is_in_view : bool:
 	get: return position.x + size.x >= chart.scroll_position \
 			&& position.x <= chart.scroll_end
+# n.b. a delta of 1e-18 or -1e-17 in a .tmb will round to 0 when parsed in with the JSON parser
+# (see the note in the JSON class's doc) but still show in the game as a note with length. however,
+# if this happens you definitely did that on purpose and on re-saving from charter
+# the delta will become 0 (the note will become a tap note)
+# if desired, this knowledge could be exploited to make the game not convert some notes to tap notes
+# by giving them an imperceptible and inconsequential delta value (0.0001 is already only ~0.14¢)
+var is_tap_note: bool:
+	get: return length <= 0.0625 && !is_slide
+	set(_v): assert(false)
 var dragging := 0
 enum {
 	DRAG_NONE,
@@ -72,7 +81,9 @@ var touching_notes : Dictionary:
 var show_bar_handle : bool:
 	get: return (touching_notes.get(START_IS_TOUCHING) == null)
 var show_end_handle : bool:
-	get: return (touching_notes.get(END_IS_TOUCHING) == null)
+	get: return (touching_notes.get(END_IS_TOUCHING) == null
+				&& (!is_tap_note || has_focus())
+			)
 
 # ???
 #@onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
@@ -108,6 +119,7 @@ func _gui_input(event):
 
 
 func _on_handle_input(event, which_handle):
+	move_child(end_handle, -1 if is_tap_note else 0)
 	move_child(pitch_handle, -1 if Input.is_key_pressed(KEY_SHIFT) else 0)
 	
 	event = event as InputEventMouseButton
@@ -159,7 +171,6 @@ func _process_drag():
 
 func _end_drag():
 	dragging = DRAG_NONE
-	
 	slide_helper.snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		slide_helper.pass_on_slide_propagation()
@@ -197,8 +208,8 @@ func update_handle_visibility():
 	var prev_note = touching_notes.get(START_IS_TOUCHING)
 	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
-	if ((!show_bar_handle && bar != prev_note.end)
-			|| (!show_end_handle && end != next_note.bar)):
+	if ((prev_note != null && bar != prev_note.end)
+			|| (next_note != null && end != next_note.bar)):
 		update_touching_notes()
 	
 	if !show_bar_handle:
@@ -220,8 +231,8 @@ func _update():
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
-	
 	var scaledlength = scaled_length
+	
 	size.x = scaledlength
 	if !is_in_view: return
 	
@@ -280,8 +291,9 @@ func _draw():
 		draw_polyline(points, Color.BLACK, 16, true)
 		draw_polyline(points, Color.WHITE, 12, true)
 		draw_polyline_colors(points, colors, 6, true)
+		draw_polyline_colors(points, colors, 6, true)
 	
-	_draw_tail.call()
+	if !is_tap_note || has_focus():_draw_tail.call()
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
 
