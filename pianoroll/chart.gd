@@ -246,14 +246,17 @@ func _gui_input(event):
 		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 		else: new_note_pos.x = to_unsnapped(event.position).x
 		
+		# Current length of tap notes
+		var note_length = 0.0625 if settings.tap_notes else current_subdiv
+		
 		if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
-		if continuous_note_overlaps(new_note_pos.x, current_subdiv): return
+		if continuous_note_overlaps(new_note_pos.x, note_length): return
 		
 		if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 		else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 				Global.SEMITONE * -13, Global.SEMITONE * 13)
 		
-		add_note(true, new_note_pos.x, current_subdiv, new_note_pos.y)
+		add_note(true, new_note_pos.x, note_length, new_note_pos.y)
 	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN \
 			|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
 			|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
