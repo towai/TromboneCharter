@@ -37,7 +37,7 @@ var initial_size = 0
 
 var a_array := []
 var d_array := []
-
+var main_stack := []
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
