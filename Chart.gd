@@ -39,11 +39,9 @@ var new_note : Note
 
 #Dew's variables#
 var new_array := []
-var main_stack := []
 var target_note := []
 var dumb_copy := []
 var bar_array := [] #list of bars
-var redoability = 0
 var drag_available := false
 var short_stack = 0
 var prev_bar #bar of clearable note
@@ -72,14 +70,14 @@ func _on_scroll_change():
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
-		short_stack = Global.a_array.size() + Global.initial_size - main_stack.size()
+		short_stack = Global.a_array.size() + Global.initial_size - Global.main_stack.size()
 		Global.UR[0] = 1
 		print("undo!")
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
 		Global.UR[0] = 2
 		Global.UR[1] = 2
-		short_stack = Global.a_array.size() + Global.initial_size - main_stack.size()
+		short_stack = Global.a_array.size() + Global.initial_size - Global.main_stack.size()
 		print("redo!")
 		if short_stack == 1 :
 			Global.UR[1] = 1
@@ -229,10 +227,10 @@ func update_note_array():
 		print(note_array)
 		new_array.append(note_array)
 		bar_array.append(note_array[0])
-		main_stack = new_array
+		Global.main_stack = new_array
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
-	print("main_stack: ",main_stack)
+	print("Global.main_stack: ",Global.main_stack)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	bar_array.sort()
 	tmb.notes = new_array
@@ -250,9 +248,9 @@ func recoome_eraser_gun() :
 		#neither???
 		0 : print("no, that's wrong!")
 		#undo
-		1 : erase_me = main_stack[main_stack.bsearch(Global.a_array[Global.revision-1])]
+		1 : erase_me = Global.main_stack[Global.main_stack.bsearch(Global.a_array[Global.revision-1])]
 		#redo
-		2 : erase_me = main_stack[main_stack.bsearch(Global.d_array[Global.revision])]
+		2 : erase_me = Global.main_stack[Global.main_stack.bsearch(Global.d_array[Global.revision])]
 	get_children()[tmb.notes.bsearch(erase_me)].queue_free()
 	#throws error when trying to access %Settings
 	
@@ -268,8 +266,8 @@ func UR_handler():
 				print("undo dragged")
 				passed_note = Global.d_array[Global.revision-2]
 				recoome_eraser_gun()
-				main_stack.remove_at(main_stack.bsearch(Global.a_array[Global.revision-1]))
-				main_stack.append(passed_note)
+				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.main_stack.append(passed_note)
 				Global.revision -= 2
 				Global.UR[0] = 0
 				Global.UR[2] += 1
@@ -278,7 +276,7 @@ func UR_handler():
 			if Global.d_array[Global.revision-1] == Global.ratio:
 				print("undo added")
 				recoome_eraser_gun()
-				main_stack.remove_at(main_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.revision -= 1
 				Global.UR[0] = 0
 				Global.UR[2] += 1
@@ -286,12 +284,12 @@ func UR_handler():
 			elif Global.a_array[Global.revision-1] == Global.ratio:
 				print("undo deleted")
 				passed_note = Global.d_array[Global.revision-1]
-				main_stack.append(passed_note)
+				Global.main_stack.append(passed_note)
 				Global.revision -= 1
 				Global.UR[0] = 0
 				Global.UR[2] += 1
-		print(main_stack)
-		dumb_copy = main_stack
+		print(Global.main_stack)
+		dumb_copy = Global.main_stack
 		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = dumb_copy
 		
@@ -302,8 +300,8 @@ func UR_handler():
 				print("redo dragged")
 				recoome_eraser_gun()
 				passed_note = Global.a_array[Global.revision+1]
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision]))
-				main_stack.append(passed_note)
+				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.d_array[Global.revision]))
+				Global.main_stack.append(passed_note)
 				Global.revision += 2
 				Global.UR[2] -= 1
 				drag_UR = true
@@ -312,25 +310,25 @@ func UR_handler():
 			if Global.d_array[Global.revision] == Global.ratio :
 				print("redo added")
 				passed_note = Global.a_array[Global.revision]
-				main_stack.append(passed_note)
+				Global.main_stack.append(passed_note)
 				Global.revision += 1
 				Global.UR[2] -= 1
 		
 			elif Global.a_array[Global.revision] == Global.ratio :
 				print("redo deleted")
 				recoome_eraser_gun()
-				main_stack.remove_at(main_stack.bsearch(Global.d_array[Global.revision]))
+				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.d_array[Global.revision]))
 				Global.revision += 1
 				Global.UR[2] -= 1
 				
 
 		Global.UR[1] = 0
-		dumb_copy = main_stack.slice(0,Global.revision)
+		dumb_copy = Global.main_stack.slice(0,Global.revision)
 		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = dumb_copy
 		
 	print("revision post-UR: ",Global.revision)
-	print("main_stack: ",main_stack)
+	print("Global.main_stack: ",Global.main_stack)
 	print("tmb.notes: ",tmb.notes)
 	
 	#if erase_me != null :
