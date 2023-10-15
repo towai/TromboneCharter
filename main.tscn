@@ -156,9 +156,20 @@ wrap_controls = true
 transient = true
 content_scale_mode = 1
 
-[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc"]
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc"]
 offset_right = 600.0
 offset_bottom = 480.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DiffCalc/PanelContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(2.08165e-12, 2.08165e-12)
+layout_mode = 2
+size_flags_vertical = 3
 bbcode_enabled = true
 text = "[font_size=25]TMB Information[/font_size]
 
@@ -188,6 +199,10 @@ TT at 60% Maximum Percentage: [b]{base_tt}[/b]
 
 
 a"
+
+[node name="Button" type="Button" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "OK"
 
 [node name="DiffCalcOld" type="AcceptDialog" parent="."]
 title = "TootTally Difficulty Calculator"
@@ -785,6 +800,7 @@ text = "toot toot lol"
 [connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
 [connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
+[connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/LoadChart" to="." method="_on_load_chart_pressed"]

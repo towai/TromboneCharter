@@ -4,6 +4,7 @@ extends Control
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
 @onready var toottally_button : Button = $Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload
+@onready var diff_calc_contents : RichTextLabel = $DiffCalc/PanelContainer/VBoxContainer/CalcInfo
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -170,7 +171,7 @@ func _on_toottally_request_completed(_result, _response_code, _headers, body):
 	json.parse(body.get_string_from_utf8())
 	var data = json.get_data()
 	print(data)
-	$DiffCalc/CalcInfo.text = """[font_size=25]TMB Information[/font_size]
+	diff_calc_contents.text = """[font_size=25]TMB Information[/font_size]
 
 Track Name: [b]{name}[/b]
 Note Hash: [b]{note_hash}[/b]
@@ -202,23 +203,23 @@ TT at 60% Maximum Percentage: [b]{base_tt}[/b]
 				notice_count += 1
 				notice_table += cell
 	if error_count > 0:
-		$DiffCalc/CalcInfo.text += "\n\n[color=#DE7576]{0} error/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+		diff_calc_contents.text += "\n\n[color=#DE7576]{0} error/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
 			[error_count, table_header, error_table]
 		)
 	else:
-		$DiffCalc/CalcInfo.text += "\n\n0 error/s found!"
+		diff_calc_contents.text += "\n\n0 error/s found!"
 	if warn_count > 0:
-		$DiffCalc/CalcInfo.text += "\n\n[color=#F5D64C]{0} warning/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+		diff_calc_contents.text += "\n\n[color=#F5D64C]{0} warning/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
 			[warn_count, table_header, warn_table]
 		)
 	else:
-		$DiffCalc/CalcInfo.text += "\n\n0 warnings/s found!"
+		diff_calc_contents.text += "\n\n0 warnings/s found!"
 	if notice_count > 0:
-		$DiffCalc/CalcInfo.text += "\n\n[color=#53CCF5]{0} notice/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+		diff_calc_contents.text += "\n\n[color=#53CCF5]{0} notice/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
 			[notice_count, table_header, notice_table]
 		)
 	else:
-		$DiffCalc/CalcInfo.text += "\n\n0 notice/s found!"
+		diff_calc_contents.text += "\n\n0 notice/s found!"
 	show_popup($DiffCalc)
 	toottally_button.disabled = false
 
@@ -243,10 +244,13 @@ func _on_toottally_upload_pressed():
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
 func _on_diff_calc_about_to_popup():
-	$DiffCalc/CalcInfo.set_size($DiffCalc.size)
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
 
 func _on_diff_calc_win_size_changed():
-	$DiffCalc/CalcInfo.set_size($DiffCalc.size)
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
 
 func _on_diff_calc_win_close_requested():
+	$DiffCalc.visible = false
+
+func _on_diff_ok_button_pressed():
 	$DiffCalc.visible = false
