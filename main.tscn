@@ -800,6 +800,7 @@ text = "toot toot lol"
 [connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
 [connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
+[connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/CalcInfo" to="." method="_on_calc_info_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
