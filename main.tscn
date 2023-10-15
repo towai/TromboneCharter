@@ -147,6 +147,41 @@ Linux:
 　Install ffmpeg using your package manager of choice."
 dialog_autowrap = true
 
+[node name="DiffCalc" type="AcceptDialog" parent="."]
+title = "TootTally Difficulty Calculator"
+position = Vector2i(200, 48)
+size = Vector2i(720, 514)
+visible = true
+dialog_autowrap = true
+
+[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 712.0
+offset_bottom = 468.0
+bbcode_enabled = true
+text = "[font_size=25]TMB Information[/font_size]
+
+Track Name: [b]{name}[/b]
+Note Hash: [b]{note_hash}[/b]
+File Hash: [b]{file_hash}[/b]
+Estimated Difficulty: [b]{difficulty}[/b]
+Tap Rating: [b]{tap}[/b]
+Aim Rating: [b]{aim}[/b]
+Acc Rating: [b]{acc}[/b]
+TT at 60% Maximum Percentage: [b]{base_tt}[/b]
+
+[font_size=25]Rating Criteria Checks[/font_size]
+
+[color=#DE7576]{sum_errors} error/s found![/color]
+
+[table=4]
+[cell][b]Type[/b][/cell]
+[cell][b]Note ID[/b][/cell]
+[cell][b]Timing[/b][/cell]
+[cell][b]Value[/b][/cell]
+[/table]"
+
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
 layout_mode = 2
@@ -382,6 +417,13 @@ json_key = "savednotespacing"
 field_name = "Note Spacing"
 min_value = 10
 max_value = 480
+
+[node name="Control2" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
+layout_mode = 2
+
+[node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
+layout_mode = 2
+text = "Upload to TootTally"
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 layout_mode = 2
@@ -731,6 +773,7 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/SaveChart" to="." method="_on_save_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="text_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/Description" to="." method="_on_description_text_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload" to="." method="_on_toottally_upload_pressed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/StartColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]

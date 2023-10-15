@@ -3,6 +3,7 @@ extends Control
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
+@onready var toottally_button : Button = $Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -163,3 +164,40 @@ func _on_copy_confirmed():
 		tmb.notes.append(note)
 	tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	emit_signal("chart_loaded")
+
+func _on_toottally_request_completed(_result, _response_code, _headers, body):
+	var json = JSON.new()
+	json.parse(body.get_string_from_utf8())
+	var data = json.get_data()
+	print(data)
+	$DiffCalc/CalcInfo.text = """Track Name: [b]{name}[/b]
+	Note Hash: [b]{note_hash}[/b]
+	File Hash: [b]{file_hash}[/b]
+	Estimated Difficulty: [b]{difficulty}[/b]
+	Tap Rating: [b]{tap}[/b]
+	Aim Rating: [b]{aim}[/b]
+	Acc Rating: [b]{acc}[/b]
+	TT at 60% Maximum Percentage: [b]{base_tt}[/b]""".format(data)
+	show_popup($DiffCalc)
+	toottally_button.disabled = false
+
+func _on_toottally_upload_pressed():
+	toottally_button.disabled = true
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+	http_request.request_completed.connect(_on_toottally_request_completed)
+	var path = $SaveDialog.current_path if $SaveDialog.current_path else "TromboneCharterProject"
+	var chart_data = JSON.stringify(tmb.to_dict(path))
+	var f = FileAccess.open("test.tmb",FileAccess.WRITE)
+	var dict = {"tmb": chart_data, "skip_save": true}
+	var body = JSON.stringify(dict)
+	f.store_string(body)
+	var error = http_request.request(
+		"https://toottally.com/api/upload/", 
+		["Content-Type: application/json"],
+		HTTPClient.METHOD_POST, body)
+	if error != OK:
+		push_error("An error occured while submitting to TootTally: " + error)
+		$Alert.alert("Couldn't submit! " + error,
+				Vector2(72, %NewChart.global_position.y + 20),
+				Alert.LV_ERROR, 2)
