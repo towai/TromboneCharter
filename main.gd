@@ -179,10 +179,22 @@ func jump_to_note(note: int):
 			child.grab_focus()
 			break
 
-func _on_toottally_request_completed(_result, _response_code, _headers, body):
+func _on_toottally_request_completed(_result, response_code, _headers, body):
+	if response_code != HTTPClient.ResponseCode.RESPONSE_OK:
+		push_error("An error occured while submitting to TootTally: Response Code %s" % response_code)
+		$Alert.alert("Couldn't submit! Code %s" % response_code,
+				Vector2(toottally_button.global_position.x - 30, 
+				toottally_button.global_position.y - 20),
+				Alert.LV_ERROR, 2)
+		toottally_button.disabled = false
+		return
 	var json = JSON.new()
 	json.parse(body.get_string_from_utf8())
 	var data = json.get_data()
+	if data.get('error'):
+		diff_calc_contents.text = "[center]\n\n\n[font_size=25]Failed to process chart![/fontsize]\n\n{error}".format(data)
+		toottally_button.disabled = false
+		return
 	diff_calc_contents.text = """[font_size=25]TMB Information[/font_size]
 
 Track Name: [b]{name}[/b]
@@ -249,7 +261,7 @@ func _on_toottally_upload_pressed():
 	if error != OK:
 		push_error("An error occured while submitting to TootTally: " + error)
 		$Alert.alert("Couldn't submit! " + error,
-				Vector2(72, %NewChart.global_position.y + 20),
+				Vector2(toottally_button.global_position.x - 30, toottally_button.global_position.y - 20),
 				Alert.LV_ERROR, 2)
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
