@@ -151,7 +151,7 @@ dialog_autowrap = true
 title = "TootTally Difficulty Calculator"
 position = Vector2i(200, 48)
 size = Vector2i(720, 514)
-visible = true
+exclusive = false
 dialog_autowrap = true
 
 [node name="CalcInfo" type="RichTextLabel" parent="DiffCalc"]

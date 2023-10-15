@@ -170,14 +170,55 @@ func _on_toottally_request_completed(_result, _response_code, _headers, body):
 	json.parse(body.get_string_from_utf8())
 	var data = json.get_data()
 	print(data)
-	$DiffCalc/CalcInfo.text = """Track Name: [b]{name}[/b]
-	Note Hash: [b]{note_hash}[/b]
-	File Hash: [b]{file_hash}[/b]
-	Estimated Difficulty: [b]{difficulty}[/b]
-	Tap Rating: [b]{tap}[/b]
-	Aim Rating: [b]{aim}[/b]
-	Acc Rating: [b]{acc}[/b]
-	TT at 60% Maximum Percentage: [b]{base_tt}[/b]""".format(data)
+	$DiffCalc/CalcInfo.text = """[font_size=25]TMB Information[/font_size]
+
+Track Name: [b]{name}[/b]
+Note Hash: [b]{note_hash}[/b]
+File Hash: [b]{file_hash}[/b]
+Estimated Difficulty: [b]{difficulty}[/b]
+Tap Rating: [b]{tap}[/b]
+Aim Rating: [b]{aim}[/b]
+Acc Rating: [b]{acc}[/b]
+TT at 60% Maximum Percentage: [b]{base_tt}[/b]
+
+[font_size=25]Rating Criteria Checks[/font_size]""".format(data)
+	var table_header = "[cell][b]Type[/b][/cell][cell][b]Note ID[/b][/cell][cell][b]Timing[/b][/cell][cell][b]Value[/b][/cell]"
+	var error_count = 0
+	var error_table = ""
+	var warn_count = 0
+	var warn_table = ""
+	var notice_count = 0
+	var notice_table = ""
+	for err in data["chart_errors"]:
+		var cell = "\n[cell]{error_type}[/cell][cell]{note_id}[/cell][cell]{timing}[/cell][cell]{value}[/cell]".format(err)
+		match err["error_level"]:
+			"Error":
+				error_count += 1
+				error_table += cell
+			"Warning":
+				warn_count += 1
+				warn_table += cell
+			"Notice":
+				notice_count += 1
+				notice_table += cell
+	if error_count > 0:
+		$DiffCalc/CalcInfo.text += "\n\n[color=#DE7576]{0} error/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+			[error_count, table_header, error_table]
+		)
+	else:
+		$DiffCalc/CalcInfo.text += "\n\n0 error/s found!"
+	if warn_count > 0:
+		$DiffCalc/CalcInfo.text += "\n\n[color=#F5D64C]{0} warning/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+			[warn_count, table_header, warn_table]
+		)
+	else:
+		$DiffCalc/CalcInfo.text += "\n\n0 warnings/s found!"
+	if notice_count > 0:
+		$DiffCalc/CalcInfo.text += "\n\n[color=#53CCF5]{0} notice/s found![/color]\n\n[table=4]{1}{2}\n[/table]".format(
+			[notice_count, table_header, notice_table]
+		)
+	else:
+		$DiffCalc/CalcInfo.text += "\n\n0 notice/s found!"
 	show_popup($DiffCalc)
 	toottally_button.disabled = false
 
@@ -188,10 +229,8 @@ func _on_toottally_upload_pressed():
 	http_request.request_completed.connect(_on_toottally_request_completed)
 	var path = $SaveDialog.current_path if $SaveDialog.current_path else "TromboneCharterProject"
 	var chart_data = JSON.stringify(tmb.to_dict(path))
-	var f = FileAccess.open("test.tmb",FileAccess.WRITE)
 	var dict = {"tmb": chart_data, "skip_save": true}
 	var body = JSON.stringify(dict)
-	f.store_string(body)
 	var error = http_request.request(
 		"https://toottally.com/api/upload/", 
 		["Content-Type: application/json"],
