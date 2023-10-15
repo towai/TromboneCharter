@@ -147,18 +147,18 @@ Linux:
 　Install ffmpeg using your package manager of choice."
 dialog_autowrap = true
 
-[node name="DiffCalc" type="AcceptDialog" parent="."]
+[node name="DiffCalc" type="Window" parent="."]
 title = "TootTally Difficulty Calculator"
 position = Vector2i(200, 48)
-size = Vector2i(720, 514)
-exclusive = false
-dialog_autowrap = true
+size = Vector2i(600, 480)
+visible = false
+wrap_controls = true
+transient = true
+content_scale_mode = 1
 
 [node name="CalcInfo" type="RichTextLabel" parent="DiffCalc"]
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 712.0
-offset_bottom = 468.0
+offset_right = 600.0
+offset_bottom = 480.0
 bbcode_enabled = true
 text = "[font_size=25]TMB Information[/font_size]
 
@@ -180,7 +180,22 @@ TT at 60% Maximum Percentage: [b]{base_tt}[/b]
 [cell][b]Note ID[/b][/cell]
 [cell][b]Timing[/b][/cell]
 [cell][b]Value[/b][/cell]
-[/table]"
+[/table]
+
+
+
+
+
+
+a"
+
+[node name="DiffCalcOld" type="AcceptDialog" parent="."]
+title = "TootTally Difficulty Calculator"
+position = Vector2i(200, 48)
+size = Vector2i(720, 607)
+exclusive = false
+popup_window = true
+dialog_autowrap = true
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
@@ -767,6 +782,9 @@ text = "toot toot lol"
 [connection signal="confirmed" from="CopyConfirm" to="." method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]
+[connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
+[connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
+[connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/LoadChart" to="." method="_on_load_chart_pressed"]

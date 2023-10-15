@@ -240,3 +240,13 @@ func _on_toottally_upload_pressed():
 		$Alert.alert("Couldn't submit! " + error,
 				Vector2(72, %NewChart.global_position.y + 20),
 				Alert.LV_ERROR, 2)
+
+# For some reason I have to manually handle resizing the window contents to fit the window size.
+func _on_diff_calc_about_to_popup():
+	$DiffCalc/CalcInfo.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_size_changed():
+	$DiffCalc/CalcInfo.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_close_requested():
+	$DiffCalc.visible = false
