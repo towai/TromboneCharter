@@ -4,7 +4,7 @@ extends Control
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
 @onready var toottally_button : Button = $Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload
-@onready var diff_calc_contents : RichTextLabel = $DiffCalc/PanelContainer/VBoxContainer/CalcInfo
+@onready var diff_calc_contents : RichTextLabel = $DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -236,6 +236,8 @@ TT at 60% Maximum Percentage: [b]{base_tt}[/b]
 		)
 	else:
 		diff_calc_contents.text += "\n\n0 warnings/s found!"
+	if error_count == 0 and warn_count == 0:
+		diff_calc_contents.text += "\n\n[center][rainbow sat=0.6][wave]Maximum Boner Levels Achieved"
 	show_popup($DiffCalc)
 	toottally_button.disabled = false
 

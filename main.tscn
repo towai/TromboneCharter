@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=24 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -23,6 +23,12 @@
 
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecsdr"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+border_width_left = 8
+border_width_right = 8
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
 
 [node name="Main" type="VBoxContainer"]
 anchors_preset = 15
@@ -103,7 +109,7 @@ title = "Error"
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 468)
+size = Vector2i(720, 629)
 dialog_text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
 
 Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. With \"propagate slide changes\" enabled, hold Alt when dragging to break a note away from its neighbor. Note too short to easily grab the pitch handle? Hold Shift to bring it to the front.
@@ -149,24 +155,31 @@ dialog_autowrap = true
 
 [node name="DiffCalc" type="Window" parent="."]
 title = "TootTally Difficulty Calculator"
-position = Vector2i(200, 48)
-size = Vector2i(600, 480)
+position = Vector2i(200, 36)
+size = Vector2i(700, 600)
 visible = false
 wrap_controls = true
 transient = true
 content_scale_mode = 1
 
 [node name="PanelContainer" type="PanelContainer" parent="DiffCalc"]
-offset_right = 600.0
-offset_bottom = 480.0
+offset_right = 700.0
+offset_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ucscc")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="DiffCalc/PanelContainer"]
 layout_mode = 2
+theme_override_constants/separation = 0
 alignment = 1
 
-[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ecsdr")
+
+[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer/PanelContainer"]
 custom_minimum_size = Vector2(2.08165e-12, 2.08165e-12)
 layout_mode = 2
 size_flags_vertical = 3
@@ -800,7 +813,7 @@ text = "toot toot lol"
 [connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
 [connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
-[connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/CalcInfo" to="." method="_on_calc_info_meta_clicked"]
+[connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_calc_info_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
