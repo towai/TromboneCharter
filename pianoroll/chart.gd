@@ -193,6 +193,18 @@ func update_note_array():
 	tmb.notes = new_array
 
 
+func jump_to_note(note: int):
+	var count = 0
+	for child in %Chart.get_children():
+		if !(child is Note): continue
+		count += 1
+		if count == note:
+			%ChartView.set_h_scroll(int(child.position.x - (%ChartView.size.x / 2)))
+			redraw_notes()
+			queue_redraw()
+			child.grab_focus()
+			break
+
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
