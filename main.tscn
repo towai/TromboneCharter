@@ -423,7 +423,6 @@ theme_override_constants/v_separation = 8
 layout_mode = 2
 json_key = "endpoint"
 field_name = "Length (beats)"
-is_float = false
 min_value = 2.0
 max_value = 1e+07
 
@@ -432,7 +431,6 @@ layout_mode = 2
 json_key = "tempo"
 field_name = "Tempo"
 is_float = true
-value = 1.0
 min_value = 1.0
 max_value = 9999.0
 
@@ -440,8 +438,6 @@ max_value = 9999.0
 layout_mode = 2
 json_key = "timesig"
 field_name = "Time Signature"
-is_float = false
-value = 1.0
 min_value = 1.0
 max_value = 1e+07
 
@@ -452,7 +448,6 @@ layout_mode = 2
 layout_mode = 2
 json_key = "year"
 field_name = "Year"
-is_float = false
 min_value = -9999.0
 max_value = 9999.0
 
@@ -460,14 +455,12 @@ max_value = 9999.0
 layout_mode = 2
 json_key = "difficulty"
 field_name = "Difficulty"
-is_float = false
 max_value = 10.0
 
 [node name="NoteSpacing" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "savednotespacing"
 field_name = "Note Spacing"
-is_float = false
 min_value = 10.0
 max_value = 480.0
 

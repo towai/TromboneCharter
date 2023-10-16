@@ -18,6 +18,7 @@ var notes := []
 # { bar:float, lyric:string }
 var lyrics := []
 var improv_zones := []
+var bgdata := []
 var title		:= ""
 var shortName	:= ""
 var author		:= ""
@@ -118,6 +119,15 @@ func load_from_file(filename:String) -> int:
 	timesig 	= data.timesig
 	difficulty	= data.difficulty
 	savednotespacing = data.savednotespacing
+
+	if data.has('bgdata'):
+		bgdata = data.bgdata
+	else:
+		bgdata = []
+	if data.has('improv_zones'):
+		improv_zones = data.improv_zones
+	else:
+		improv_zones = []
 	
 	if data.has("note_color_start"):
 		Global.settings.use_custom_colors = true
@@ -160,7 +170,8 @@ func to_dict() -> Dictionary:
 	dict["description"] = description
 	dict["notes"] = notes
 	dict["lyrics"] = lyrics
-	dict["improv_zones"] = {}
+	dict["improv_zones"] = improv_zones
+	dict["bgdata"] = bgdata
 	dict["UNK1"] = 0
 	
 	if Global.settings.use_custom_colors:
