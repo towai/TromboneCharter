@@ -64,6 +64,7 @@ func _on_toottally_request_completed(_result, response_code, _headers, body):
 		calc_contents.text += "\n\n0 warnings/s found!"
 	if error_count == 0 and warn_count == 0:
 		calc_contents.text += "\n\n[center][rainbow sat=0.6][wave]Maximum Boner Levels Achieved"
+	%Chart.assign_tt_note_ids()
 	main.show_popup(diff_calc)
 	disabled = false
 

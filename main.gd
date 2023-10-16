@@ -172,7 +172,7 @@ func _on_calc_info_meta_clicked(meta):
 	if not data:
 		OS.shell_open(str(meta))
 	else:
-		%Chart.jump_to_note(data['note'])
+		%Chart.jump_to_note(data['note'], true)
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
 func _on_diff_calc_about_to_popup():

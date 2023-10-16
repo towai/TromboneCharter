@@ -65,6 +65,8 @@ enum { # TODO figure out better names for these
 }
 
 var doot_enabled : bool = false
+# This will get assigned when uploading to TootTally
+var tt_note_id : int = 0
 
 @onready var chart = get_parent()
 
