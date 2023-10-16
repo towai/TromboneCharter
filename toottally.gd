@@ -23,7 +23,7 @@ func _on_toottally_request_completed(_result, response_code, _headers, body):
 	if response_code != HTTPClient.ResponseCode.RESPONSE_OK:
 		push_error("An error occured while submitting to TootTally: Response Code %s" % response_code)
 		%Alert.alert("Couldn't submit! Code %s" % response_code,
-				Vector2(global_position.x - 30, global_position.y - 20),
+				Vector2(global_position.x + 20, global_position.y - 20),
 				Alert.LV_ERROR, 2)
 		disabled = false
 		return
@@ -74,7 +74,6 @@ func _on_toottally_upload_pressed():
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
 	http_request.request_completed.connect(_on_toottally_request_completed)
-	# TODO: Handle trackRef better
 	var tmb_data = main.tmb.to_dict()
 	if not tmb_data.trackRef:
 		tmb_data.trackRef = "TromboneCharterProject"
@@ -88,5 +87,5 @@ func _on_toottally_upload_pressed():
 	if error != OK:
 		push_error("An error occured while submitting to TootTally: " + error)
 		%Alert.alert("Couldn't submit! " + error,
-				Vector2(global_position.x - 30, global_position.y - 20),
+				Vector2(global_position.x + 20, global_position.y - 20),
 				Alert.LV_ERROR, 2)
