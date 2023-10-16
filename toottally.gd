@@ -15,7 +15,7 @@ Aim Rating: [b]{aim}[/b]
 Acc Rating: [b]{acc}[/b]
 TT at 60% Maximum Percentage: [b]{base_tt}[/b]
 
-[font_size=25]Rating Criteria Checks[/font_size]"""
+[font_size=25]Rating Criteria Checks[/font_size] [url=\"https://toottally.com/ratingchecks/\"](?)[/url]"""
 var table_header = "[cell][b]Type[/b][/cell][cell][b]Note ID[/b][/cell][cell][b]Timing[/b][/cell][cell][b]Value[/b][/cell][cell][/cell]"
 
 
