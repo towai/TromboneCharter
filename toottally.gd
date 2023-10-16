@@ -31,7 +31,8 @@ func _on_toottally_request_completed(_result, response_code, _headers, body):
 	json.parse(body.get_string_from_utf8())
 	var data = json.get_data()
 	if data.get('error'):
-		calc_contents.text = "[center]\n\n\n[font_size=25]Failed to process chart![/fontsize]\n\n{error}".format(data)
+		calc_contents.text = "[center]\n\n\n[font_size=25]Failed to process chart![/font_size]\n\n{error}".format(data)
+		main.show_popup(diff_calc)
 		disabled = false
 		return
 	calc_contents.text = template.format(data)
