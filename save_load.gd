@@ -74,7 +74,7 @@ func validate_win_path(path:String):
 	path = drive + path
 
 
-func save_tmb_to_file(filename : String, dir : String) -> int:
+func save_tmb_to_file(filename : String) -> int:
 	print("try to save tmb to %s" % filename)
 	var f = FileAccess.open(filename,FileAccess.WRITE)
 	if f == null:
@@ -82,7 +82,7 @@ func save_tmb_to_file(filename : String, dir : String) -> int:
 		print(error_string(err))
 		return err
 	
-	var dict := tmb.to_dict(dir)
+	var dict := tmb.to_dict()
 	f.store_string(JSON.stringify(dict))
 	print("finished saving")
 	return OK

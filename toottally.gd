@@ -75,8 +75,10 @@ func _on_toottally_upload_pressed():
 	add_child(http_request)
 	http_request.request_completed.connect(_on_toottally_request_completed)
 	# TODO: Handle trackRef better
-	var path = %SaveDialog.current_path if %SaveDialog.current_path else "TromboneCharterProject"
-	var chart_data = JSON.stringify(main.tmb.to_dict(path))
+	var tmb_data = main.tmb.to_dict()
+	if not tmb_data.trackRef:
+		tmb_data.trackRef = "TromboneCharterProject"
+	var chart_data = JSON.stringify(tmb_data)
 	var dict = {"tmb": chart_data, "skip_save": true}
 	var body = JSON.stringify(dict)
 	var error = http_request.request(

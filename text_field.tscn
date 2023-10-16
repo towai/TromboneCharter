@@ -4,7 +4,7 @@
 
 [node name="TextField" type="HBoxContainer"]
 offset_right = 198.0
-offset_bottom = 36.0
+offset_bottom = 31.0
 size_flags_horizontal = 8
 script = ExtResource("1_grrmg")
 
@@ -12,6 +12,6 @@ script = ExtResource("1_grrmg")
 layout_mode = 2
 
 [node name="TextEntry" type="LineEdit" parent="."]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(160, 20)
 layout_mode = 2
 size_flags_horizontal = 0

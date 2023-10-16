@@ -365,7 +365,6 @@ text = "New Chart"
 
 [node name="ChartInfo" type="HBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -390,6 +389,12 @@ layout_mode = 2
 json_key = "author"
 field_name = "Author"
 
+[node name="TrackRef" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
+size_flags_vertical = 6
+json_key = "trackRef"
+field_name = "Track Ref"
+
 [node name="Genre" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
 layout_mode = 2
 json_key = "genre"
@@ -397,11 +402,16 @@ field_name = "Genre"
 
 [node name="Description" type="TextEdit" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(240, 70)
 layout_mode = 2
 size_flags_vertical = 3
 placeholder_text = "Description"
 wrap_mode = 1
+
+[node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
+layout_mode = 2
+text = "Upload to TootTally"
+script = ExtResource("7_h0pqp")
 
 [node name="SongInfo2" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 unique_name_in_owner = true
@@ -414,7 +424,7 @@ layout_mode = 2
 json_key = "endpoint"
 field_name = "Length (beats)"
 min_value = 2
-max_value = 9999
+max_value = 9999999
 
 [node name="Tempo" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
@@ -428,7 +438,7 @@ layout_mode = 2
 json_key = "timesig"
 field_name = "Time Signature"
 min_value = 1
-max_value = 16
+max_value = 9999999
 
 [node name="Control" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
 layout_mode = 2
@@ -455,11 +465,6 @@ max_value = 480
 
 [node name="Control2" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
 layout_mode = 2
-
-[node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
-layout_mode = 2
-text = "Upload to TootTally"
-script = ExtResource("7_h0pqp")
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 layout_mode = 2
@@ -814,7 +819,7 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/SaveChart" to="." method="_on_save_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="text_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/Description" to="." method="_on_description_text_changed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload" to="Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload" method="_on_toottally_upload_pressed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" to="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" method="_on_toottally_upload_pressed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/StartColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]

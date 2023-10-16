@@ -3,8 +3,6 @@ extends Control
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
-@onready var toottally_button : Button = $Settings/MarginC/HBoxC/ChartInfo/SongInfo2/TootTallyUpload
-@onready var diff_calc_contents : RichTextLabel = $DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -107,7 +105,7 @@ func _on_save_chart_pressed():
 func _on_save_dialog_file_selected(path:String):
 	if OS.get_name() == "Windows": saveload.validate_win_path(path)
 	
-	var err = saveload.save_tmb_to_file(path,$SaveDialog.current_dir)
+	var err = saveload.save_tmb_to_file(path)
 	if err == OK:
 		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
 				Alert.LV_SUCCESS)

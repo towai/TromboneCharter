@@ -23,6 +23,7 @@ var shortName	:= ""
 var author		:= ""
 var genre		:= ""
 var description := ""
+var trackRef    := ""
 var year		: int = 1999
 var tempo		: int = 120
 var endpoint	: int = 4
@@ -109,6 +110,7 @@ func load_from_file(filename:String) -> int:
 	author		= data.author
 	genre		= data.genre
 	description = data.description
+	trackRef    = data.trackRef
 	
 	year		= data.year
 	tempo		= data.tempo
@@ -133,7 +135,7 @@ func load_from_file(filename:String) -> int:
 	return LoadResult.SUCCESS
 
 
-func save_to_file(filename : String, dir : String) -> int:
+func save_to_file(filename : String) -> int:
 	print("try save tmb to %s" % filename)
 	var f = FileAccess.open(filename,FileAccess.WRITE)
 	if f == null:
@@ -141,12 +143,12 @@ func save_to_file(filename : String, dir : String) -> int:
 		print(error_string(err))
 		return err
 	
-	var dict := to_dict( dir.split("/")[-1] )
+	var dict := to_dict()
 	f.store_string(JSON.stringify(dict))
 	print("finished saving")
 	return OK
 
-func to_dict(dir:String) -> Dictionary:
+func to_dict() -> Dictionary:
 	var dict := {}
 	
 	for value in Global.settings.values:
@@ -159,7 +161,6 @@ func to_dict(dir:String) -> Dictionary:
 	dict["notes"] = notes
 	dict["lyrics"] = lyrics
 	dict["improv_zones"] = {}
-	dict["trackRef"] = dir.split("/")[-1]
 	dict["UNK1"] = 0
 	
 	if Global.settings.use_custom_colors:
