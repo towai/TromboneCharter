@@ -76,8 +76,21 @@ func _on_toottally_upload_pressed():
 	add_child(http_request)
 	http_request.request_completed.connect(_on_toottally_request_completed)
 	var tmb_data = main.tmb.to_dict()
-	if not tmb_data.trackRef:
-		tmb_data.trackRef = "TromboneCharterProject"
+	var errors = []
+	for key in tmb_data.keys():
+		if tmb_data[key] is String and not tmb_data[key]:
+			errors.append("Field [code]%s[/code] is missing!" % key)
+		elif tmb_data[key] is int and key not in ["UNK1", "year"] and tmb_data[key] < 1:
+			errors.append("Invaid value for [code]%s[/code]!" % key)
+		elif key == "notes" and not tmb_data[key]:
+			errors.append("There are no notes to process!")
+	if errors:
+		calc_contents.text = "[center]\n\n\n[font_size=25]Failed to process chart![/font_size]\n\n"
+		for e in errors:
+			calc_contents.text += "\n" + e
+		main.show_popup(diff_calc)
+		disabled = false
+		return
 	var chart_data = JSON.stringify(tmb_data)
 	var dict = {"tmb": chart_data, "skip_save": true}
 	var body = JSON.stringify(dict)
