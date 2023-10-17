@@ -195,7 +195,10 @@ func update_note_array():
 
 func jump_to_note(note: int, use_tt: bool = false):
 	var count = 0
-	for child in %Chart.get_children():
+	var children = %Chart.get_children()
+	if not use_tt:
+		children.sort_custom(func(a, b): return a.position.x < b.position.x)
+	for child in children:
 		if !(child is Note): continue
 		count += 1
 		if use_tt and note != child.tt_note_id:
@@ -211,7 +214,9 @@ func jump_to_note(note: int, use_tt: bool = false):
 
 func assign_tt_note_ids():
 	var count = 0
-	for child in %Chart.get_children():
+	var children = %Chart.get_children()
+	children.sort_custom(func(a, b): return a.position.x < b.position.x)
+	for child in children:
 		if !(child is Note): continue
 		count += 1
 		child.tt_note_id = count
