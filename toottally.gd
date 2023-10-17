@@ -79,7 +79,7 @@ func _on_toottally_upload_pressed():
 	var errors = []
 	for key in tmb_data.keys():
 		if tmb_data[key] is String and not tmb_data[key]:
-			errors.append("Field [code]%s[/code] is missing!" % key)
+			errors.append("Field [code]%s[/code] is empty!" % key)
 		elif tmb_data[key] is int and key not in ["UNK1", "year"] and tmb_data[key] < 1:
 			errors.append("Invaid value for [code]%s[/code]!" % key)
 		elif key == "notes" and not tmb_data[key]:
