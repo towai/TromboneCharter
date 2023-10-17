@@ -165,7 +165,7 @@ func _on_copy_confirmed():
 	emit_signal("chart_loaded")
 
 
-func _on_calc_info_meta_clicked(meta):
+func _on_rich_text_label_meta_clicked(meta):
 	var data = JSON.parse_string(meta)
 	if not data:
 		OS.shell_open(str(meta))
