@@ -10,19 +10,35 @@ signal value_changed(new_value)
 		field_name = with
 		if has_node("Label"): $Label.text = field_name
 
-var value : int:
+@export var is_float : bool:
 	set(with):
+		is_float = with
+		if !has_node("SpinBox"): return
+		if is_float:
+			# if step is 0 it rounds regardless, might be a godot bug
+			# 0.001 is seemingly as low as it'll let me go
+			$SpinBox.rounded = false
+			$SpinBox.step = 0.001
+		else:
+			$SpinBox.rounded = true
+			$SpinBox.step = 1
+			$SpinBox.value = int(value)
+
+@export var value : float:
+	set(with):
+		print(with)
 		value = clamp(with, min_value, max_value)
+		if !is_float: value = int(value)
 		if !has_node("SpinBox"): return
 		$SpinBox.value = value
 		emit_signal("value_changed",value)
 
-@export var min_value : int:
+@export var min_value : float:
 	set(with):
 		min_value = with
 		if !has_node("SpinBox"): return
 		$SpinBox.min_value = min_value
-@export var max_value : int:
+@export var max_value : float:
 	set(with):
 		max_value = with
 		if !has_node("SpinBox"): return

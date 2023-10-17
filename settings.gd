@@ -8,6 +8,7 @@ var tmb : TMBInfo:
 @onready var author 	= %SongInfo.get_node("Author")
 @onready var genre		= %SongInfo.get_node("Genre")
 @onready var desc		= %SongInfo.get_node("Description")
+@onready var track_ref  = %SongInfo.get_node("TrackRef")
 @onready var length  = %SongInfo2.get_node("Length")
 @onready var tempo	 = %SongInfo2.get_node("Tempo")
 @onready var timesig = %SongInfo2.get_node("TimeSig")
@@ -17,7 +18,7 @@ var tmb : TMBInfo:
 
 var values : Array:
 	get: return [
-		title,short_name,author,genre,desc,
+		title,short_name,author,genre,desc,track_ref,
 		length,tempo,timesig,year,diff,notespc
 	]
 
@@ -98,6 +99,7 @@ func _update_values():
 	author.value = tmb.author
 	genre.value = tmb.genre
 	desc.text = tmb.description
+	track_ref.value = tmb.trackRef
 	
 	length.value = tmb.endpoint
 	tempo.value = tmb.tempo

@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=26 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -11,7 +11,10 @@
 [ext_resource type="Script" path="res://settings.gd" id="6_2cfeh"]
 [ext_resource type="PackedScene" uid="uid://u1i3jv8qhy1e" path="res://text_field.tscn" id="6_hqpqp"]
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
+[ext_resource type="Script" path="res://toottally.gd" id="7_h0pqp"]
+[ext_resource type="FontFile" uid="uid://bednem37cigyi" path="res://fonts/SourceCodePro-Regular.ttf" id="7_jt8rs"]
 [ext_resource type="Script" path="res://pianoroll/chart_view.gd" id="8_j823s"]
+[ext_resource type="Script" path="res://ffmpeg_instructions.gd" id="8_wmpcw"]
 [ext_resource type="Script" path="res://pianoroll/chart.gd" id="9_g46yt"]
 [ext_resource type="Script" path="res://pianoroll/wave_preview.gd" id="10_8jxge"]
 [ext_resource type="Script" path="res://color_preview.gd" id="10_14v0o"]
@@ -23,6 +26,12 @@
 
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecsdr"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+border_width_left = 8
+border_width_right = 8
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
 
 [node name="Main" type="VBoxContainer"]
 anchors_preset = 15
@@ -103,49 +112,123 @@ title = "Error"
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 468)
-dialog_text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
+size = Vector2i(720, 629)
+dialog_autowrap = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Instructions"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 712.0
+offset_bottom = 583.0
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
 
 Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. With \"propagate slide changes\" enabled, hold Alt when dragging to break a note away from its neighbor. Note too short to easily grab the pitch handle? Hold Shift to bring it to the front.
 
-On saving, the chart's trackRef field is automatically populated with the directory it was saved to. Keep this in mind if using a working folder other than the one the chart is destined for. You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
+The \"Track Ref\" field should be unique to your chart; you can use the song's name, or include both the name and the artist. If someone else has charted the same song before then make sure it doesn't clash with the existing chart's [code]trackRef[/code]. It is also best practice to name your chart's folder the same as your [code]trackRef[/code].
 
-On chart load and save, Trombone Charter will try to load song.wav from the chart's folder. If song.wav is not present and you have ffmpeg, it will try to convert song.ogg into song.wav. This should only take a moment, even for long songs, but you can disable it in Edit Settings. Just be sure not to include song.wav in your release since WAVs are huge compared to Ogg files.
+You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
 
-You can pass in a .tmb by dragging it onto the executable, and it will automatically be loaded.
+On chart load and save, Trombone Charter will try to load song.wav from the chart's folder. If [code]song.wav[/code] is not present and you have FFmpeg, it will try to convert [code]song.ogg[/code] into [code]song.wav[/code]. This should only take a moment, even for long songs, but you can disable it in Edit Settings. Just be sure not to include [code]song.wav[/code] in your release since WAVs are huge compared to Ogg files.
 
-Preview timing can be wonky because it can only update at the refresh rate of your monitor. gloat all you like, 144hz bougies
+You can pass in a [code].tmb[/code] by dragging it onto the executable, and it will automatically be loaded.
+
+Preview timing can be wonky because it can only update at the refresh rate of your monitor. Gloat all you like, 144hz bougies.
 
 
-Created with Godot 4 by twi — twitter/@towaii — github/towai
-I'm in the Trombone Champ Modding Discord if you have issues or potential improvements, or you can submit them as a GitHub issue."
-dialog_autowrap = true
+Created with Godot 4 by twi — [url=\"https://twitter.com/towaii\"]twitter/@towaii[/url] — [url=\"https://github.com/towai\"]github/towai[/url]
+I'm in the [url=\"https://discord.gg/KVzKRsbetJ\"]Trombone Champ Modding Discord[/url] if you have issues or potential improvements, or you can submit them as a [url=\"https://github.com/towai/TromboneCharter\"]GitHub issue[/url]."
 
 [node name="FFmpegInstructions" type="AcceptDialog" parent="."]
 title = "Using Advanced Features with FFmpeg"
 position = Vector2i(200, 48)
-size = Vector2i(720, 468)
-dialog_text = "Install ffmpeg to take advantage of extended Trombone Charter features.
-
-Windows:
-　Type into the Command Prompt: `winget install ffmpeg`
-　Or:
-　　Download ffmpeg from the official site: https://ffmpeg.org/download.html
-　　Then, stick ffmpeg.exe either in the Trombone Charter folder,
-　　　or any folder that exists in your %PATH% variable.
-　　　You can look at your %PATH% by opening the Start menu and typing \"path\"
-　　　　to bring up the search, then selecting \"Edit system environment variables\".
-　　　There's one specific to your user account, and one for the whole system.
-　　　You can add a custom one and put anything you like in it!
-
-Mac:
-　Download the latest static build from the official site.
-	Stick it in Trombone Champ's folder, or find someone online who actually has a Mac
-　　and can show you how to add stuff to your universal path.
-
-Linux:
-　Install ffmpeg using your package manager of choice."
+size = Vector2i(720, 350)
 dialog_autowrap = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="FFmpegInstructions"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 712.0
+offset_bottom = 304.0
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "Install FFmpeg to take advantage of extended Trombone Charter features.
+
+[ul]Type into the Command Prompt: [code]winget install ffmpeg[/code][/ul]
+
+Or:
+
+[ul]Download FFmpeg from the official site: [url]https://ffmpeg.org/download.html[/url]
+Then, stick [code]ffmpeg.exe[/code] either in the Trombone Charter folder, or any folder that exists in your [code]%PATH%[/code] variable.
+[ul]You can look at your [code]%PATH%[/code] by opening the Start menu and typing [code]path[/code] to bring up the search, then selecting \\\"Edit system environment variables\\\".
+[ul]There's one specific to your user account, and one for the whole system.
+You can add a custom one and put anything you like in it![/ul][/ul][/ul]"
+script = ExtResource("8_wmpcw")
+
+[node name="DiffCalc" type="Window" parent="."]
+title = "TootTally Difficulty Calculator"
+position = Vector2i(200, 36)
+size = Vector2i(700, 600)
+visible = false
+wrap_controls = true
+transient = true
+content_scale_mode = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc"]
+offset_right = 700.0
+offset_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DiffCalc/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ecsdr")
+
+[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer/PanelContainer"]
+custom_minimum_size = Vector2(2.08165e-12, 2.08165e-12)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "[font_size=25]TMB Information[/font_size]
+
+Track Name: [b]{name}[/b]
+Note Hash: [b]{note_hash}[/b]
+File Hash: [b]{file_hash}[/b]
+Estimated Difficulty: [b]{difficulty}[/b]
+Tap Rating: [b]{tap}[/b]
+Aim Rating: [b]{aim}[/b]
+Acc Rating: [b]{acc}[/b]
+TT at 60% Maximum Percentage: [b]{base_tt}[/b]
+
+[font_size=25]Rating Criteria Checks[/font_size]
+
+[color=#DE7576]{sum_errors} error/s found![/color]
+
+[table=4]
+[cell][b]Type[/b][/cell]
+[cell][b]Note ID[/b][/cell]
+[cell][b]Timing[/b][/cell]
+[cell][b]Value[/b][/cell]
+[/table]
+
+
+
+
+
+
+a"
+
+[node name="Button" type="Button" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "OK"
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
@@ -320,6 +403,12 @@ layout_mode = 2
 json_key = "author"
 field_name = "Author"
 
+[node name="TrackRef" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
+size_flags_vertical = 6
+json_key = "trackRef"
+field_name = "Track Ref"
+
 [node name="Genre" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
 layout_mode = 2
 json_key = "genre"
@@ -327,11 +416,16 @@ field_name = "Genre"
 
 [node name="Description" type="TextEdit" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(240, 70)
 layout_mode = 2
 size_flags_vertical = 3
 placeholder_text = "Description"
 wrap_mode = 1
+
+[node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
+layout_mode = 2
+text = "Upload to TootTally"
+script = ExtResource("7_h0pqp")
 
 [node name="SongInfo2" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 unique_name_in_owner = true
@@ -343,22 +437,23 @@ theme_override_constants/v_separation = 8
 layout_mode = 2
 json_key = "endpoint"
 field_name = "Length (beats)"
-min_value = 2
-max_value = 9999
+min_value = 2.0
+max_value = 1e+07
 
 [node name="Tempo" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "tempo"
 field_name = "Tempo"
-min_value = 10
-max_value = 9999
+is_float = true
+min_value = 1.0
+max_value = 9999.0
 
 [node name="TimeSig" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "timesig"
 field_name = "Time Signature"
-min_value = 1
-max_value = 16
+min_value = 1.0
+max_value = 1e+07
 
 [node name="Control" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
 layout_mode = 2
@@ -367,21 +462,24 @@ layout_mode = 2
 layout_mode = 2
 json_key = "year"
 field_name = "Year"
-min_value = -9999
-max_value = 9999
+min_value = -9999.0
+max_value = 9999.0
 
 [node name="Diff" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "difficulty"
 field_name = "Difficulty"
-max_value = 10
+max_value = 10.0
 
 [node name="NoteSpacing" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "savednotespacing"
 field_name = "Note Spacing"
-min_value = 10
-max_value = 480
+min_value = 10.0
+max_value = 480.0
+
+[node name="Control2" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
+layout_mode = 2
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 layout_mode = 2
@@ -725,12 +823,20 @@ text = "toot toot lol"
 [connection signal="confirmed" from="CopyConfirm" to="." method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]
+[connection signal="meta_clicked" from="Instructions/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="meta_clicked" from="FFmpegInstructions/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
+[connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
+[connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
+[connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/LoadChart" to="." method="_on_load_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/SaveChart" to="." method="_on_save_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="text_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/Description" to="." method="_on_description_text_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" to="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" method="_on_toottally_upload_pressed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/StartColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]
