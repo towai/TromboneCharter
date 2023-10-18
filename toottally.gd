@@ -4,32 +4,7 @@ extends Button
 @onready var diff_calc : Window = main.get_node("DiffCalc")
 @onready var calc_contents : RichTextLabel = diff_calc.get_node("PanelContainer/VBoxContainer/PanelContainer/CalcInfo")
 
-var template = """[font_size=25]TMB Information:[/font_size]
-[font_size=20]Track Name: [b]{name}[/b][/font_size]
-
-Note Hash: [b]{note_hash}[/b]
-File Hash: [b]{file_hash}[/b]
-Estimated Difficulty: [b]{difficulty}[/b]
-Tap Rating: [b]{tap}[/b]
-Aim Rating: [b]{aim}[/b]
-Acc Rating: [b]{acc}[/b]
-TT at 60% Maximum Percentage: [b]{base_tt}[/b]
-
-[font_size=25]Rating Criteria Checks[/font_size] [url=\"https://toottally.com/ratingchecks/\"](?)[/url]"""
-var table_header = "
-[cell border=#fff padding=4,2,4,0][b]Type[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Note ID[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Timing[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Value[/b][/cell][cell][/cell]"
-
-
-func _on_toottally_request_completed(_result, response_code, _headers, body):
-	table_header = "
-[cell border=#fff padding=4,2,4,0][b]Type[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Note ID[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Timing[/b][/cell]\
-[cell border=#fff padding=4,2,4,0][b]Value[/b][/cell][cell][/cell]"
-	var info_template = """[i][font_size=24][b]{name}[/b][/font_size]\
+var info_template = """[i][font_size=24][b]{name}[/b][/font_size]\
 [font_size=18] — TootTally Info[/font_size][/i]
 [font_size=16]Note Hash: [b][url={"hash": "{note_hash}"}]\
 [hint={note_hash}\n(Click to copy)]{short_note_hash}[/hint]\
@@ -38,20 +13,29 @@ File Hash: [b][url={"hash": "{file_hash}"}]\
 [hint={file_hash}\n(Click to copy)]{short_file_hash}[/hint]\
 [/url][/b]
 [/font_size]"""
-	var diff_template = """
+var diff_template = """
 [table=3]
-[cell][font_size=26]D[font_size=20]ifficulty[/font_size]⠀[/font_size][b]%s[/b][/cell]
+[cell][hint='Difficulty rating estimated by TootTally's algorithm'][font_size=26]E[font_size=20]st. Diff.[/font_size]  [/font_size][b]%s[/b][/hint][/cell]
 [cell][/cell]
-[cell][font_size=26]B[font_size=20]ase TT[/font_size] [/font_size][b]%s[/b][/cell]
-[cell][left][font_size=16]T[/font_size]ap Rating\n[b]%s[/b][/left][/cell]
-[cell][font_size=16]A[/font_size]im Rating\n[b]%s[/b][/cell]
-[cell][right][font_size=16]A[/font_size]cc. Rating\n[b]%s[/b][/right][/cell]
+[cell][hint='TT earned at 60%% Max Percentage'][font_size=26]B[font_size=20]ase TT[/font_size]  [/font_size][b]%s[/b][/hint][/cell]
+[cell][left][font_size=18]T[/font_size]ap Rating\n[b]%s[/b][/left][/cell]
+[cell][font_size=18]A[/font_size]im Rating\n[b]%s[/b][/cell]
+[cell][right][font_size=18]A[/font_size]cc. Rating\n[b]%s[/b][/right][/cell]
 [/table]
 """
-	var rating_checks_header = """
+var rating_checks_header = """
 [font_size=25]Rating Criteria Checks[/font_size] \
 [hint="View explanation on TootTally website"]\
 [url=\"https://toottally.com/ratingchecks/\"][font_size=16](?)[/font_size][/url][/hint]"""
+
+var table_header = "
+[cell border=#fff padding=4,2,4,0][b]Type[/b][/cell]\
+[cell border=#fff padding=4,2,4,0][b]Note ID[/b][/cell]\
+[cell border=#fff padding=4,2,4,0][b]Timing[/b][/cell]\
+[cell border=#fff padding=4,2,4,0][b]Value[/b][/cell][cell][/cell]"
+
+
+func _on_toottally_request_completed(_result, response_code, _headers, body):
 	if response_code != HTTPClient.ResponseCode.RESPONSE_OK:
 		push_error("An error occured while submitting to TootTally: Response Code %s" % response_code)
 		%Alert.alert("Couldn't submit! Code %s" % response_code,

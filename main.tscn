@@ -195,34 +195,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_ecsdr")
 layout_mode = 2
 theme_override_fonts/mono_font = ExtResource("7_jt8rs")
 bbcode_enabled = true
-text = "[font_size=25]TMB Information[/font_size]
-
-Track Name: [b]{name}[/b]
-Note Hash: [b]{note_hash}[/b]
-File Hash: [b]{file_hash}[/b]
-Estimated Difficulty: [b]{difficulty}[/b]
-Tap Rating: [b]{tap}[/b]
-Aim Rating: [b]{aim}[/b]
-Acc Rating: [b]{acc}[/b]
-TT at 60% Maximum Percentage: [b]{base_tt}[/b]
-
-[font_size=25]Rating Criteria Checks[/font_size]
-
-[color=#DE7576]{sum_errors} error/s found![/color]
-
-[table=4]
-[cell][b]Type[/b][/cell]
-[cell][b]Note ID[/b][/cell]
-[cell][b]Timing[/b][/cell]
-[cell][b]Value[/b][/cell]
-[/table]
-
-
-
-
-
-
-a"
+text = "What is Up my Dude"
+tab_size = 2
 
 [node name="Button" type="Button" parent="DiffCalc/PanelContainer/VBoxContainer"]
 layout_mode = 2
