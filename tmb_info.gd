@@ -124,7 +124,7 @@ func load_from_file(filename:String) -> int:
 		bgdata = data.bgdata
 	else:
 		bgdata = []
-	if data.has('improv_zones'):
+	if data.has('improv_zones') && data['improv_zones'] is Array:
 		improv_zones = data.improv_zones
 	else:
 		improv_zones = []
