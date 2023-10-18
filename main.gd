@@ -169,8 +169,10 @@ func _on_rich_text_label_meta_clicked(meta):
 	var data = JSON.parse_string(meta)
 	if not data:
 		OS.shell_open(str(meta))
-	else:
-		%Chart.jump_to_note(data['note'], true)
+	elif data.has('note'): %Chart.jump_to_note(data['note'], true)
+	# DisplayServer is a bit of a weird place to have this but it's the window management ig
+	elif data.has('hash'): DisplayServer.clipboard_set(data['hash'])
+	else: print("meta clicked and idk what to do, here's the data: %s" % data)
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
 func _on_diff_calc_about_to_popup():

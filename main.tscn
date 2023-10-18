@@ -192,9 +192,7 @@ size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_ecsdr")
 
 [node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer/PanelContainer"]
-custom_minimum_size = Vector2(2.08165e-12, 2.08165e-12)
 layout_mode = 2
-size_flags_vertical = 3
 theme_override_fonts/mono_font = ExtResource("7_jt8rs")
 bbcode_enabled = true
 text = "[font_size=25]TMB Information[/font_size]
