@@ -1,4 +1,4 @@
-name: Build Godot Project
+name: Build for Debug
 
 on:
   push:
