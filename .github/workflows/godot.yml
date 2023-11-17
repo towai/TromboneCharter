@@ -29,8 +29,13 @@ jobs:
           preset: ${{ matrix.platform }}
           subdirectory: github
           debugMode: "true"
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+            calculatedSha=$(git rev-parse --short ${{ github.sha }})
+            echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: TromboneCharter.${{ matrix.platform }}
+          name: TromboneCharter-${{ matrix.platform }}-${{ env.COMMIT_SHORT_SHA }}
           path: ${{ github.workspace }}/${{ steps.build.outputs.build }}
