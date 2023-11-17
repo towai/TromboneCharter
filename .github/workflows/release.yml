@@ -1,8 +1,9 @@
 name: Build for Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "*"
 
 jobs:
   Godot:
@@ -35,4 +36,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           file: ${{ github.workspace }}/${{ steps.build.outputs.build }}
-          update_latest_release: true
+          tags: true
