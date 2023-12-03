@@ -88,7 +88,7 @@ func _on_save_chart_pressed():
 func _on_save_dialog_file_selected(path:String) -> void:
 	if OS.get_name() == "Windows": saveload.validate_win_path(path)
 	
-	var err = saveload.save_tmb_to_file(path,$SaveDialog.current_dir)
+	var err = saveload.save_tmb_to_file(path)
 	if err == OK:
 		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
 				Alert.LV_SUCCESS)
@@ -193,3 +193,26 @@ func _on_copy_confirmed():
 		tmb.notes.append(note)
 	tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	emit_signal("chart_loaded")
+
+
+func _on_rich_text_label_meta_clicked(meta):
+	var data = JSON.parse_string(meta)
+	if not data:
+		OS.shell_open(str(meta))
+	elif data.has('note'): %Chart.jump_to_note(data['note'], true)
+	# DisplayServer is a bit of a weird place to have this but it's the window management ig
+	elif data.has('hash'): DisplayServer.clipboard_set(data['hash'])
+	else: print("meta clicked and idk what to do, here's the data: %s" % data)
+
+# For some reason I have to manually handle resizing the window contents to fit the window size.
+func _on_diff_calc_about_to_popup():
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_size_changed():
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_close_requested():
+	$DiffCalc.visible = false
+
+func _on_diff_ok_button_pressed():
+	$DiffCalc.visible = false
