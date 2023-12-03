@@ -58,40 +58,23 @@ func show_popup(window:Window):
 	window.show()
 
 
-func try_to_load_wav(path:String) -> int:
-	print("Try load wav from %s" % path)
-	var f = FileAccess.open(path,FileAccess.READ)
-	if f == null:
-		var err = FileAccess.get_open_error()
-		return err
-	
-	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
-	if stream == null :
-		print("stream null?")
-		return ERR_FILE_CANT_READ
-	elif stream.data == null || stream.data.is_empty():
-		print("no data?")
-		return ERR_FILE_CANT_READ
-	
-	%WavPlayer.stream = stream
-	return OK
-
-
 func _on_new_chart_pressed(): show_popup($NewChartConfirm)
 func _on_new_chart_confirmed():
 	tmb = TMBInfo.new()
 	%Settings.use_custom_colors = false
-	%WavPlayer.stream = null
+	%TrackPlayer.stream = null
 	print("new tmb")
 	emit_signal("chart_loaded")
 
 
 func _on_load_chart_pressed(): show_popup($LoadDialog)
-func _on_load_dialog_file_selected(path:String):
+func _on_load_dialog_file_selected(path:String) -> void:
 	var dir = saveload.on_load_dialog_file_selected(path)
-	%WavPlayer.stream = null
+	%TrackPlayer.stream = null
 	emit_signal("chart_loaded")
-	if settings.load_wav_on_chart_load: saveload.load_wav_or_convert_ogg(dir)
+	if settings.load_stream_upon_chart_io:
+		var err = try_to_load_stream(dir)
+		if err: print("No stream loaded -- %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 
@@ -102,7 +85,7 @@ func _on_save_chart_pressed():
 	else: show_popup($SaveDialog)
 
 
-func _on_save_dialog_file_selected(path:String):
+func _on_save_dialog_file_selected(path:String) -> void:
 	if OS.get_name() == "Windows": saveload.validate_win_path(path)
 	
 	var err = saveload.save_tmb_to_file(path,$SaveDialog.current_dir)
@@ -119,10 +102,57 @@ func _on_save_dialog_file_selected(path:String):
 	cfg.set_value("Config", "saved_dir", dir)
 	try_cfg_save()
 	
-	if !%Settings.load_wav_on_chart_load: return
-	err = try_to_load_wav(dir + "/song.wav")
-	if err != OK:
-		print("No wav loaded -- %s" % error_string(err))
+	if !%Settings.load_stream_upon_chart_io: return
+	else:
+		err = try_to_load_stream(dir)
+		if err: print("No stream loaded -- %s" % error_string(err))
+
+#region AudioLoading
+# TODO should we perhaps give the TrackPlayer a script and give it these?
+func try_to_load_ogg(path:String) -> int:
+	print("Try load ogg from %s" % path)
+	var f = FileAccess.open(path,FileAccess.READ)
+	if f == null: return FileAccess.get_open_error()
+	
+	var stream := AudioStreamOggVorbis.load_from_file(path)
+	if stream == null || stream.packet_sequence.packet_data.is_empty():
+		print("Ogg load: stream null/no data?")
+		return ERR_FILE_CANT_READ
+	
+	%TrackPlayer.stream = stream
+	return OK
+
+# TODO deprecate entirely in favor of Ogg runtime loading (godot/commit/e391eae)
+func try_to_load_wav(path:String) -> int:
+	print("Try load wav from %s" % path)
+	var f = FileAccess.open(path,FileAccess.READ)
+	if f == null:
+		var err = FileAccess.get_open_error()
+		return err
+	
+	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
+	if stream == null :
+		print("stream null?")
+		return ERR_FILE_CANT_READ
+	elif stream.data == null || stream.data.is_empty():
+		print("no data?")
+		return ERR_FILE_CANT_READ
+	
+	%TrackPlayer.stream = stream
+	return OK
+
+
+func try_to_load_stream(dir) -> int:
+	var err : int
+	if Global.version == "4.2":
+		err = try_to_load_ogg(dir + "/song.ogg")
+		if err:
+			print("%s -- maybe there's only a .wav"
+					% error_string(err))
+			err = saveload.load_wav_or_convert_ogg(dir)
+	else: err = saveload.load_wav_or_convert_ogg(dir)
+	return err
+#endregion
 
 
 func try_cfg_save():

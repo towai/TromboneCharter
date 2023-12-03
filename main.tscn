@@ -51,7 +51,7 @@ max_polyphony = 16
 unique_name_in_owner = true
 stream = ExtResource("4_wfwxx")
 
-[node name="WavPlayer" type="AudioStreamPlayer" parent="."]
+[node name="TrackPlayer" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
 volume_db = -5.0
 

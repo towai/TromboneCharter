@@ -5,7 +5,7 @@ extends Node
 @onready var settings : Settings = %Settings
 @onready var player : AudioStreamPlayer = %TrombPlayer
 @onready var metronome : AudioStreamPlayer = %MetronomePlayer
-@onready var wavplayer : AudioStreamPlayer = %WavPlayer
+@onready var StreamPlayer : AudioStreamPlayer = %TrackPlayer
 var is_playing : bool = false
 var song_position : float = -1.0
 var tmb : TMBInfo
@@ -39,7 +39,7 @@ func _do_preview():
 		return arr
 	var note_ons : Array[float] = get_note_ons.call()
 	
-	wavplayer.play(startpoint_in_stream)
+	StreamPlayer.play(startpoint_in_stream)
 	while is_playing:
 		time = Time.get_ticks_msec() / 1000.0
 		var elapsed_time = time - initial_time
@@ -80,7 +80,7 @@ func _do_preview():
 		await(get_tree().process_frame)
 	is_playing = false
 	
-	wavplayer.stop()
+	StreamPlayer.stop()
 	player.stop()
 	
 	song_position = -1.0

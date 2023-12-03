@@ -30,7 +30,7 @@ var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
 var propagate_changes : bool:
 	get: return %PropagateChanges.button_pressed
-var load_wav_on_chart_load: bool:
+var load_stream_upon_chart_io: bool:
 	get: return %TryAutoloadWAV.button_pressed
 var convert_ogg: bool:
 	get: return %ConvertOgg.button_pressed
@@ -199,7 +199,7 @@ func section_handle_dragged(value:float,which:Node):
 
 func _on_volume_changed(value:float):
 	%VolSlider.tooltip_text = str(value)
-	%WavPlayer.volume_db = value
+	%TrackPlayer.volume_db = value
 
 
 func _on_timing_snap_value_changed(value):
