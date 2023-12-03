@@ -67,7 +67,8 @@ func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
 	
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	
-	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,idx)
+	#var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,idx)
+	var err = ffmpeg_worker.draw_spectrumchunk(start,end,dir,build_hires_wave,idx)
 	if err:
 		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
 		return false

@@ -50,3 +50,18 @@ func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,idx:int=0):
 	var err = OS.execute("ffmpeg",command,out)
 	print(out[0])
 	return err
+
+func draw_spectrumchunk(start:float,end:float,dir:String,hi_res:bool,idx:int=0):
+	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
+	var chunkwidth := int((end - start) * 100) * (2 if hi_res else 1)
+	var command : PackedStringArray = [ "-ss", '%.3f' % start, "-to", '%.3f' % end,
+					"-i", '%s' % (dir + '/song.ogg'),
+					'-lavfi',
+					'showspectrumpic=s=%dx512:legend=false' % chunkwidth,
+					wavechunkpath
+				]
+	var out := []
+	
+	var err = OS.execute("ffmpeg",command,out)
+	print(out[0])
+	return err
