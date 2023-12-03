@@ -27,8 +27,8 @@ func on_load_dialog_file_selected(path:String):
 	main.try_cfg_save()
 	return dir
 
-
-func load_wav_or_convert_ogg(dir:String):
+# TODO remove this whole thing once properly deprecated
+func load_wav_or_convert_ogg(dir:String) -> int:
 	var err = main.try_to_load_wav(dir + "/song.wav")
 	if err:
 		print("No wav loaded -- %s" % error_string(err))
@@ -38,19 +38,22 @@ func load_wav_or_convert_ogg(dir:String):
 			err = DirAccess.get_open_error()
 			if err:
 				print("DirAccess error : %s" % error_string(err))
-				return
-			if !FileAccess.file_exists(dir + "/song.ogg"):
+				return err
+			var oggpath := dir + "/song.ogg"
+			if !FileAccess.file_exists(oggpath):
 				print("song.ogg not present in the tmb's folder")
-				return
-			err = Global.ffmpeg_worker.try_to_convert_ogg(dir + "/song.ogg")
+				return ERR_FILE_NOT_FOUND
+			err = Global.ffmpeg_worker.try_to_convert_ogg(oggpath)
 			if !err:
 				var wav_err = main.try_to_load_wav(dir + "/song.wav")
 				if wav_err: print("ffmpeg success but couldn't load resulting wav?")
 			else: # redundant to print explanation, label tells us if ffmpeg's missing
 				print("conversion failed: " + error_string(err))
+				return err
 	
-	%WAVLoadedLabel.text = "song.wav loaded!" if %WavPlayer.stream != null \
+	%WAVLoadedLabel.text = "song.wav loaded!" if %TrackPlayer.stream != null \
 			else "no ffmpeg!" if err == -1 else "no song.wav loaded!"
+	return err
 
 
 func validate_win_path(path:String):
@@ -74,7 +77,7 @@ func validate_win_path(path:String):
 	path = drive + path
 
 
-func save_tmb_to_file(filename : String, dir : String) -> int:
+func save_tmb_to_file(filename : String) -> int:
 	print("try to save tmb to %s" % filename)
 	var f = FileAccess.open(filename,FileAccess.WRITE)
 	if f == null:
@@ -82,7 +85,7 @@ func save_tmb_to_file(filename : String, dir : String) -> int:
 		print(error_string(err))
 		return err
 	
-	var dict := tmb.to_dict(dir)
+	var dict := tmb.to_dict()
 	f.store_string(JSON.stringify(dict))
 	print("finished saving")
 	return OK

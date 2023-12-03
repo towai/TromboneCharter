@@ -11,8 +11,8 @@ var ffmpeg_worker : FFmpegWorker:
 var rects : Array[TextureRect] = []
 var song_length : float:
 	get:
-		if !%WavPlayer.stream: return 0.0
-		return %WavPlayer.stream.get_length()
+		if !%TrackPlayer.stream: return 0.0
+		return %TrackPlayer.stream.get_length()
 var stream_length_in_beats : float:
 	get: return Global.time_to_beat(song_length)
 	set(_v): assert(false)
@@ -86,7 +86,7 @@ func calculate_width():
 	# natural size, before scaling, aka song length in ms (*2 if hi-res wave)
 	var width := get_size().x
 	if width == 0: # no preview exists
-		scale.x == 1.0
+		scale.x = 1.0
 		return
 	
 	var true_width : float = (song_length * chart.bar_spacing) / (60.0 / bpm)

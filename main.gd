@@ -58,6 +58,71 @@ func show_popup(window:Window):
 	window.show()
 
 
+func _on_new_chart_pressed(): show_popup($NewChartConfirm)
+func _on_new_chart_confirmed():
+	tmb = TMBInfo.new()
+	%Settings.use_custom_colors = false
+	%TrackPlayer.stream = null
+	print("new tmb")
+	emit_signal("chart_loaded")
+
+
+func _on_load_chart_pressed(): show_popup($LoadDialog)
+func _on_load_dialog_file_selected(path:String) -> void:
+	var dir = saveload.on_load_dialog_file_selected(path)
+	%TrackPlayer.stream = null
+	emit_signal("chart_loaded")
+	if settings.load_stream_upon_chart_io:
+		var err = try_to_load_stream(dir)
+		if err: print("No stream loaded -- %s" % error_string(err))
+	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
+
+
+func _on_save_chart_pressed():
+	tmb.lyrics = %LyricsEditor.package_lyrics()
+	if Input.is_key_pressed(KEY_SHIFT):
+		_on_save_dialog_file_selected($SaveDialog.current_path)
+	else: show_popup($SaveDialog)
+
+
+func _on_save_dialog_file_selected(path:String) -> void:
+	if OS.get_name() == "Windows": saveload.validate_win_path(path)
+	
+	var err = saveload.save_tmb_to_file(path)
+	if err == OK:
+		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
+				Alert.LV_SUCCESS)
+	else: 
+		$Alert.alert("couldn't save to %s! %s" % [path, error_string(err)],
+				Vector2(72, %NewChart.global_position.y + 20),
+				Alert.LV_ERROR, 2)
+		return
+	
+	var dir = path.substr(0,path.rfind("/"))
+	cfg.set_value("Config", "saved_dir", dir)
+	try_cfg_save()
+	
+	if !%Settings.load_stream_upon_chart_io: return
+	else:
+		err = try_to_load_stream(dir)
+		if err: print("No stream loaded -- %s" % error_string(err))
+
+#region AudioLoading
+# TODO should we perhaps give the TrackPlayer a script and give it these?
+func try_to_load_ogg(path:String) -> int:
+	print("Try load ogg from %s" % path)
+	var f = FileAccess.open(path,FileAccess.READ)
+	if f == null: return FileAccess.get_open_error()
+	
+	var stream := AudioStreamOggVorbis.load_from_file(path)
+	if stream == null || stream.packet_sequence.packet_data.is_empty():
+		print("Ogg load: stream null/no data?")
+		return ERR_FILE_CANT_READ
+	
+	%TrackPlayer.stream = stream
+	return OK
+
+# TODO deprecate entirely in favor of Ogg runtime loading (godot/commit/e391eae)
 func try_to_load_wav(path:String) -> int:
 	print("Try load wav from %s" % path)
 	var f = FileAccess.open(path,FileAccess.READ)
@@ -73,56 +138,21 @@ func try_to_load_wav(path:String) -> int:
 		print("no data?")
 		return ERR_FILE_CANT_READ
 	
-	%WavPlayer.stream = stream
+	%TrackPlayer.stream = stream
 	return OK
 
 
-func _on_new_chart_pressed(): show_popup($NewChartConfirm)
-func _on_new_chart_confirmed():
-	tmb = TMBInfo.new()
-	%Settings.use_custom_colors = false
-	%WavPlayer.stream = null
-	print("new tmb")
-	emit_signal("chart_loaded")
-
-
-func _on_load_chart_pressed(): show_popup($LoadDialog)
-func _on_load_dialog_file_selected(path:String):
-	var dir = saveload.on_load_dialog_file_selected(path)
-	%WavPlayer.stream = null
-	emit_signal("chart_loaded")
-	if settings.load_wav_on_chart_load: saveload.load_wav_or_convert_ogg(dir)
-	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
-
-
-func _on_save_chart_pressed():
-	tmb.lyrics = %LyricsEditor.package_lyrics()
-	if Input.is_key_pressed(KEY_SHIFT):
-		_on_save_dialog_file_selected($SaveDialog.current_path)
-	else: show_popup($SaveDialog)
-
-
-func _on_save_dialog_file_selected(path:String):
-	if OS.get_name() == "Windows": saveload.validate_win_path(path)
-	
-	var err = saveload.save_tmb_to_file(path,$SaveDialog.current_dir)
-	if err == OK:
-		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
-				Alert.LV_SUCCESS)
-	else: 
-		$Alert.alert("couldn't save to %s! %s" % [path, error_string(err)],
-				Vector2(72, %NewChart.global_position.y + 20),
-				Alert.LV_ERROR, 2)
-		return
-	
-	var dir = path.substr(0,path.rfind("/"))
-	cfg.set_value("Config", "saved_dir", dir)
-	try_cfg_save()
-	
-	if !%Settings.load_wav_on_chart_load: return
-	err = try_to_load_wav(dir + "/song.wav")
-	if err != OK:
-		print("No wav loaded -- %s" % error_string(err))
+func try_to_load_stream(dir) -> int:
+	var err : int
+	if Global.version == "4.2":
+		err = try_to_load_ogg(dir + "/song.ogg")
+		if err:
+			print("%s -- maybe there's only a .wav"
+					% error_string(err))
+			err = saveload.load_wav_or_convert_ogg(dir)
+	else: err = saveload.load_wav_or_convert_ogg(dir)
+	return err
+#endregion
 
 
 func try_cfg_save():
@@ -163,3 +193,26 @@ func _on_copy_confirmed():
 		tmb.notes.append(note)
 	tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	emit_signal("chart_loaded")
+
+
+func _on_rich_text_label_meta_clicked(meta):
+	var data = JSON.parse_string(meta)
+	if not data:
+		OS.shell_open(str(meta))
+	elif data.has('note'): %Chart.jump_to_note(data['note'], true)
+	# DisplayServer is a bit of a weird place to have this but it's the window management ig
+	elif data.has('hash'): DisplayServer.clipboard_set(data['hash'])
+	else: print("meta clicked and idk what to do, here's the data: %s" % data)
+
+# For some reason I have to manually handle resizing the window contents to fit the window size.
+func _on_diff_calc_about_to_popup():
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_size_changed():
+	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
+
+func _on_diff_calc_win_close_requested():
+	$DiffCalc.visible = false
+
+func _on_diff_ok_button_pressed():
+	$DiffCalc.visible = false

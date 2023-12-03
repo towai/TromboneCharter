@@ -8,6 +8,7 @@ var tmb : TMBInfo:
 @onready var author 	= %SongInfo.get_node("Author")
 @onready var genre		= %SongInfo.get_node("Genre")
 @onready var desc		= %SongInfo.get_node("Description")
+@onready var track_ref  = %SongInfo.get_node("TrackRef")
 @onready var length  = %SongInfo2.get_node("Length")
 @onready var tempo	 = %SongInfo2.get_node("Tempo")
 @onready var timesig = %SongInfo2.get_node("TimeSig")
@@ -17,7 +18,7 @@ var tmb : TMBInfo:
 
 var values : Array:
 	get: return [
-		title,short_name,author,genre,desc,
+		title,short_name,author,genre,desc,track_ref,
 		length,tempo,timesig,year,diff,notespc
 	]
 
@@ -30,7 +31,7 @@ var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
 var propagate_changes : bool:
 	get: return %PropagateChanges.button_pressed
-var load_wav_on_chart_load: bool:
+var load_stream_upon_chart_io: bool:
 	get: return %TryAutoloadWAV.button_pressed
 var convert_ogg: bool:
 	get: return %ConvertOgg.button_pressed
@@ -98,6 +99,7 @@ func _update_values():
 	author.value = tmb.author
 	genre.value = tmb.genre
 	desc.text = tmb.description
+	track_ref.value = tmb.trackRef
 	
 	length.value = tmb.endpoint
 	tempo.value = tmb.tempo
@@ -199,7 +201,7 @@ func section_handle_dragged(value:float,which:Node):
 
 func _on_volume_changed(value:float):
 	%VolSlider.tooltip_text = str(value)
-	%WavPlayer.volume_db = value
+	%TrackPlayer.volume_db = value
 
 
 func _on_timing_snap_value_changed(value):

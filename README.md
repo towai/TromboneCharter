@@ -28,7 +28,6 @@
 	* Hitting Escape will end the preview early.
  * You can hold Shift when saving to bypass the Save As dialog.
 	* Shift also bypasses the confirmation popup on section copy.
- * `trackRef` will automatically be populated with the name of the folder the chart is saved to.
  * `note_color_start` and `note_color_end` will be populated iff "Use custom note colors" is checked.
 
 ### Contributing

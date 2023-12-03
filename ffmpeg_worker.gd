@@ -1,7 +1,7 @@
 class_name FFmpegWorker
 extends Object
 
-var owner : Node
+var owner : Node # TODO i think this field is completely pointless, verify
 var ffmpeg_exists := false
 #signal ffmpeg_checked(what:bool)
 
@@ -19,7 +19,7 @@ static func does_ffmpeg_exist() -> bool:
 	print(output[0].split("\r\n")[0].substr(0,21))
 	return true
 
-
+# TODO deprecate in favor of runtime Ogg loading
 static func try_to_convert_ogg(path:String) -> int:
 	var dir = path.substr(0,path.rfind("/"))
 	if dir == path: dir = path.substr(0,path.rfind("\\"))
