@@ -245,17 +245,6 @@ layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("9_g46yt")
 
-[node name="WavePreview" type="HBoxContainer" parent="PianoRoll/ChartView/Chart"]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0.752941)
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-grow_vertical = 2
-theme_override_constants/separation = 0
-script = ExtResource("10_8jxge")
-
 [node name="SectStartHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 layout_mode = 1
@@ -306,6 +295,17 @@ offset_right = 6.0
 grow_vertical = 2
 mouse_default_cursor_shape = 2
 script = ExtResource("10_fs4d4")
+
+[node name="WavePreview" type="HBoxContainer" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.752941)
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("10_8jxge")
 
 [node name="Settings" type="PanelContainer" parent="."]
 unique_name_in_owner = true
