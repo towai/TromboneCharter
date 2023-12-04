@@ -13,7 +13,7 @@ var popup_location : Vector2i:
 
 
 func _ready():
-	DisplayServer.window_set_min_size(Vector2(1256,540))
+	DisplayServer.window_set_min_size(Vector2(1256,600))
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
