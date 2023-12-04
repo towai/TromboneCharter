@@ -36,12 +36,12 @@ static func try_to_convert_ogg(path:String) -> int:
 	return err
 
 
-func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,spectogram:bool=false,idx:int=0):
+func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,type:int=0,idx:int=0):
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	var chunkwidth := int((end - start) * 100) * (2 if hi_res else 1)
 	var command : PackedStringArray = [ "-hide_banner", "-ss", "%.3f" % start, "-to", "%.3f" % end,
 										"-y", "-i", "%s" % (dir + "/song.ogg"),"-lavfi"]
-	if spectogram:
+	if type == 1:
 		command += PackedStringArray(["showspectrumpic=s=%dx442:legend=false" % chunkwidth,wavechunkpath])
 	else:
 		command += PackedStringArray(["showwavespic=s=%dx442:colors=ff8000|0080ff" % chunkwidth,wavechunkpath])

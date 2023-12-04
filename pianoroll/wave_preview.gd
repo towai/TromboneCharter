@@ -43,7 +43,7 @@ func build_wave_preview():
 	
 	for i in rects.size(): rects[i].texture = null
 	for i in rects.size():
-		var result = do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
+		var result = do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i,%PreviewType.selected)
 		if !result:
 			print("Done in %d steps" % i)
 			break
@@ -52,7 +52,7 @@ func build_wave_preview():
 	calculate_width()
 
 
-func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
+func do_ffmpeg_convert(dir:String,idx:int=0,type:int=0) -> bool:
 	print("building waveform...%d" % idx)
 	
 	var start := idx * 163.84
@@ -67,7 +67,7 @@ func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
 	
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	
-	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,true,idx)
+	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,type,idx)
 	if err:
 		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
 		return false

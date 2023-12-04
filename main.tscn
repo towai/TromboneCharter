@@ -579,11 +579,8 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
-[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
-layout_mode = 2
-text = "On chart load:"
-
 [node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+visible = false
 layout_mode = 2
 
 [node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
@@ -592,15 +589,9 @@ layout_mode = 2
 button_pressed = true
 text = "Try to load song.wav"
 
-[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 10
-tooltip_text = "How do I use these features?"
-text = "  ?  "
-
 [node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
@@ -617,7 +608,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
 button_pressed = true
-text = "Build waveform preview"
+text = "Build audio preview"
 alignment = 2
 
 [node name="HiResWave" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
@@ -627,6 +618,27 @@ size_flags_horizontal = 6
 tooltip_text = "This might take a while!"
 text = "Hi-Res"
 alignment = 2
+
+[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+tooltip_text = "How do I use these features?"
+text = "  ?  "
+
+[node name="PreviewLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+text = "Audio preview type:"
+
+[node name="PreviewType" type="OptionButton" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Waveform"
+popup/item_0/id = 0
+popup/item_1/text = "Spectogram"
+popup/item_1/id = 1
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -821,7 +833,7 @@ text = "toot toot lol"
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox2/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
