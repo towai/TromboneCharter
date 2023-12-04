@@ -608,7 +608,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
 button_pressed = true
-text = "Build audio preview"
+text = "Show audio preview"
 alignment = 2
 
 [node name="HiResWave" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
@@ -639,6 +639,13 @@ popup/item_0/text = "Waveform"
 popup/item_0/id = 0
 popup/item_1/text = "Spectogram"
 popup/item_1/id = 1
+
+[node name="PreviewGenLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Generating audio preview..."
+horizontal_alignment = 1
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -834,6 +841,7 @@ text = "toot toot lol"
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
+[connection signal="item_selected" from="Settings/MarginC/HBoxC/EditSettings/PreviewType" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_preview_type_item_selected"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]

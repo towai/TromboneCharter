@@ -69,6 +69,7 @@ func _on_new_chart_confirmed():
 
 func _on_load_chart_pressed(): show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path:String) -> void:
+	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
 	emit_signal("chart_loaded")
