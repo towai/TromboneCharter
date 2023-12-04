@@ -26,16 +26,14 @@ var build_hires_wave : bool:
 var wave_is_hires := false
 
 
-func _ready():
-	# max song length = 16 * 163.84s = 43m40s
-	# in reality, this is for 21m50s max at high resolution (1/200s per h-pixel)
-	for i in 16:
-		var rect = TextureRect.new()
-		add_child(rect)
-		rects.append(rect)
+func calc_rects_amount() -> int:
+	var divided_by = 81.92 if build_hires_wave else 163.84
+	var amount = ceil(song_length / divided_by) + 1
+	return amount
 
 func clear_wave_preview():
-	for i in rects.size(): rects[i].texture = null
+	for i in rects.size(): rects[i].free()
+	rects = []
 
 func build_wave_preview():
 	if !Global.ffmpeg_worker.ffmpeg_exists:
@@ -52,16 +50,22 @@ func build_wave_preview():
 
 	var textures : Array = []
 
-	for i in rects.size():
+	for i in calc_rects_amount():
 		var result =  await do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i,%PreviewType.selected)
 		if !result:
 			print("Done in %d steps" % i)
 			break
 		else:
 			textures.append(result)
-	
+		
+	if rects:
+		clear_wave_preview()
+
 	for i in textures.size():
-		rects[i].texture = ImageTexture.create_from_image(textures[i])
+		var rect = TextureRect.new()
+		add_child(rect)
+		rects.append(rect)
+		rect.texture = ImageTexture.create_from_image(textures[i])
 	
 	%BuildWaveform.disabled = false
 	%HiResWave.disabled = false
