@@ -24,22 +24,6 @@ func does_ffmpeg_exist() -> bool:
 	print(output[0].split("\r\n")[0].substr(0,21))
 	return true
 
-# TODO deprecate in favor of runtime Ogg loading
-func try_to_convert_ogg(path:String) -> int:
-	var dir = path.substr(0,path.rfind("/"))
-	if dir == path: dir = path.substr(0,path.rfind("\\"))
-	var args = PackedStringArray([
-			"-i",
-			'%s' % path,
-			'%s' % (dir + "/song.wav")
-			])
-	
-	var output = []
-	var err = OS.execute(ffmpeg_path,args,output,true,true)
-	print(output[0].c_unescape())
-	print(output.size())
-	return err
-
 
 func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,type:int=0,idx:int=0):
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]

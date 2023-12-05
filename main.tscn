@@ -112,14 +112,14 @@ title = "Error"
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 629)
+size = Vector2i(720, 600)
 dialog_autowrap = true
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Instructions"]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 712.0
-offset_bottom = 583.0
+offset_bottom = 554.0
 theme_override_fonts/mono_font = ExtResource("7_jt8rs")
 bbcode_enabled = true
 text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
@@ -130,7 +130,7 @@ The \"Track Ref\" field should be unique to your chart; you can use the song's n
 
 You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
 
-On chart load and save, Trombone Charter will try to load song.wav from the chart's folder. If [code]song.wav[/code] is not present and you have FFmpeg, it will try to convert [code]song.ogg[/code] into [code]song.wav[/code]. This should only take a moment, even for long songs, but you can disable it in Edit Settings. Just be sure not to include [code]song.wav[/code] in your release since WAVs are huge compared to Ogg files.
+On chart load and save, Trombone Charter will try to load song.ogg from the chart's folder. If [code]song.ogg[/code] is not present then no backing track will play.
 
 You can pass in a [code].tmb[/code] by dragging it onto the executable, and it will automatically be loaded.
 
@@ -579,26 +579,6 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
-[node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
-visible = false
-layout_mode = 2
-
-[node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
-unique_name_in_owner = true
-layout_mode = 2
-button_pressed = true
-text = "Try to load song.wav"
-
-[node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 0
-tooltip_text = "Requires ffmpeg."
-button_pressed = true
-text = "Convert song.ogg if song.wav missing"
-alignment = 2
-
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
@@ -669,15 +649,6 @@ ticks_on_borders = true
 [node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
 layout_mode = 2
 icon = ExtResource("14_8wa4s")
-
-[node name="WAVLoadedLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_vertical = 8
-text = "no song.wav loaded!"
-horizontal_alignment = 1
-vertical_alignment = 2
 
 [node name="RefreshButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
 visible = false

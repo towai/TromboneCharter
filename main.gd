@@ -77,9 +77,8 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
 	emit_signal("chart_loaded")
-	if settings.load_stream_upon_chart_io:
-		var err = try_to_load_stream(dir)
-		if err: print("No stream loaded -- %s" % error_string(err))
+	var err = try_to_load_stream(dir)
+	if err: print("No stream loaded -- %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 
@@ -107,10 +106,8 @@ func _on_save_dialog_file_selected(path:String) -> void:
 	cfg.set_value("Config", "saved_dir", dir)
 	try_cfg_save()
 	
-	if !%Settings.load_stream_upon_chart_io: return
-	else:
-		err = try_to_load_stream(dir)
-		if err: print("No stream loaded -- %s" % error_string(err))
+	err = try_to_load_stream(dir)
+	if err: print("No stream loaded -- %s" % error_string(err))
 
 #region AudioLoading
 # TODO should we perhaps give the TrackPlayer a script and give it these?
@@ -127,35 +124,14 @@ func try_to_load_ogg(path:String) -> int:
 	%TrackPlayer.stream = stream
 	return OK
 
-# TODO deprecate entirely in favor of Ogg runtime loading (godot/commit/e391eae)
-func try_to_load_wav(path:String) -> int:
-	print("Try load wav from %s" % path)
-	var f = FileAccess.open(path,FileAccess.READ)
-	if f == null:
-		var err = FileAccess.get_open_error()
-		return err
-	
-	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
-	if stream == null :
-		print("stream null?")
-		return ERR_FILE_CANT_READ
-	elif stream.data == null || stream.data.is_empty():
-		print("no data?")
-		return ERR_FILE_CANT_READ
-	
-	%TrackPlayer.stream = stream
-	return OK
-
 
 func try_to_load_stream(dir) -> int:
 	var err : int
 	if Global.version == "4.2":
 		err = try_to_load_ogg(dir + "/song.ogg")
 		if err:
-			print("%s -- maybe there's only a .wav"
+			print("Failed to load song.ogg: %s"
 					% error_string(err))
-			err = saveload.load_wav_or_convert_ogg(dir)
-	else: err = saveload.load_wav_or_convert_ogg(dir)
 	return err
 #endregion
 
