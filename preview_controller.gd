@@ -21,7 +21,8 @@ func _do_preview():
 	else: tmb = chart.tmb
 	if is_playing:
 		is_playing = false
-		await(get_tree().process_frame) # wait for the existing preview to kill itself
+		%PreviewButton.text = "Preview"
+		return
 	is_playing = true
 	
 	var bpm : float = tmb.tempo
@@ -40,6 +41,7 @@ func _do_preview():
 	var note_ons : Array[float] = get_note_ons.call()
 	
 	StreamPlayer.play(startpoint_in_stream)
+	%PreviewButton.text = "Stop"
 	while is_playing:
 		time = Time.get_ticks_msec() / 1000.0
 		var elapsed_time = time - initial_time

@@ -705,6 +705,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "Preview"
 

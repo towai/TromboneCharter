@@ -46,6 +46,8 @@ func _input(event):
 	if event == null: return
 	if event.pressed && event.keycode == KEY_S && Input.is_key_pressed(KEY_CTRL):
 		_on_save_chart_pressed()
+	if event.pressed && event.is_action_pressed("toggle_playback"):
+		%PreviewController._do_preview()
 
 
 func _on_description_text_changed(): tmb.description = %Description.text
