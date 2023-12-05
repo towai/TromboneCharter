@@ -108,6 +108,7 @@ func _on_save_dialog_file_selected(path:String) -> void:
 	
 	err = try_to_load_stream(dir)
 	if err: print("No stream loaded -- %s" % error_string(err))
+	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 #region AudioLoading
 # TODO should we perhaps give the TrackPlayer a script and give it these?
@@ -126,12 +127,10 @@ func try_to_load_ogg(path:String) -> int:
 
 
 func try_to_load_stream(dir) -> int:
-	var err : int
-	if Global.version == "4.2":
-		err = try_to_load_ogg(dir + "/song.ogg")
-		if err:
-			print("Failed to load song.ogg: %s"
-					% error_string(err))
+	var err := try_to_load_ogg(dir + "/song.ogg")
+	if err:
+		print("Failed to load song.ogg: %s"
+				% error_string(err))
 	return err
 #endregion
 
