@@ -14,6 +14,10 @@ var popup_location : Vector2i:
 
 func _ready():
 	DisplayServer.window_set_min_size(Vector2(1256,600))
+	if OS.get_environment("SteamDeck") == "1":
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		var window = get_viewport()
+		window.gui_embed_subwindows = true
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
