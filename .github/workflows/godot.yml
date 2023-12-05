@@ -22,9 +22,6 @@ jobs:
             extension: zip
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-          submodules: true
       - name: Build
         id: build
         uses: DerpyChap/build-godot-action@4117f9a9b07d1a919a1665ee5c69044a31d84056        
