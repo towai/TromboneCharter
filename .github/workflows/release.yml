@@ -13,6 +13,8 @@ jobs:
         include:
           - platform: Windows
             extension: exe
+          - platform: Windows.OpenGL
+            extension: exe
           - platform: Linux
             extension: x86-64
           - platform: macOS
