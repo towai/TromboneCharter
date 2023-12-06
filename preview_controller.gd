@@ -80,7 +80,9 @@ func _do_preview():
 #			print(slide_start)
 		previous_time = time
 		await(get_tree().process_frame)
+	
 	is_playing = false
+	%PreviewButton.text = "Preview"
 	
 	StreamPlayer.stop()
 	player.stop()
