@@ -690,9 +690,10 @@ alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Section:"
 
-[node name="Button" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+[node name="SectionToViewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
 layout_mode = 2
 text = " Get Over Here "
 
@@ -853,6 +854,7 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/TootVolSlider" to="Settings" method="_on_toot_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox2/SectionToViewButton" to="Settings" method="_on_section_to_view_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]

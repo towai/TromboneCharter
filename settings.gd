@@ -47,10 +47,13 @@ var default_end_color = Color("#FDCA4B")
 
 var section_start : float:
 	get: return %SectionStart.value
+	set(with):  %SectionStart.value = with
 var section_length : float:
 	get: return %SectionLength.value
+	set(with):  %SectionLength.value = with
 var section_target : float:
 	get: return %CopyTarget.value
+	set(with):  %CopyTarget.value = with
 @onready var sect_start_handle = %SectStartHandle
 
 
@@ -165,7 +168,7 @@ func _force_decimals(box:SpinBox):
 const SECT_HANDLE_RADIUS = 3.0
 
 func _on_section_start_value_changed(value):
-	%SectionStart.value = value
+	section_start = value
 	%SectionLength.max_value = max(1,tmb.endpoint - value)
 	_force_decimals(%SectionStart)
 	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
@@ -173,16 +176,25 @@ func _on_section_start_value_changed(value):
 	%Chart.queue_redraw()
 
 func _on_section_length_value_changed(value):
-	%SectionLength.value = value
+	section_length = value
 	_force_decimals(%SectionLength)
 	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
 func _on_copy_target_value_changed(value):
-	%CopyTarget.value = value
+	section_target = value
 	_force_decimals(%CopyTarget)
 	%SectTargetHandle.position.x = %Chart.bar_to_x(section_target) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
+
+func _on_section_to_view_button_pressed() -> void:
+	var min_bar = ceil(  %Chart.x_to_bar(%Chart.scroll_position) )
+	var max_bar = floor( %Chart.x_to_bar(%Chart.scroll_end) )
+	if (section_start >= min_bar) && ( section_start <= max_bar): return
+	section_start = min_bar
+	# not totally sure we should do this part
+	var max_len = max_bar - min_bar
+	section_length = min(section_length,max_len)
 
 
 func section_handle_dragged(value:float,which:Node):
