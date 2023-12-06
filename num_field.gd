@@ -26,7 +26,7 @@ signal value_changed(new_value)
 
 @export var value : float:
 	set(with):
-		print(with)
+		#print("float set ",with)
 		value = clamp(with, min_value, max_value)
 		if !is_float: value = int(value)
 		if !has_node("SpinBox"): return
