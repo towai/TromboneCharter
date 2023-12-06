@@ -194,6 +194,8 @@ func section_handle_dragged(value:float,which:Node):
 		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 
+func _on_vol_reset_pressed() -> void:
+	%VolSlider.value = 0 # the below gets called iff volume wasn't already 0
 func _on_volume_changed(value:float):
 	%VolSlider.tooltip_text = str(value)
 	%TrackPlayer.volume_db = value

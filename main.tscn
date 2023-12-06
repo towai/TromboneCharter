@@ -818,6 +818,7 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
 [connection signal="item_selected" from="Settings/MarginC/HBoxC/EditSettings/PreviewType" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_preview_type_item_selected"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolReset" to="Settings" method="_on_vol_reset_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox2/SectionLength" to="Settings" method="_on_section_length_value_changed"]

@@ -164,7 +164,7 @@ func _on_copy_confirmed():
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
-		print("empy")
+		print("copy section empy")
 		return
 	
 	var copy_target = Global.settings.section_target
