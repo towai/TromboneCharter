@@ -13,7 +13,11 @@ var popup_location : Vector2i:
 
 
 func _ready():
-	DisplayServer.window_set_min_size(Vector2(1256,540))
+	DisplayServer.window_set_min_size(Vector2(1256,600))
+	if OS.get_environment("SteamDeck") == "1":
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		var window = get_viewport()
+		window.gui_embed_subwindows = true
 	$Instructions.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	$ErrorPopup.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
@@ -42,6 +46,8 @@ func _input(event):
 	if event == null: return
 	if event.pressed && event.keycode == KEY_S && Input.is_key_pressed(KEY_CTRL):
 		_on_save_chart_pressed()
+	if event.pressed && event.is_action_pressed("toggle_playback"):
+		%PreviewController._do_preview()
 
 
 func _on_description_text_changed(): tmb.description = %Description.text
@@ -69,12 +75,12 @@ func _on_new_chart_confirmed():
 
 func _on_load_chart_pressed(): show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path:String) -> void:
+	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
 	emit_signal("chart_loaded")
-	if settings.load_stream_upon_chart_io:
-		var err = try_to_load_stream(dir)
-		if err: print("No stream loaded -- %s" % error_string(err))
+	var err = try_to_load_stream(dir)
+	if err: print("No stream loaded -- %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 
@@ -102,10 +108,9 @@ func _on_save_dialog_file_selected(path:String) -> void:
 	cfg.set_value("Config", "saved_dir", dir)
 	try_cfg_save()
 	
-	if !%Settings.load_stream_upon_chart_io: return
-	else:
-		err = try_to_load_stream(dir)
-		if err: print("No stream loaded -- %s" % error_string(err))
+	err = try_to_load_stream(dir)
+	if err: print("No stream loaded -- %s" % error_string(err))
+	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 #region AudioLoading
 # TODO should we perhaps give the TrackPlayer a script and give it these?
@@ -122,35 +127,12 @@ func try_to_load_ogg(path:String) -> int:
 	%TrackPlayer.stream = stream
 	return OK
 
-# TODO deprecate entirely in favor of Ogg runtime loading (godot/commit/e391eae)
-func try_to_load_wav(path:String) -> int:
-	print("Try load wav from %s" % path)
-	var f = FileAccess.open(path,FileAccess.READ)
-	if f == null:
-		var err = FileAccess.get_open_error()
-		return err
-	
-	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
-	if stream == null :
-		print("stream null?")
-		return ERR_FILE_CANT_READ
-	elif stream.data == null || stream.data.is_empty():
-		print("no data?")
-		return ERR_FILE_CANT_READ
-	
-	%TrackPlayer.stream = stream
-	return OK
-
 
 func try_to_load_stream(dir) -> int:
-	var err : int
-	if Global.version == "4.2":
-		err = try_to_load_ogg(dir + "/song.ogg")
-		if err:
-			print("%s -- maybe there's only a .wav"
-					% error_string(err))
-			err = saveload.load_wav_or_convert_ogg(dir)
-	else: err = saveload.load_wav_or_convert_ogg(dir)
+	var err := try_to_load_ogg(dir + "/song.ogg")
+	if err:
+		print("Failed to load song.ogg: %s"
+				% error_string(err))
 	return err
 #endregion
 

@@ -1,5 +1,6 @@
 extends Control
 
+#TODO: remove w_image
 @onready var w_image := Image.new()
 @onready var chart : Node = get_parent()
 var cfg : ConfigFile:
@@ -25,36 +26,60 @@ var build_hires_wave : bool:
 var wave_is_hires := false
 
 
-func _ready():
-	# max song length = 16 * 163.84s = 43m40s
-	# in reality, this is for 21m50s max at high resolution (1/200s per h-pixel)
-	for i in 16:
-		var rect = TextureRect.new()
-		add_child(rect)
-		rects.append(rect)
+func calc_rects_amount() -> int:
+	var divided_by = 81.92 if build_hires_wave else 163.84
+	var amount = ceil(song_length / divided_by) + 1
+	return amount
 
+func clear_wave_preview():
+	for i in rects.size(): rects[i].free()
+	rects = []
 
 func build_wave_preview():
 	if !Global.ffmpeg_worker.ffmpeg_exists:
-		print("Hey!! You can't make a waveform preview without ffmpeg!")
+		print("Roses are chrominance blue\nWater is chrominance red\nYou can't make a waveform preview without ffmpeg")
 		return
+	
 	print(song_length)
 	wave_is_hires = build_hires_wave
-	
-	for i in rects.size(): rects[i].texture = null
-	for i in rects.size():
-		var result = do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i)
+
+	%BuildWaveform.disabled = true
+	%HiResWave.disabled = true
+	%PreviewType.disabled = true
+	%PreviewGenLabel.visible = true
+
+	var textures : Array = []
+
+	for i in calc_rects_amount():
+		var result =  await do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i,%PreviewType.selected)
 		if !result:
 			print("Done in %d steps" % i)
 			break
+		else:
+			textures.append(result)
+		
+	if rects:
+		clear_wave_preview()
+
+	for i in textures.size():
+		var rect = TextureRect.new()
+		add_child(rect)
+		rects.append(rect)
+		rect.texture = ImageTexture.create_from_image(textures[i])
 	
-	await(get_tree().process_frame)
+	%BuildWaveform.disabled = false
+	%HiResWave.disabled = false
+	%PreviewType.disabled = false
+	%PreviewGenLabel.visible = false
+
+	await get_tree().process_frame
 	calculate_width()
 
 
-func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
+func do_ffmpeg_convert(dir:String,idx:int=0,type:int=0) -> Image:
 	print("building waveform...%d" % idx)
 	
+	var thread = Thread.new()
 	var start := idx * 163.84
 	var end := start + 163.84
 	
@@ -62,24 +87,29 @@ func do_ffmpeg_convert(dir:String,idx:int=0) -> bool:
 		start /= 2
 		end /= 2
 	
-	if song_length < start: return false
+	if song_length < start: return null
 	if song_length < end: end = song_length
-	
+
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
-	
-	var err = ffmpeg_worker.draw_wavechunk(start,end,dir,build_hires_wave,idx)
+
+	var callable = Callable(ffmpeg_worker, "draw_wavechunk")
+
+	thread.start(callable.bind(start,end,dir,build_hires_wave,type,idx))
+	while thread.is_alive():
+		await get_tree().process_frame
+	var err = thread.wait_to_finish()
+	thread = null
 	if err:
 		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
-		return false
+		return null
 	
 #	err = w_image.load(wavechunkpath)
 #	if err:
 #		print(error_string(err))
 #		return
-	w_image = Image.load_from_file(wavechunkpath)
-	rects[idx].texture = ImageTexture.create_from_image(w_image)
+	var img = Image.load_from_file(wavechunkpath)
 	DirAccess.remove_absolute(wavechunkpath)
-	return true
+	return img
 
 
 func calculate_width():
@@ -96,6 +126,19 @@ func calculate_width():
 	
 	scale.x = max(scalefactor,0.001)
 
+func _on_preview_type_item_selected(_index:int) -> void:
+	if %BuildWaveform.button_pressed:
+		build_wave_preview()
+
+func _on_build_waveform_toggled(toggled_on: bool) -> void:
+	if toggled_on:
+		build_wave_preview()
+	else:
+		clear_wave_preview()
+
+func _on_hi_res_wave_toggled(_toggled_on:bool) -> void:
+	if %BuildWaveform.button_pressed:
+		build_wave_preview()
 
 func _process(_delta): pass
 func _draw(): pass

@@ -112,14 +112,14 @@ title = "Error"
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 629)
+size = Vector2i(720, 600)
 dialog_autowrap = true
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Instructions"]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 712.0
-offset_bottom = 583.0
+offset_bottom = 554.0
 theme_override_fonts/mono_font = ExtResource("7_jt8rs")
 bbcode_enabled = true
 text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
@@ -130,7 +130,7 @@ The \"Track Ref\" field should be unique to your chart; you can use the song's n
 
 You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
 
-On chart load and save, Trombone Charter will try to load song.wav from the chart's folder. If [code]song.wav[/code] is not present and you have FFmpeg, it will try to convert [code]song.ogg[/code] into [code]song.wav[/code]. This should only take a moment, even for long songs, but you can disable it in Edit Settings. Just be sure not to include [code]song.wav[/code] in your release since WAVs are huge compared to Ogg files.
+On chart load and save, Trombone Charter will try to load song.ogg from the chart's folder. If [code]song.ogg[/code] is not present then no backing track will play.
 
 You can pass in a [code].tmb[/code] by dragging it onto the executable, and it will automatically be loaded.
 
@@ -248,10 +248,10 @@ script = ExtResource("9_g46yt")
 [node name="WavePreview" type="HBoxContainer" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.752941)
+show_behind_parent = true
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
+anchors_preset = 9
+anchor_bottom = 1.0
 grow_vertical = 2
 theme_override_constants/separation = 0
 script = ExtResource("10_8jxge")
@@ -579,35 +579,6 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
-[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
-layout_mode = 2
-text = "On chart load:"
-
-[node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
-layout_mode = 2
-
-[node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
-unique_name_in_owner = true
-layout_mode = 2
-button_pressed = true
-text = "Try to load song.wav"
-
-[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 10
-tooltip_text = "How do I use these features?"
-text = "  ?  "
-
-[node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 0
-tooltip_text = "Requires ffmpeg."
-button_pressed = true
-text = "Convert song.ogg if song.wav missing"
-alignment = 2
-
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
@@ -617,7 +588,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
 button_pressed = true
-text = "Build waveform preview"
+text = "Show audio preview"
 alignment = 2
 
 [node name="HiResWave" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
@@ -627,6 +598,34 @@ size_flags_horizontal = 6
 tooltip_text = "This might take a while!"
 text = "Hi-Res"
 alignment = 2
+
+[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+tooltip_text = "How do I use these features?"
+text = "  ?  "
+
+[node name="PreviewLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+text = "Audio preview type:"
+
+[node name="PreviewType" type="OptionButton" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Waveform"
+popup/item_0/id = 0
+popup/item_1/text = "Spectrogram"
+popup/item_1/id = 1
+
+[node name="PreviewGenLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Generating audio preview..."
+horizontal_alignment = 1
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -650,15 +649,6 @@ ticks_on_borders = true
 [node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
 layout_mode = 2
 icon = ExtResource("14_8wa4s")
-
-[node name="WAVLoadedLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_vertical = 8
-text = "no song.wav loaded!"
-horizontal_alignment = 1
-vertical_alignment = 2
 
 [node name="RefreshButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
 visible = false
@@ -715,6 +705,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "Preview"
 
@@ -821,7 +813,10 @@ text = "toot toot lol"
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox2/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/BuildWaveform" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_build_waveform_toggled"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/HiResWave" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_hi_res_wave_toggled"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
+[connection signal="item_selected" from="Settings/MarginC/HBoxC/EditSettings/PreviewType" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_preview_type_item_selected"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]

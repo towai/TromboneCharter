@@ -31,10 +31,6 @@ var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
 var propagate_changes : bool:
 	get: return %PropagateChanges.button_pressed
-var load_stream_upon_chart_io: bool:
-	get: return %TryAutoloadWAV.button_pressed
-var convert_ogg: bool:
-	get: return %ConvertOgg.button_pressed
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -86,11 +82,10 @@ func _ready():
 
 func _toggle_ffmpeg_features():
 	var disable = !Global.ffmpeg_worker.ffmpeg_exists
-	%TryAutoloadWAV.disabled = disable
-	%ConvertOgg.disabled = disable
 	%BuildWaveform.disabled = disable
 	%HiResWave.disabled = disable
 	%FFmpegHelp.visible = disable
+	%PreviewType.disabled = disable
 
 
 func _update_values():

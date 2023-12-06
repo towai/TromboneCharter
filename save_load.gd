@@ -27,34 +27,6 @@ func on_load_dialog_file_selected(path:String):
 	main.try_cfg_save()
 	return dir
 
-# TODO remove this whole thing once properly deprecated
-func load_wav_or_convert_ogg(dir:String) -> int:
-	var err = main.try_to_load_wav(dir + "/song.wav")
-	if err:
-		print("No wav loaded -- %s" % error_string(err))
-		if %Settings.convert_ogg:
-			print("try to convert song.ogg to wav")
-			DirAccess.open(dir)
-			err = DirAccess.get_open_error()
-			if err:
-				print("DirAccess error : %s" % error_string(err))
-				return err
-			var oggpath := dir + "/song.ogg"
-			if !FileAccess.file_exists(oggpath):
-				print("song.ogg not present in the tmb's folder")
-				return ERR_FILE_NOT_FOUND
-			err = Global.ffmpeg_worker.try_to_convert_ogg(oggpath)
-			if !err:
-				var wav_err = main.try_to_load_wav(dir + "/song.wav")
-				if wav_err: print("ffmpeg success but couldn't load resulting wav?")
-			else: # redundant to print explanation, label tells us if ffmpeg's missing
-				print("conversion failed: " + error_string(err))
-				return err
-	
-	%WAVLoadedLabel.text = "song.wav loaded!" if %TrackPlayer.stream != null \
-			else "no ffmpeg!" if err == -1 else "no song.wav loaded!"
-	return err
-
 
 func validate_win_path(path:String):
 	if path[1] == ':': return path
