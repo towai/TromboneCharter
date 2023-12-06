@@ -151,15 +151,6 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	add_child(new_note)
 	new_note.grab_focus()
 
-# !! unused
-func stepped_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
-	var steps : int = ceil(length) * 8
-	var step_length : float = length / steps
-	for step in steps + 1:
-		var step_time = step_length * step
-		if Global.overlaps_any_note(time + step_time, exclude): return true
-	return false
-
 # move to ???
 func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
 	var is_in_range := func(value: float, range_start:float, range_end:float):
