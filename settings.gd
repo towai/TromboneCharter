@@ -71,7 +71,9 @@ var tap_notes : bool:
 func _ready():
 	start_color = default_start_color
 	end_color = default_end_color
-	_on_volume_changed(0.0)
+	# i think these are redundant anyway. nevertheless,
+	_on_preview_volume_changed(0.0)
+	_on_toot_volume_changed(0.0)
 	
 	Global.settings = self
 	get_tree().get_current_scene().chart_loaded.connect(_update_values)
@@ -194,11 +196,17 @@ func section_handle_dragged(value:float,which:Node):
 		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 
-func _on_vol_reset_pressed() -> void:
-	%VolSlider.value = 0 # the below gets called iff volume wasn't already 0
-func _on_volume_changed(value:float):
-	%VolSlider.tooltip_text = str(value)
+func _on_preview_vol_reset_pressed() -> void:
+	%TrackVolSlider.value = 0 # the below gets called iff volume wasn't already 0
+func _on_preview_volume_changed(value: float) -> void:
+	%TrackVolSlider.tooltip_text = str(value)
 	%TrackPlayer.volume_db = value
+
+func _on_toot_vol_reset_pressed() -> void:
+	%TootVolSlider.value = 0
+func _on_toot_volume_changed(value: float) -> void:
+	%TootVolSlider.tooltip_text = str(value)
+	%TrombPlayer.volume_db = value
 
 
 func _on_timing_snap_value_changed(value):

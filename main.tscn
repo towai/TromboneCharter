@@ -633,9 +633,9 @@ size_flags_vertical = 10
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
 layout_mode = 2
-text = "Vol."
+text = "Track 🔊"
 
-[node name="VolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
+[node name="TrackVolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -650,6 +650,29 @@ ticks_on_borders = true
 layout_mode = 2
 icon = ExtResource("14_8wa4s")
 
+[node name="Vol2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings/Vol2"]
+layout_mode = 2
+text = "Toot 🔊 "
+
+[node name="TootVolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/EditSettings/Vol2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -12.0
+max_value = 6.0
+step = 0.1
+tick_count = 7
+ticks_on_borders = true
+
+[node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/Vol2"]
+layout_mode = 2
+icon = ExtResource("14_8wa4s")
+
 [node name="RefreshButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
 visible = false
 layout_mode = 2
@@ -661,28 +684,36 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
-layout_mode = 2
-alignment = 2
-
-[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
-layout_mode = 2
-text = "Section Start:"
-
-[node name="SectionStart" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
-unique_name_in_owner = true
-layout_mode = 2
-focus_mode = 2
-
 [node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
 alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
 layout_mode = 2
-text = "Section Length:"
+text = "Section:"
 
-[node name="SectionLength" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+[node name="Button" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+layout_mode = 2
+text = " Get Over Here "
+
+[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+layout_mode = 2
+text = "Start:"
+
+[node name="SectionStart" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+
+[node name="Label2" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+layout_mode = 2
+text = "Length:"
+
+[node name="SectionLength" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
@@ -817,11 +848,13 @@ text = "toot toot lol"
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/HiResWave" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_hi_res_wave_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
 [connection signal="item_selected" from="Settings/MarginC/HBoxC/EditSettings/PreviewType" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_preview_type_item_selected"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolReset" to="Settings" method="_on_vol_reset_pressed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/TrackVolSlider" to="Settings" method="_on_preview_volume_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolReset" to="Settings" method="_on_preview_vol_reset_pressed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/TootVolSlider" to="Settings" method="_on_toot_volume_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox2/SectionLength" to="Settings" method="_on_section_length_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyButton" to="." method="_on_copy_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyTarget" to="Settings" method="_on_copy_target_value_changed"]
