@@ -67,7 +67,8 @@ func redraw_notes():
 		if !(child is Note): continue
 		if child.is_in_view:
 			child.show()
-			child.queue_redraw()
+			#child.queue_redraw()
+			child._update()
 		else: child.hide()
 
 
@@ -251,6 +252,13 @@ func _draw():
 		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
 				Vector2(bar_to_x(%CopyTarget.value), size.y),
 				Color.ORANGE_RED, 2.0)
+
+
+func count_onscreen_notes() -> int:
+	var accum := 0
+	for child in get_children():
+		if (child is Note && child.is_in_view): accum += 1
+	return accum
 
 
 func _gui_input(event):

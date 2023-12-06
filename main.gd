@@ -48,6 +48,8 @@ func _input(event):
 		_on_save_chart_pressed()
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
+	if event.pressed && event.keycode == KEY_C:
+		print(%Chart.count_onscreen_notes()," notes being drawn")
 
 
 func _on_description_text_changed(): tmb.description = %Description.text
