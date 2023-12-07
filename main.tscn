@@ -724,6 +724,7 @@ value = 1.0
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 6
 alignment = 2
 
@@ -784,6 +785,7 @@ text = "Add new lyric at..."
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/LyricsTools"]
 layout_mode = 2
+size_flags_horizontal = 8
 
 [node name="LyricHereButton" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools/HBoxContainer"]
 layout_mode = 2
