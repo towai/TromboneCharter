@@ -53,8 +53,12 @@ func _input(event):
 		return
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
-	if event.pressed && event.keycode == KEY_C:
-		print(%Chart.count_onscreen_notes()," notes being drawn")
+	#if event.pressed && event.keycode == KEY_C:
+		#print(%Chart.count_onscreen_notes()," notes being drawn")
+	#if event.pressed && event.keycode == KEY_I:
+		#for note in %Chart.get_children():
+			#if !(note is Note): continue
+			#print(note.bar," \t→ ",note.index_in_slide)
 
 
 func _on_description_text_changed(): tmb.description = %Description.text

@@ -86,9 +86,24 @@ var show_end_handle : bool:
 	get: return (touching_notes.get(END_IS_TOUCHING) == null
 				&& (!is_tap_note || has_focus())
 			)
+var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
-# ???
-#@onready var player : AudioStreamPlayer = get_tree().current_scene.find_child("AudioStreamPlayer")
+# cat rolls the most horrible solution ever, asked to leave the repo
+func find_idx_in_slide() -> int:
+	var left_neighbor : Note = touching_notes.get(START_IS_TOUCHING)
+	
+	match left_neighbor:
+		null: index_in_slide = 0
+		_:    index_in_slide = (left_neighbor.find_idx_in_slide() + 1)
+	
+	return index_in_slide
+
+func propagate_to_the_right(f:StringName,args:Array=[]):
+	var right_neighbor : Note = touching_notes.get(END_IS_TOUCHING)
+	
+	match right_neighbor:
+		null: return callv(f,args)
+		_: return right_neighbor.propagate_to_the_right(f,args)
 
 
 func _ready():
@@ -178,7 +193,8 @@ func _end_drag():
 		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()
-	
+	print("call end_drag from ",bar)
+	print(propagate_to_the_right("find_idx_in_slide"))
 	chart.update_note_array()
 
 
@@ -253,8 +269,9 @@ func _draw():
 		draw_rect(Rect2(bar_handle.position,bar_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(pitch_handle.position,pitch_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(end_handle.position,end_handle.size),Color.WHITE,false)
-	var start_color = chart.settings.start_color
-	var end_color = chart.settings.end_color
+	var swap_colors : bool = (index_in_slide & 1)
+	var start_color = chart.settings.start_color if !swap_colors else chart.settings.end_color
+	var end_color = chart.settings.end_color if !swap_colors else chart.settings.start_color
 	
 	var _draw_bar_handle := func():
 		var radius = BARHANDLE_SIZE.x / 2
