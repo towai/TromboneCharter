@@ -74,6 +74,12 @@ var tap_notes : bool:
 func _ready():
 	start_color = default_start_color
 	end_color = default_end_color
+	
+	var panel : StyleBoxFlat = get_theme_stylebox("panel")
+	panel.corner_radius_top_left     = 0
+	panel.corner_radius_top_right    = 0
+	panel.corner_radius_bottom_left  = 0
+	panel.corner_radius_bottom_right = 0
 	# i think these are redundant anyway. nevertheless,
 	_on_preview_volume_changed(0.0)
 	_on_toot_volume_changed(0.0)
