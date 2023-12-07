@@ -34,7 +34,7 @@ func validate_win_path(path:String):
 	var drive : String
 	var saved_dir = cfg.get_value("Config","saved_dir")
 	if saved_dir == null:
-		$Alert.alert("no saved dir in config! did you delete it?",
+		%Alert.alert("no saved dir in config! did you delete it?",
 				Vector2(12, %ViewSwitcher.global_position.y + 38),
 				Alert.LV_ERROR)
 		return
