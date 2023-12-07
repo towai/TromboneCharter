@@ -46,6 +46,11 @@ func _input(event):
 	if event == null: return
 	if event.pressed && event.keycode == KEY_S && Input.is_key_pressed(KEY_CTRL):
 		_on_save_chart_pressed()
+	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
+	# note that, even typing into numerical SpinBoxes, you're using its own child LineEdit
+	if (		(get_viewport().gui_get_focus_owner() is TextEdit)
+			||  (get_viewport().gui_get_focus_owner() is LineEdit)):
+		return
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
 	if event.pressed && event.keycode == KEY_C:
