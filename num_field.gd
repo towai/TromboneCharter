@@ -48,7 +48,7 @@ signal value_changed(new_value)
 func _ready():
 	$Label.text = field_name
 	$SpinBox.value_changed.connect(_on_spinbox_changed)
-	value_changed.connect(Global._on_tmb_updated.bind(json_key))
+	if !Engine.is_editor_hint(): value_changed.connect(Global._on_tmb_updated.bind(json_key))
 
 
 func _on_spinbox_changed(new_value):
