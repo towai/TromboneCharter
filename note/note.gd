@@ -233,18 +233,20 @@ func _update():
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
-	var scaledlength = scaled_length
 	
-	size.x = scaledlength
+	size.x = scaled_length
 	if !is_in_view: return
 	
+	resize_handles()
+	
+	queue_redraw()
+
+func resize_handles() -> void:
+	var scaledlength = scaled_length # only calculate once
 	end_handle.position = Vector2(scaledlength, end_height) - ENDHANDLE_SIZE / 2
 	
 	pitch_handle.size = Vector2(scaledlength, visual_height + TAIL_HEIGHT)
 	pitch_handle.position = Vector2(0, higher_pitch - (TAIL_HEIGHT / 2) )
-	
-	queue_redraw()
-
 
 func _draw():
 	if chart.draw_targets:

@@ -67,8 +67,8 @@ func redraw_notes():
 		if !(child is Note): continue
 		if child.is_in_view:
 			child.show()
+			child.resize_handles()
 			#child.queue_redraw()
-			child._update()
 		else: child.hide()
 
 
@@ -212,6 +212,7 @@ func assign_tt_note_ids():
 		if !(child is Note): continue
 		count += 1
 		child.tt_note_id = count
+
 
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()
