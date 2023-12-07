@@ -165,7 +165,18 @@ func _force_decimals(box:SpinBox):
 	lineedit.text = ("%.4f" % box.value).rstrip('0')
 	box.tooltip_text = lineedit.text
 
+#region Sections
 const SECT_HANDLE_RADIUS = 3.0
+
+func section_handle_dragged(value:float,which:Node):
+	if which == %SectStartHandle:
+		_on_section_start_value_changed(value)
+	elif which == %SectEndHandle: 
+		_on_section_length_value_changed(value - section_start)
+	elif which == %SectTargetHandle: 
+		_on_copy_target_value_changed(value)
+	if which == %AddLyricHandle:
+		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 func _on_section_start_value_changed(value):
 	section_start = value
@@ -188,25 +199,23 @@ func _on_copy_target_value_changed(value):
 	%Chart.queue_redraw()
 
 func _on_section_to_view_button_pressed() -> void:
-	var min_bar = ceil(  %Chart.x_to_bar(%Chart.scroll_position) )
-	var max_bar = floor( %Chart.x_to_bar(%Chart.scroll_end) )
+	var bounds = %Chart.view_bounds
+	var min_bar = ceil(  bounds.left )
+	var max_bar = floor( bounds.right )
 	if (section_start >= min_bar) && ( section_start <= max_bar): return
 	section_start = min_bar
 	# not totally sure we should do this part
 	var max_len = max_bar - min_bar
 	section_length = min(section_length,max_len)
 
+func _on_copy_here_button_pressed() -> void:
+	var bounds = %Chart.view_bounds
+	%SectTargetHandle.set_bar( bounds.center )
 
-func section_handle_dragged(value:float,which:Node):
-	if which == %SectStartHandle:
-		_on_section_start_value_changed(value)
-	elif which == %SectEndHandle: 
-		_on_section_length_value_changed(value - section_start)
-	elif which == %SectTargetHandle: 
-		_on_copy_target_value_changed(value)
-	if which == %AddLyricHandle:
-		%LyricsEditor._on_lyric_bar_value_changed(value)
-
+func _on_lyric_here_button_pressed() -> void:
+	var bounds = %Chart.view_bounds
+	%AddLyricHandle.set_bar( bounds.center )
+#endregion
 
 func _on_preview_vol_reset_pressed() -> void:
 	%TrackVolSlider.value = 0 # the below gets called iff volume wasn't already 0

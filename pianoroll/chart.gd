@@ -1,10 +1,25 @@
 extends Control
 
 const scrollbar_height : float = 8
+
 var scroll_position : float:
 	get: return %ChartView.scroll_horizontal
 var scroll_end : float:
 	get: return scroll_position + %ChartView.size.x
+var view_bounds: ViewBounds:
+	get: return ViewBounds.new(x_to_bar(scroll_position),x_to_bar(scroll_end))
+	set(_with): pass # would a function to set the scroll and zoom together be useful?
+class ViewBounds:	# effectively a vector2 with nicer code completion
+					# these values are in bars, not pixels
+	var left: float
+	var right:float
+	var center: float:
+		get: return (left + right) / 2.0
+		set(_with): assert(false)
+	func _init(left:float,right:float):
+		self.left = left
+		self.right = right
+
 var bar_spacing : float = 1.0
 #	get: return tmb.savednotespacing * %ZoomLevel.value
 var middle_c_y : float:
