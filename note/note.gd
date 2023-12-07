@@ -96,6 +96,7 @@ func find_idx_in_slide() -> int:
 		null: index_in_slide = 0
 		_:    index_in_slide = (left_neighbor.find_idx_in_slide() + 1)
 	
+	queue_redraw()
 	return index_in_slide
 
 func propagate_to_the_right(f:StringName,args:Array=[]):
