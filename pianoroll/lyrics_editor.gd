@@ -59,6 +59,9 @@ func _refresh_lyrics():
 func _on_show_lyrics_toggled(button_pressed):
 	move_to_front()
 	set_visible(button_pressed)
+	%AddLyric.disabled = !button_pressed
+	%CopyLyrics.disabled = !button_pressed
+	%LyricBar.editable = button_pressed
 
 
 func _on_chart_loaded():
@@ -97,7 +100,11 @@ func _on_copy_lyrics_pressed():
 		if lyric.bar < section_start || lyric.bar > section_start + section_length: continue
 		var new_lyric : Dictionary = lyric.duplicate()
 		new_lyric.bar += copy_offset
-		if new_lyric.bar >= Global.working_tmb.endpoint: continue
+		if new_lyric.bar >= Global.working_tmb.endpoint:
+			%Alert.alert("Any more lyrics would go past the chart's endpoint!",
+					Vector2(%SectionSelection.position.x - 12, %Settings.position.y - 12),
+					Alert.LV_ERROR)
+			break # lyrics are sorted into bar order in package_lyrics()
 		copied_lyrics.append(new_lyric)
 	
 	var any_collisions = !lyrics_array.is_empty() && !copied_lyrics.is_empty()

@@ -779,6 +779,7 @@ text = "Show lyrics editor"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
+disabled = true
 text = "Add new lyric at..."
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/LyricsTools"]
@@ -796,6 +797,7 @@ layout_mode = 2
 size_flags_horizontal = 10
 focus_mode = 2
 alignment = 2
+editable = false
 prefix = "Beat"
 
 [node name="CopyLyrics" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
