@@ -49,7 +49,7 @@ var is_in_view : bool:
 # if desired, this knowledge could be exploited to make the game not convert some notes to tap notes
 # by giving them an imperceptible and inconsequential delta value (0.0001 is already only ~0.14¢)
 var is_tap_note: bool:
-	get: return length <= 0.0625 && !is_slide
+	get: return length <= 0.0625 && !is_slide && touching_notes.is_empty()
 	set(_v): assert(false)
 var dragging := 0
 enum {
