@@ -34,9 +34,10 @@ border_width_right = 8
 border_color = Color(0.25098, 0.25098, 0.25098, 1)
 
 [node name="Main" type="VBoxContainer"]
-anchors_preset = 15
-anchor_right = 1.0
+anchors_preset = -1
+anchor_right = 1.011
 anchor_bottom = 1.0
+offset_right = -14.0801
 grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_eswg4")
@@ -720,7 +721,6 @@ text = "Length:"
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
-min_value = 1.0
 value = 1.0
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]

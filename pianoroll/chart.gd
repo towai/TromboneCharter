@@ -37,6 +37,7 @@ var draw_targets : bool:
 var doot_enabled : bool = true
 var _update_queued := false
 var clearing_notes := false
+var prev_section_start : float = 0.0
 func height_to_pitch(height:float):
 	return ((height - middle_c_y) / key_height) * Global.SEMITONE
 func pitch_to_height(pitch:float):
@@ -48,6 +49,11 @@ func bar_to_x(bar:float): return bar * bar_spacing
 @onready var measure_font : Font = ThemeDB.get_fallback_font()
 @onready var tmb : TMBInfo:
 	get: return Global.working_tmb
+
+
+var EDIT_MODE := 0
+var SELECT_MODE := 1
+var mouse_mode : int = EDIT_MODE
 
 
 func doot(pitch:float):
@@ -93,7 +99,7 @@ func _on_tmb_updated():
 
 func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
-	%SectionStart.max_value = tmb.endpoint - 1
+	%SectionStart.max_value = tmb.endpoint
 	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
 	%CopyTarget.max_value = tmb.endpoint - 1
 	%LyricBar.max_value = tmb.endpoint - 1
@@ -282,31 +288,53 @@ func _gui_input(event):
 	if event is InputEventPanGesture:
 		# Used for two finger scrolling on trackpads
 		_on_scroll_change()
-	event = event as InputEventMouseButton
-	if event == null || !event.pressed: return
-	if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-		@warning_ignore("unassigned_variable")
-		var new_note_pos : Vector2
-		
-		if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
-		else: new_note_pos.x = to_unsnapped(event.position).x
-		
-		# Current length of tap notes
-		var note_length = 0.0625 if settings.tap_notes else current_subdiv
-		
-		if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
-		if continuous_note_overlaps(new_note_pos.x, note_length): return
-		
-		if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
-		else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
-				Global.SEMITONE * -13, Global.SEMITONE * 13)
-		
-		add_note(true, new_note_pos.x, note_length, new_note_pos.y)
-	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN \
-			|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
-			|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
-			|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
-		_on_scroll_change()
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN \
+		|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
+		|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
+		|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
+			_on_scroll_change()
+	match mouse_mode:
+		SELECT_MODE:
+			# this isn't as clean as i'd like but i didn't want to rewrite everything
+			var bar = %Chart.x_to_bar(event.position.x)
+			if bar < 0:
+				bar = 0
+			if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
+			if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
+				prev_section_start = bar
+				settings.section_start = bar
+				settings.section_length = 0
+			elif event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
+				prev_section_start = settings.section_start
+			elif event is InputEventMouseMotion && event.pressure:
+				if %Chart.x_to_bar(event.position.x) < prev_section_start:
+					settings.section_length = prev_section_start - bar
+					settings.section_start = bar
+				else:
+					settings.section_length = bar - settings.section_start
+		EDIT_MODE: #Edit mode (default)
+			event = event as InputEventMouseButton
+			if event == null || !event.pressed: return
+			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
+				@warning_ignore("unassigned_variable")
+				var new_note_pos : Vector2
+				
+				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
+				else: new_note_pos.x = to_unsnapped(event.position).x
+				
+				# Current length of tap notes
+				var note_length = 0.0625 if settings.tap_notes else current_subdiv
+				
+				if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
+				if continuous_note_overlaps(new_note_pos.x, note_length): return
+				
+				if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
+				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
+						Global.SEMITONE * -13, Global.SEMITONE * 13)
+				
+				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+	
 
 
 func _notification(what):

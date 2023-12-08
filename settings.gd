@@ -186,7 +186,7 @@ func section_handle_dragged(value:float,which:Node):
 
 func _on_section_start_value_changed(value):
 	section_start = value
-	%SectionLength.max_value = max(1,tmb.endpoint - value)
+	%SectionLength.max_value = tmb.endpoint - value
 	_force_decimals(%SectionStart)
 	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
 	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS

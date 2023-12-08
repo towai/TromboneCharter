@@ -53,6 +53,14 @@ func _input(event):
 		return
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
+	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL):
+		%Chart.mouse_mode = %Chart.SELECT_MODE
+		$Alert.alert("Switched mouse to Select Mode", Vector2(%Chart.global_position.x, 10),
+				Alert.LV_SUCCESS)
+	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL):
+		%Chart.mouse_mode = %Chart.EDIT_MODE
+		$Alert.alert("Switched mouse to Edit Mode", Vector2(%Chart.global_position.x, 10),
+				Alert.LV_SUCCESS)
 	#if event.pressed && event.keycode == KEY_C:
 		#print(%Chart.count_onscreen_notes()," notes being drawn")
 	#if event.pressed && event.keycode == KEY_I:
