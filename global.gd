@@ -3,9 +3,6 @@ extends Node
 signal tmb_updated
 const SEMITONE := 13.75
 const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
-# mainly significant for updates to Ogg loading
-@onready var version := "%d.%d" % [Engine.get_version_info().major,
-								 Engine.get_version_info().minor]
 static func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 # range goes from -13 to 13, c3 to c5
 const BLACK_KEYS = [
