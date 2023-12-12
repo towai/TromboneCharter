@@ -3,6 +3,8 @@ extends Control
 
 var lyric_scn = preload("res://lyric.tscn")
 @onready var chart = %Chart
+@onready var enter_mode : int:
+	get: return %EnterKeyMode.selected
 var _update_queued := false
 
 func _ready():

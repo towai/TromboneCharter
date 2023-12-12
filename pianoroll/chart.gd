@@ -209,7 +209,7 @@ func update_note_array():
 
 func jump_to_note(note: int, use_tt: bool = false):
 	var count = 0
-	var children = %Chart.get_children()
+	var children = get_children()
 	if not use_tt:
 		children.sort_custom(func(a, b): return a.position.x < b.position.x)
 	for child in children:

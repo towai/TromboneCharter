@@ -387,7 +387,8 @@ wrap_mode = 1
 
 [node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 layout_mode = 2
-text = "Upload to TootTally"
+tooltip_text = "Uploads the chart to TootTally's Difficulty Calculator, which provides a rough estimate for its difficulty along with some checks to TootTally's rating criteria."
+text = "Calculate Difficulty via TootTally"
 script = ExtResource("7_h0pqp")
 
 [node name="SongInfo2" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
@@ -756,10 +757,34 @@ size_flags_horizontal = 8
 size_flags_vertical = 2
 text = "Show lyrics editor"
 
+[node name="Label3" type="Label" parent="Settings/MarginC/HBoxC/LyricsTools"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+tooltip_text = "Controls what the enter key does when writing lyrics.
+
+Next Note will insert a new lyric at the next nearest note.
+
+Next Bar will instert a new lyric at the next bar."
+mouse_filter = 1
+text = "Enter key mode:"
+
+[node name="EnterKeyMode" type="OptionButton" parent="Settings/MarginC/HBoxC/LyricsTools"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+item_count = 2
+selected = 0
+popup/item_0/text = "Next Note"
+popup/item_0/id = 0
+popup/item_1/text = "Next Bar"
+popup/item_1/id = 1
+
 [node name="CopyLyrics" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 8
 size_flags_vertical = 10
 text = "Copy section lyrics"
 
