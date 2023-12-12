@@ -60,9 +60,7 @@ func _on_show_lyrics_toggled(button_pressed):
 	move_to_front()
 	%PlayheadHandle.move_to_front()
 	set_visible(button_pressed)
-	%AddLyric.disabled = !button_pressed
 	%CopyLyrics.disabled = !button_pressed
-	%LyricBar.editable = button_pressed
 
 
 func _on_chart_loaded():
@@ -71,15 +69,8 @@ func _on_chart_loaded():
 	%PlayheadHandle.move_to_front()
 
 
-func _on_add_lyric_pressed(): _add_lyric(%LyricBar.value,"")
-
-
 func _draw():
 	draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))
-	var lyric_add_bar = chart.bar_to_x(%LyricBar.value)
-	draw_line(Vector2.RIGHT * lyric_add_bar, Vector2(lyric_add_bar,size.y),
-			Color(0.7, 0.15, 1, 0.35), 8.0
-			)
 
 func _gui_input(event):
 	if Input.is_key_pressed(KEY_SHIFT):

@@ -103,7 +103,6 @@ func _do_tmb_update():
 	%SectionStart.max_value = tmb.endpoint
 	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
 	%PlayheadPos.max_value = tmb.endpoint
-	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
 	%Settings._update_handles()
 	for note in get_children():

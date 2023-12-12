@@ -685,11 +685,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Section:"
 
-[node name="SectionToViewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
-layout_mode = 2
-tooltip_text = "Move the section to the current scroll position."
-text = " Get Over Here "
-
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
 alignment = 2
@@ -749,11 +744,6 @@ layout_mode = 2
 focus_mode = 2
 step = 2.08165e-12
 
-[node name="CopyHereButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
-layout_mode = 2
-tooltip_text = "Move copy handle to within the current view."
-text = "Here"
-
 [node name="LyricsTools" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -765,34 +755,6 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 2
 text = "Show lyrics editor"
-
-[node name="AddLyric" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 8
-disabled = true
-text = "Add new lyric at..."
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/LyricsTools"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 8
-
-[node name="LyricHereButton" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools/HBoxContainer"]
-layout_mode = 2
-tooltip_text = "Move lyric handle to within the current view."
-text = "Here"
-
-[node name="LyricBar" type="SpinBox" parent="Settings/MarginC/HBoxC/LyricsTools/HBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(114, 0)
-layout_mode = 2
-size_flags_horizontal = 10
-focus_mode = 2
-alignment = 2
-editable = false
-prefix = "Beat"
 
 [node name="CopyLyrics" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
@@ -866,16 +828,11 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/TootVolSlider" to="Settings" method="_on_toot_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox2/SectionToViewButton" to="Settings" method="_on_section_to_view_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyButton" to="." method="_on_copy_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/PlayheadPos" to="Settings" method="_on_copy_target_value_changed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyHereButton" to="Settings" method="_on_copy_here_button_pressed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/AddLyric" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_add_lyric_pressed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/HBoxContainer/LyricHereButton" to="Settings" method="_on_lyric_here_button_pressed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/LyricsTools/HBoxContainer/LyricBar" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_lyric_bar_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/CopyLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_copy_lyrics_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/HelpButton" to="." method="_on_help_button_pressed"]

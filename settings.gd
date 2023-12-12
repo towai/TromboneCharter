@@ -201,24 +201,6 @@ func _on_copy_target_value_changed(value):
 	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
-func _on_section_to_view_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	var min_bar = ceil(  bounds.left )
-	var max_bar = floor( bounds.right )
-	if (section_start >= min_bar) && ( section_start <= max_bar): return
-	section_start = min_bar
-	# not totally sure we should do this part
-	var max_len = max_bar - min_bar
-	section_length = min(section_length,max_len)
-
-func _on_copy_here_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	%PlayheadHandle.set_bar( bounds.center )
-
-# TODO: delete this
-# func _on_lyric_here_button_pressed() -> void:
-# 	var bounds = %Chart.view_bounds
-# 	%AddLyricHandle.set_bar( bounds.center )
 #endregion
 
 func _on_preview_vol_reset_pressed() -> void:
