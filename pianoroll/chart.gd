@@ -293,6 +293,25 @@ func count_onscreen_notes() -> int:
 		if (child is Note && child.is_in_view): accum += 1
 	return accum
 
+func update_playhead(event):
+	var bar = %Chart.x_to_bar(event.position.x)
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				# Since the Chart node is currently handling this input event
+				# Godot won't change the cursor shape when the playhead moves
+				# so I'm manually setting it here
+				mouse_default_cursor_shape = CURSOR_POINTING_HAND
+				settings.playhead_pos = bar
+			else:
+				mouse_default_cursor_shape = CURSOR_ARROW
+	elif event is InputEventMouseMotion:
+		queue_redraw()
+	# Forward the input event to the handle here otherwise the user will
+	# need to re-click to move the playhead further.
+	var mouse_pos = %PlayheadHandle.get_local_mouse_position()
+	event.position = mouse_pos
+	%PlayheadHandle._gui_input(event)
 
 func _gui_input(event):
 	if event is InputEventPanGesture:
@@ -305,24 +324,7 @@ func _gui_input(event):
 		|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
 			_on_scroll_change()
 	if Input.is_key_pressed(KEY_SHIFT):
-		var bar = %Chart.x_to_bar(event.position.x)
-		if event is InputEventMouseButton:
-			if event.button_index == MOUSE_BUTTON_LEFT:
-				if event.pressed:
-					# Since the Chart node is currently handling this input event
-					# Godot won't change the cursor shape when the playhead moves
-					# so I'm manually setting it here
-					mouse_default_cursor_shape = CURSOR_POINTING_HAND
-					settings.playhead_pos = bar
-				else:
-					mouse_default_cursor_shape = CURSOR_ARROW
-		elif event is InputEventMouseMotion:
-			queue_redraw()
-		# Forward the input event to the handle here otherwise the user will
-		# need to re-click to move the playhead further.
-		var mouse_pos = %PlayheadHandle.get_local_mouse_position()
-		event.position = mouse_pos
-		%PlayheadHandle._gui_input(event)
+		update_playhead(event)
 		return
 	match mouse_mode:
 		SELECT_MODE:
@@ -364,6 +366,8 @@ func _gui_input(event):
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
 				
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+				%LyricsEditor.move_to_front()
+				%PlayheadHandle.move_to_front()
 
 func _notification(what):
 	match what:

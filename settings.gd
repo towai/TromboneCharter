@@ -161,7 +161,6 @@ func _update_handles():
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
 		%PlayheadHandle.update_pos(playhead_pos)
-		%AddLyricHandle.update_pos(%LyricBar.value)
 
 func _force_decimals(box:SpinBox):
 	if box.value == int(box.value):
@@ -181,8 +180,6 @@ func section_handle_dragged(value:float,which:Node):
 		_on_section_length_value_changed(value - section_start)
 	elif which == %PlayheadHandle: 
 		_on_copy_target_value_changed(value)
-	if which == %AddLyricHandle:
-		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 func _on_section_start_value_changed(value):
 	section_start = value
@@ -218,9 +215,10 @@ func _on_copy_here_button_pressed() -> void:
 	var bounds = %Chart.view_bounds
 	%PlayheadHandle.set_bar( bounds.center )
 
-func _on_lyric_here_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	%AddLyricHandle.set_bar( bounds.center )
+# TODO: delete this
+# func _on_lyric_here_button_pressed() -> void:
+# 	var bounds = %Chart.view_bounds
+# 	%AddLyricHandle.set_bar( bounds.center )
 #endregion
 
 func _on_preview_vol_reset_pressed() -> void:
@@ -241,7 +239,6 @@ func _on_timing_snap_value_changed(value):
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
-	%LyricBar.step = snap
 
 
 func _on_time_snap_toggled(button_pressed):
@@ -250,8 +247,6 @@ func _on_time_snap_toggled(button_pressed):
 		true: 
 			%SectionStart.step	= snap
 			%SectionLength.step = snap
-			%LyricBar.step		= snap
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
-			%LyricBar.step = 0.0001

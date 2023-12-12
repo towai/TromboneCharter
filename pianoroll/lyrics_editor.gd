@@ -7,7 +7,6 @@ var _update_queued := false
 
 func _ready():
 	Global.tmb_updated.connect(_on_tmb_update)
-	%AddLyricHandle.double_clicked.connect(_add_lyric.bind(""))
 
 func _on_tmb_update(): _update_queued = true
 
@@ -32,6 +31,7 @@ func _add_lyric(bar:float,lyric:String):
 	new_lyric.text = lyric
 	new_lyric.bar = bar
 	add_child(new_lyric)
+	return new_lyric
 
 
 func _update_lyrics():
@@ -58,6 +58,7 @@ func _refresh_lyrics():
 
 func _on_show_lyrics_toggled(button_pressed):
 	move_to_front()
+	%PlayheadHandle.move_to_front()
 	set_visible(button_pressed)
 	%AddLyric.disabled = !button_pressed
 	%CopyLyrics.disabled = !button_pressed
@@ -67,15 +68,10 @@ func _on_show_lyrics_toggled(button_pressed):
 func _on_chart_loaded():
 	_refresh_lyrics()
 	move_to_front()
+	%PlayheadHandle.move_to_front()
 
 
 func _on_add_lyric_pressed(): _add_lyric(%LyricBar.value,"")
-
-func _on_lyric_bar_value_changed(value):
-	%LyricBar.value = value
-	%Settings._force_decimals(%LyricBar)
-	%AddLyricHandle.position.x = %Chart.bar_to_x(%LyricBar.value) - 3
-	queue_redraw()
 
 
 func _draw():
@@ -85,6 +81,15 @@ func _draw():
 			Color(0.7, 0.15, 1, 0.35), 8.0
 			)
 
+func _gui_input(event):
+	if Input.is_key_pressed(KEY_SHIFT):
+		%Chart.update_playhead(event)
+		return
+	if event is InputEventMouseButton and event.double_click:
+		var bar = %Chart.x_to_bar(event.position.x)
+		if %Settings.snap_time: bar = snapped(bar, chart.current_subdiv)
+		var new_lyric = _add_lyric(bar,"")
+		new_lyric.line_edit.grab_focus()
 
 func _on_copy_lyrics_pressed():
 	Global.working_tmb.lyrics = package_lyrics()
