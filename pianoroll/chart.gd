@@ -54,7 +54,8 @@ func bar_to_x(bar:float): return bar * bar_spacing
 var EDIT_MODE := 0
 var SELECT_MODE := 1
 var mouse_mode : int = EDIT_MODE
-
+var show_preview : bool = false
+var playhead_preview : float = 0.0
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -101,7 +102,7 @@ func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
 	%SectionStart.max_value = tmb.endpoint
 	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
-	%PlayheadPos.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint
 	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
 	%Settings._update_handles()
@@ -244,6 +245,11 @@ func _draw():
 				bar_to_x(settings.section_length), size.y)
 		draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
 		draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
+	if show_preview:
+		var mouse_pos = get_local_mouse_position()
+		if get_rect().has_point(mouse_pos):
+			draw_line(Vector2(mouse_pos.x,0), Vector2(mouse_pos.x,size.y),
+						Color.ORANGE_RED, 1 )
 	if %PreviewController.is_playing:
 		if settings.section_length:
 			draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
@@ -298,48 +304,65 @@ func _gui_input(event):
 		|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
 		|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
 			_on_scroll_change()
-	match mouse_mode:
-		SELECT_MODE:
-			# this isn't as clean as i'd like but i didn't want to rewrite everything
-			var bar = %Chart.x_to_bar(event.position.x)
-			if bar < 0:
-				bar = 0
-			if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
-			if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
-				prev_section_start = bar
-				settings.section_start = bar
-				settings.section_length = 0
-			elif event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
-				prev_section_start = settings.section_start
-			elif event is InputEventMouseMotion && event.pressure:
-				if %Chart.x_to_bar(event.position.x) < prev_section_start:
-					settings.section_length = prev_section_start - bar
-					settings.section_start = bar
+	if Input.is_key_pressed(KEY_SHIFT):
+		var bar = %Chart.x_to_bar(event.position.x)
+		if event is InputEventMouseButton:
+			if event.button_index == MOUSE_BUTTON_LEFT:
+				if event.pressed:
+					# Since the Chart node is currently handling this input event
+					# Godot won't change the cursor shape when the playhead moves
+					# so I'm manually setting it here
+					mouse_default_cursor_shape = CURSOR_POINTING_HAND
+					settings.playhead_pos = bar
 				else:
-					settings.section_length = bar - settings.section_start
-		EDIT_MODE: #Edit mode (default)
-			event = event as InputEventMouseButton
-			if event == null || !event.pressed: return
-			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-				@warning_ignore("unassigned_variable")
-				var new_note_pos : Vector2
-				
-				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
-				else: new_note_pos.x = to_unsnapped(event.position).x
-				
-				# Current length of tap notes
-				var note_length = 0.0625 if settings.tap_notes else current_subdiv
-				
-				if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
-				if continuous_note_overlaps(new_note_pos.x, note_length): return
-				
-				if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
-				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
-						Global.SEMITONE * -13, Global.SEMITONE * 13)
-				
-				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
-	
-
+					mouse_default_cursor_shape = CURSOR_ARROW
+		elif event is InputEventMouseMotion:
+			queue_redraw()
+	else:
+		match mouse_mode:
+			SELECT_MODE:
+				# this isn't as clean as i'd like but i didn't want to rewrite everything
+				var bar = %Chart.x_to_bar(event.position.x)
+				if bar < 0:
+					bar = 0
+				if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
+				if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
+					prev_section_start = bar
+					settings.section_start = bar
+					settings.section_length = 0
+				elif event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
+					prev_section_start = settings.section_start
+				elif event is InputEventMouseMotion && event.pressure:
+					if %Chart.x_to_bar(event.position.x) < prev_section_start:
+						settings.section_length = prev_section_start - bar
+						settings.section_start = bar
+					else:
+						settings.section_length = bar - settings.section_start
+			EDIT_MODE: #Edit mode (default)
+				event = event as InputEventMouseButton
+				if event == null || !event.pressed: return
+				if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
+					@warning_ignore("unassigned_variable")
+					var new_note_pos : Vector2
+					
+					if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
+					else: new_note_pos.x = to_unsnapped(event.position).x
+					
+					# Current length of tap notes
+					var note_length = 0.0625 if settings.tap_notes else current_subdiv
+					
+					if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
+					if continuous_note_overlaps(new_note_pos.x, note_length): return
+					
+					if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
+					else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
+							Global.SEMITONE * -13, Global.SEMITONE * 13)
+					
+					add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+	# Forward the input event to the handle here otherwise the user will need to re-click to move the playhead further.
+	var mouse_pos = %PlayheadHandle.get_local_mouse_position()
+	event.position = mouse_pos
+	%PlayheadHandle._gui_input(event)
 
 func _notification(what):
 	match what:
@@ -355,3 +378,13 @@ func _on_doot_toggle_toggled(toggle): doot_enabled = toggle
 func _on_show_targets_toggled(toggle):
 	draw_targets = toggle
 	for note in get_children(): note.queue_redraw()
+
+func _on_mouse_exited():
+	show_preview = false
+	queue_redraw()
+
+
+func _on_mouse_entered():
+	if Input.is_key_pressed(KEY_SHIFT):
+		show_preview = true
+		queue_redraw()

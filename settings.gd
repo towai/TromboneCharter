@@ -113,7 +113,7 @@ func _update_values():
 	year.value = tmb.year
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
-	%PlayheadPos.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint
 	_update_handles()
 	
 	if !use_custom_colors:
