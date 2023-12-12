@@ -88,6 +88,12 @@ func _on_line_edit_gui_input(event:InputEvent) -> void:
 					new_bar = snapped(bar + snap_value, snap_value)
 					if new_bar >= Global.working_tmb.endpoint:
 						return
+				for lyric in editor.get_children():
+					if lyric.bar == new_bar:
+						if !lyric.is_in_view:
+							lyric.scroll_to_lyric()
+						lyric.line_edit.grab_focus()
+						return
 				new_lyric = editor._add_lyric(new_bar, "")
 				if !new_lyric.is_in_view:
 					new_lyric.scroll_to_lyric()
