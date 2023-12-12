@@ -318,51 +318,52 @@ func _gui_input(event):
 					mouse_default_cursor_shape = CURSOR_ARROW
 		elif event is InputEventMouseMotion:
 			queue_redraw()
-	else:
-		match mouse_mode:
-			SELECT_MODE:
-				# this isn't as clean as i'd like but i didn't want to rewrite everything
-				var bar = %Chart.x_to_bar(event.position.x)
-				if bar < 0:
-					bar = 0
-				if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
-				if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
-					prev_section_start = bar
+		# Forward the input event to the handle here otherwise the user will
+		# need to re-click to move the playhead further.
+		var mouse_pos = %PlayheadHandle.get_local_mouse_position()
+		event.position = mouse_pos
+		%PlayheadHandle._gui_input(event)
+		return
+	match mouse_mode:
+		SELECT_MODE:
+			# this isn't as clean as i'd like but i didn't want to rewrite everything
+			var bar = %Chart.x_to_bar(event.position.x)
+			if bar < 0:
+				bar = 0
+			if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
+			if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
+				prev_section_start = bar
+				settings.section_start = bar
+				settings.section_length = 0
+			elif event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
+				prev_section_start = settings.section_start
+			elif event is InputEventMouseMotion && event.pressure:
+				if %Chart.x_to_bar(event.position.x) < prev_section_start:
+					settings.section_length = prev_section_start - bar
 					settings.section_start = bar
-					settings.section_length = 0
-				elif event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && !event.pressed:
-					prev_section_start = settings.section_start
-				elif event is InputEventMouseMotion && event.pressure:
-					if %Chart.x_to_bar(event.position.x) < prev_section_start:
-						settings.section_length = prev_section_start - bar
-						settings.section_start = bar
-					else:
-						settings.section_length = bar - settings.section_start
-			EDIT_MODE: #Edit mode (default)
-				event = event as InputEventMouseButton
-				if event == null || !event.pressed: return
-				if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-					@warning_ignore("unassigned_variable")
-					var new_note_pos : Vector2
-					
-					if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
-					else: new_note_pos.x = to_unsnapped(event.position).x
-					
-					# Current length of tap notes
-					var note_length = 0.0625 if settings.tap_notes else current_subdiv
-					
-					if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
-					if continuous_note_overlaps(new_note_pos.x, note_length): return
-					
-					if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
-					else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
-							Global.SEMITONE * -13, Global.SEMITONE * 13)
-					
-					add_note(true, new_note_pos.x, note_length, new_note_pos.y)
-	# Forward the input event to the handle here otherwise the user will need to re-click to move the playhead further.
-	var mouse_pos = %PlayheadHandle.get_local_mouse_position()
-	event.position = mouse_pos
-	%PlayheadHandle._gui_input(event)
+				else:
+					settings.section_length = bar - settings.section_start
+		EDIT_MODE: #Edit mode (default)
+			event = event as InputEventMouseButton
+			if event == null || !event.pressed: return
+			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
+				@warning_ignore("unassigned_variable")
+				var new_note_pos : Vector2
+				
+				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
+				else: new_note_pos.x = to_unsnapped(event.position).x
+				
+				# Current length of tap notes
+				var note_length = 0.0625 if settings.tap_notes else current_subdiv
+				
+				if new_note_pos.x == tmb.endpoint: new_note_pos.x -= (1.0 / settings.timing_snap)
+				if continuous_note_overlaps(new_note_pos.x, note_length): return
+				
+				if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
+				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
+						Global.SEMITONE * -13, Global.SEMITONE * 13)
+				
+				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
 
 func _notification(what):
 	match what:
