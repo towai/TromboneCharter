@@ -95,6 +95,9 @@ func _on_line_edit_gui_input(event:InputEvent) -> void:
 						lyric.line_edit.grab_focus()
 						return
 				new_lyric = editor._add_lyric(new_bar, "")
-				if !new_lyric.is_in_view:
-					new_lyric.scroll_to_lyric()
 				new_lyric.line_edit.grab_focus()
+
+
+func _on_line_edit_focus_entered() -> void:
+	if !is_in_view:
+		scroll_to_lyric()

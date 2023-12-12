@@ -46,6 +46,7 @@ mouse_default_cursor_shape = 15
 texture_normal = ExtResource("3_65fow")
 
 [connection signal="pressed" from="DeleteButton" to="." method="_on_delete_button_pressed"]
+[connection signal="focus_entered" from="LineEdit" to="." method="_on_line_edit_focus_entered"]
 [connection signal="gui_input" from="LineEdit" to="." method="_on_line_edit_gui_input"]
 [connection signal="text_changed" from="LineEdit" to="." method="_on_line_edit_text_changed"]
 [connection signal="gui_input" from="DragHandle" to="." method="_on_drag_handle_gui_input"]
