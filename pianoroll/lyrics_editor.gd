@@ -92,7 +92,7 @@ func _on_copy_lyrics_pressed():
 	var copied_lyrics := []
 	var section_start = Global.settings.section_start
 	var section_length = Global.settings.section_length
-	var copy_target = Global.settings.section_target
+	var copy_target = Global.settings.playhead_pos
 	
 	var copy_offset = copy_target - section_start
 	

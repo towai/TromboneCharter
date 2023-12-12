@@ -101,7 +101,7 @@ func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
 	%SectionStart.max_value = tmb.endpoint
 	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
-	%CopyTarget.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint - 1
 	%LyricBar.max_value = tmb.endpoint - 1
 	%LyricsEditor._update_lyrics()
 	%Settings._update_handles()
@@ -239,14 +239,18 @@ func assign_tt_note_ids():
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
-	var section_rect = Rect2(bar_to_x(settings.section_start), 1,
-			bar_to_x(settings.section_length), size.y)
-	draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
-	draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
+	if settings.section_length:
+		var section_rect = Rect2(bar_to_x(settings.section_start), 1,
+				bar_to_x(settings.section_length), size.y)
+		draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
+		draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
 	if %PreviewController.is_playing:
-		draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
-				Vector2(bar_to_x(%PreviewController.song_position),size.y),
-				Color.CORNFLOWER_BLUE, 2 )
+		if settings.section_length:
+			draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
+					Vector2(bar_to_x(%PreviewController.song_position),size.y),
+					Color.CORNFLOWER_BLUE, 2 )
+		else:
+			settings.playhead_pos = %PreviewController.song_position
 	for i in tmb.endpoint + 1:
 		var line_x = i * bar_spacing
 		var next_line_x = (i + 1) * bar_spacing
@@ -272,8 +276,8 @@ func _draw():
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
 					str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
-		draw_line(Vector2(bar_to_x(%CopyTarget.value), 0),
-				Vector2(bar_to_x(%CopyTarget.value), size.y),
+		draw_line(Vector2(bar_to_x(%PlayheadPos.value), 0),
+				Vector2(bar_to_x(%PlayheadPos.value), size.y),
 				Color.ORANGE_RED, 2.0)
 
 

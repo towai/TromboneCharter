@@ -51,9 +51,9 @@ var section_start : float:
 var section_length : float:
 	get: return %SectionLength.value
 	set(with):  %SectionLength.value = with
-var section_target : float:
-	get: return %CopyTarget.value
-	set(with):  %CopyTarget.value = with
+var playhead_pos : float:
+	get: return %PlayheadPos.value
+	set(with):  %PlayheadPos.value = with
 @onready var sect_start_handle = %SectStartHandle
 
 
@@ -113,7 +113,7 @@ func _update_values():
 	year.value = tmb.year
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
-	%CopyTarget.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint - 1
 	_update_handles()
 	
 	if !use_custom_colors:
@@ -160,7 +160,7 @@ func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 func _update_handles():
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
-		%SectTargetHandle.update_pos(section_target)
+		%PlayheadHandle.update_pos(playhead_pos)
 		%AddLyricHandle.update_pos(%LyricBar.value)
 
 func _force_decimals(box:SpinBox):
@@ -179,7 +179,7 @@ func section_handle_dragged(value:float,which:Node):
 		_on_section_start_value_changed(value)
 	elif which == %SectEndHandle: 
 		_on_section_length_value_changed(value - section_start)
-	elif which == %SectTargetHandle: 
+	elif which == %PlayheadHandle: 
 		_on_copy_target_value_changed(value)
 	if which == %AddLyricHandle:
 		%LyricsEditor._on_lyric_bar_value_changed(value)
@@ -199,9 +199,9 @@ func _on_section_length_value_changed(value):
 	%Chart.queue_redraw()
 
 func _on_copy_target_value_changed(value):
-	section_target = value
-	_force_decimals(%CopyTarget)
-	%SectTargetHandle.position.x = %Chart.bar_to_x(section_target) - SECT_HANDLE_RADIUS
+	playhead_pos = value
+	_force_decimals(%PlayheadPos)
+	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
 func _on_section_to_view_button_pressed() -> void:
@@ -216,7 +216,7 @@ func _on_section_to_view_button_pressed() -> void:
 
 func _on_copy_here_button_pressed() -> void:
 	var bounds = %Chart.view_bounds
-	%SectTargetHandle.set_bar( bounds.center )
+	%PlayheadHandle.set_bar( bounds.center )
 
 func _on_lyric_here_button_pressed() -> void:
 	var bounds = %Chart.view_bounds
@@ -241,7 +241,6 @@ func _on_timing_snap_value_changed(value):
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
-	%CopyTarget.step = snap
 	%LyricBar.step = snap
 
 
@@ -251,10 +250,8 @@ func _on_time_snap_toggled(button_pressed):
 		true: 
 			%SectionStart.step	= snap
 			%SectionLength.step = snap
-			%CopyTarget.step	= snap
 			%LyricBar.step		= snap
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
-			%CopyTarget.step = 0.0001
 			%LyricBar.step = 0.0001

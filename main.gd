@@ -166,7 +166,7 @@ func try_cfg_save():
 
 
 func _on_copy_button_pressed():
-	if %CopyTarget.value + Global.settings.section_length > tmb.endpoint:
+	if %PlayheadPos.value + Global.settings.section_length > tmb.endpoint:
 		$Alert.alert("Can't copy -- would run past the chart endpoint!",
 				Vector2(%SectionSelection.position.x - 12, %Settings.position.y - 12),
 				Alert.LV_ERROR)
@@ -186,7 +186,7 @@ func _on_copy_confirmed():
 		print("copy section empy")
 		return
 	
-	var copy_target = Global.settings.section_target
+	var copy_target = Global.settings.playhead_pos
 	
 	tmb.clear_section(copy_target,length)
 	for note in notes:

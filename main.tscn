@@ -277,7 +277,7 @@ grow_vertical = 2
 mouse_default_cursor_shape = 2
 script = ExtResource("10_fs4d4")
 
-[node name="SectTargetHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
+[node name="PlayheadHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 9
@@ -721,7 +721,6 @@ text = "Length:"
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
-value = 1.0
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
@@ -754,11 +753,11 @@ layout_mode = 2
 tooltip_text = "Hold Shift to bypass confirmation"
 text = "Copy to:"
 
-[node name="CopyTarget" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
+[node name="PlayheadPos" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
-value = 2.0
+step = 2.08165e-12
 
 [node name="CopyHereButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
 layout_mode = 2
@@ -878,7 +877,7 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyButton" to="." method="_on_copy_button_pressed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyTarget" to="Settings" method="_on_copy_target_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/PlayheadPos" to="Settings" method="_on_copy_target_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyHereButton" to="Settings" method="_on_copy_here_button_pressed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/AddLyric" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_add_lyric_pressed"]
