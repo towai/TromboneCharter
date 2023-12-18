@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=27 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
 [ext_resource type="Script" path="res://toottally.gd" id="7_h0pqp"]
 [ext_resource type="FontFile" uid="uid://bednem37cigyi" path="res://fonts/SourceCodePro-Regular.ttf" id="7_jt8rs"]
+[ext_resource type="Script" path="res://copy_confirm.gd" id="7_m5n28"]
 [ext_resource type="Script" path="res://pianoroll/chart_view.gd" id="8_j823s"]
 [ext_resource type="Script" path="res://ffmpeg_instructions.gd" id="8_wmpcw"]
 [ext_resource type="Script" path="res://pianoroll/chart.gd" id="9_g46yt"]
@@ -82,10 +83,11 @@ title = "You Sure?"
 position = Vector2i(200, 200)
 size = Vector2i(234, 192)
 unresizable = true
-dialog_text = "Anything that's already there will be deleted.
-
+dialog_text = "Are you sure you want to paste %s notes?
+%s
 Notes with tails going into or out of the section might end up overlapping other notes."
 dialog_autowrap = true
+script = ExtResource("7_m5n28")
 
 [node name="LoadDialog" type="FileDialog" parent="."]
 unique_name_in_owner = true
@@ -734,11 +736,6 @@ text = "Preview"
 layout_mode = 2
 alignment = 2
 
-[node name="CopyButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
-layout_mode = 2
-tooltip_text = "Hold Shift to bypass confirmation"
-text = "Copy to:"
-
 [node name="PlayheadPos" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -813,7 +810,7 @@ text = "toot toot lol"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
 [connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]
-[connection signal="confirmed" from="CopyConfirm" to="." method="_on_copy_confirmed"]
+[connection signal="confirmed" from="CopyConfirm" to="CopyConfirm" method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]
 [connection signal="meta_clicked" from="Instructions/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
@@ -856,7 +853,6 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyButton" to="." method="_on_copy_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/PlayheadPos" to="Settings" method="_on_copy_target_value_changed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/CopyLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_copy_lyrics_pressed"]

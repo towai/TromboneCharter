@@ -11,6 +11,9 @@ var tmb : TMBInfo:
 var popup_location : Vector2i:
 	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
 
+enum ClipboardType {
+	NOTES
+}
 
 func _ready():
 	DisplayServer.window_set_min_size(Vector2(1280,600))
@@ -57,6 +60,10 @@ func _input(event):
 		else:
 			%Chart.show_preview = false
 		%Chart.queue_redraw()
+	if event.pressed && event.is_action_pressed("ui_copy"):
+		_on_copy()
+	if event.pressed && event.is_action_pressed("ui_paste"):
+		_on_paste()
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
 	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL):
@@ -171,36 +178,46 @@ func try_cfg_save():
 		print(error_string(err))
 
 
-func _on_copy_button_pressed():
-	if %PlayheadPos.value + Global.settings.section_length > tmb.endpoint:
-		$Alert.alert("Can't copy -- would run past the chart endpoint!",
-				Vector2(%SectionSelection.position.x - 12, %Settings.position.y - 12),
-				Alert.LV_ERROR)
-		return
-	if Input.is_key_pressed(KEY_SHIFT):
-		_on_copy_confirmed()
-		return
-	$CopyConfirm.show()
-
-
-func _on_copy_confirmed():
+func _on_copy():
 	var start = Global.settings.section_start
+	print(start)
 	var length = Global.settings.section_length
+	print(length)
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
 		print("copy section empy")
 		return
-	
-	var copy_target = Global.settings.playhead_pos
-	
-	tmb.clear_section(copy_target,length)
-	for note in notes:
-		note[TMBInfo.NOTE_BAR] += copy_target
-		tmb.notes.append(note)
-	tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-	emit_signal("chart_loaded")
+	var data = {
+		"trombone_charter_data_type": ClipboardType.NOTES,
+		"length": length,
+		"notes": notes
+	}
+	DisplayServer.clipboard_set(JSON.stringify(data))
+	$Alert.alert("Copied %s notes to clipboard" % notes.size(), Vector2(%ChartView.global_position.x, 10),
+				Alert.LV_SUCCESS)
 
+func _on_paste():
+	var clipboard = DisplayServer.clipboard_get()
+	if !clipboard: return
+	var j = JSON.new()
+	var err = j.parse(clipboard)
+	if err: return
+
+	var data = j.data
+	if typeof(data) != TYPE_DICTIONARY: return
+	if !data.has('trombone_charter_data_type'): return
+	match int(data.trombone_charter_data_type):
+		ClipboardType.NOTES:
+			if %PlayheadPos.value + data.length > tmb.endpoint:
+				$Alert.alert("Can't paste -- would run past the chart endpoint!",
+						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
+				return
+			
+			var copy_target = Global.settings.playhead_pos
+
+			$CopyConfirm.set_values(copy_target, data)
+			$CopyConfirm.show()
 
 func _on_rich_text_label_meta_clicked(meta):
 	var data = JSON.parse_string(meta)
