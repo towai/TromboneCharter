@@ -1,0 +1,54 @@
+[gd_scene load_steps=5 format=3 uid="uid://ctbdgj5frf47d"]
+
+[ext_resource type="Script" path="res://addons/undoredo/Examples/TestScenePostChange.gd" id="1_2xnbp"]
+[ext_resource type="Script" path="res://addons/undoredo/Undoer.gd" id="2_jlflq"]
+
+[sub_resource type="SystemFont" id="SystemFont_sollx"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_khxlf"]
+font = SubResource("SystemFont_sollx")
+font_size = 40
+
+[node name="TestScene" type="Node2D"]
+script = ExtResource("1_2xnbp")
+
+[node name="Undoer" type="Node" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("2_jlflq")
+target = NodePath("..")
+
+[node name="UndoButton" type="Button" parent="."]
+offset_top = 36.0
+offset_right = 50.0
+offset_bottom = 67.0
+text = "Undo"
+
+[node name="RedoButton" type="Button" parent="."]
+offset_top = 72.0
+offset_right = 50.0
+offset_bottom = 103.0
+text = "Redo
+"
+
+[node name="IncrementButton" type="Button" parent="."]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Increment"
+
+[node name="DecrementButton" type="Button" parent="."]
+offset_left = 98.0
+offset_right = 192.0
+offset_bottom = 31.0
+text = "Decrement"
+
+[node name="Label" type="Label" parent="."]
+offset_left = 104.0
+offset_top = 52.0
+offset_right = 144.0
+offset_bottom = 75.0
+text = "0"
+label_settings = SubResource("LabelSettings_khxlf")
+
+[connection signal="pressed" from="UndoButton" to="." method="_on_undo_button_pressed"]
+[connection signal="pressed" from="RedoButton" to="." method="_on_redo_button_pressed"]
+[connection signal="pressed" from="IncrementButton" to="." method="_on_increment_button_pressed"]
+[connection signal="pressed" from="DecrementButton" to="." method="_on_decrement_button_pressed"]
