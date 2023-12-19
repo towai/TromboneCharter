@@ -194,7 +194,6 @@ func _end_drag():
 		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()
-	print("call end_drag from ",bar)
 	print(propagate_to_the_right("find_idx_in_slide"))
 	chart.update_note_array()
 
@@ -208,7 +207,6 @@ func has_slide_neighbor(direction:int,pitch:float):
 			return touching_notes.has(direction) && touching_notes[direction].end_pitch == pitch
 		END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
-	
 
 
 func update_touching_notes():
