@@ -100,6 +100,77 @@ func _on_new_chart_pressed(): show_popup($NewChartConfirm)
 func _on_new_chart_confirmed():
 	tmb = TMBInfo.new()
 	%Settings.use_custom_colors = false
+	%WavPlayer.stream = null
+	print("new tmb")
+	emit_signal("chart_loaded")
+
+
+func _on_load_chart_pressed(): show_popup($LoadDialog)
+func _on_load_dialog_file_selected(path):
+	print("Load tmb from %s" % path)
+	var dir = path.substr(0,path.rfind("/"))
+	if dir == path: dir = path.substr(0,path.rfind("\\"))
+	var err = tmb.load_from_file(path)
+	if err:
+		$ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
+		show_popup($ErrorPopup)
+		return
+	
+	$SaveDialog.current_dir = dir
+	$SaveDialog.current_path = path
+	cfg.set_value("Config","saved_dir", dir)
+	try_cfg_save()
+	Global.chart_just_loaded = true
+	
+	%WavPlayer.stream = null
+	
+	emit_signal("chart_loaded")
+	if %Settings.load_wav_on_chart_load:
+		err = try_to_load_wav(dir + "/song.wav")
+		if err:
+			print("No wav loaded -- %s" % error_string(err))
+			if %Settings.convert_ogg:
+				print("Try to convert song.ogg")
+				DirAccess.open(dir)
+				err = DirAccess.get_open_error()
+				if err:
+					print("DirAccess error : %s" % error_string(err))
+					return
+				err = try_to_convert_ogg(dir + "/song.ogg")
+				if !err:
+					var wav_err = try_to_load_wav(dir + "/song.wav")
+					if wav_err: print("no ffmpeg error but couldn't load wav??")
+				else: print("ogg->wav conversion result %d (-1 means ffmpeg was not found)"
+						% err)
+	
+	%WAVLoadedLabel.text = "song.wav loaded!" if %WavPlayer.stream != null \
+			else "no ffmpeg!" if err == -1 else "no song.wav loaded!"
+	
+
+
+func try_to_load_wav(path:String) -> int:
+	print("Try load wav from %s" % path)
+	var f = FileAccess.open(path,FileAccess.READ)
+	if f == null:
+		var err = FileAccess.get_open_error()
+		return err
+	
+	var stream := AudioLoader.loadfile(path, false) as AudioStreamWAV
+	if stream == null :
+		print("stream null?")
+		return ERR_FILE_CANT_READ
+	elif stream.data == null || stream.data.is_empty():
+		print("no data?")
+		return ERR_FILE_CANT_READ
+	
+	%WavPlayer.stream = stream
+	return OK
+
+
+func _on_new_chart_pressed(): show_popup($NewChartConfirm)
+func _on_new_chart_confirmed():
+	tmb = TMBInfo.new()
+	%Settings.use_custom_colors = false
 	%TrackPlayer.stream = null
 	print("new tmb")
 	emit_signal("chart_loaded")

@@ -28,7 +28,7 @@ var trackRef    := ""
 var year		: int = 1999
 var tempo		: float = 120
 var endpoint	: int = 4
-var timesig 	: int = 2
+var timesig 	: int = 4
 var difficulty	: int = 5
 var savednotespacing : int = 120
 

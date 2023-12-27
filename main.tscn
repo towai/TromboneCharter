@@ -98,6 +98,7 @@ mode_overrides_title = false
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.tmb")
+show_hidden_files = true
 
 [node name="SaveDialog" type="FileDialog" parent="."]
 unique_name_in_owner = true
@@ -107,6 +108,7 @@ ok_button_text = "Save"
 mode_overrides_title = false
 access = 2
 filters = PackedStringArray("*.tmb")
+show_hidden_files = true
 
 [node name="ErrorPopup" type="AcceptDialog" parent="."]
 unique_name_in_owner = true
@@ -213,11 +215,13 @@ text = "OK"
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
+custom_minimum_size = Vector2(360, 270)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 
 [node name="Piano" type="Control" parent="PianoRoll"]
+custom_minimum_size = Vector2(144, 0)
 custom_minimum_size = Vector2(144, 0)
 layout_mode = 2
 mouse_filter = 1
@@ -249,6 +253,7 @@ script = ExtResource("8_j823s")
 
 [node name="Chart" type="Control" parent="PianoRoll/ChartView"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
@@ -310,6 +315,7 @@ script = ExtResource("10_fs4d4")
 unique_name_in_owner = true
 clip_contents = true
 custom_minimum_size = Vector2(0, 150)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 script = ExtResource("6_2cfeh")
 
@@ -329,9 +335,12 @@ layout_mode = 2
 [node name="ViewSwitcher" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 0)
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 size_flags_vertical = 2
-text = "Edit Mode"
+tooltip_text = "-tooltip_text = \"Swap between chart info (such as length and bpm) and editor settings (such as timing snap and .wav loading).\"
+text = \"Go to Editor\""
+text = "Go to Info"
 
 [node name="LoadChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 layout_mode = 2
@@ -387,7 +396,8 @@ field_name = "Genre"
 
 [node name="Description" type="TextEdit" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 70)
+custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 size_flags_vertical = 3
 placeholder_text = "Description"

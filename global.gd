@@ -21,7 +21,25 @@ const NUM_KEYS = 27
 var settings : Settings
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
+###Dew's variables###
+var UR := [0,0,0]
+	# 0   => normal operation
+	# 1   => undo last action
+	# 2   => redo last action
+	#  ,0 => run no calculations //with addition of UR[2], should never be reached beyond initial declarations
+	#  ,1 => run A/D calculations only
+	#  ,2 => run any calculation
+	#  ,, => available redos
+var starting_note : Array
+var ratio := ["L","L","L","L","L"]
+var respects := ["F","F","F","F","F"]
+var revision = 0
+var chart_just_loaded : bool
+var initial_size = 0
 
+var a_array := []
+var d_array := []
+var main_stack := []
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
