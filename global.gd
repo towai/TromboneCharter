@@ -21,7 +21,8 @@ const NUM_KEYS = 27
 var settings : Settings
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
-###Dew's variables###
+
+### Dew's variables ###
 var UR := [0,0,0]
 	# 0   => normal operation
 	# 1   => undo last action
@@ -31,6 +32,8 @@ var UR := [0,0,0]
 	#  ,2 => run any calculation
 	#  ,, => available redos
 var starting_note : Array
+var old_note : Note
+
 var ratio := ["L","L","L","L","L"]
 var respects := ["F","F","F","F","F"]
 var revision = 0
@@ -40,6 +43,15 @@ var initial_size = 0
 var a_array := []
 var d_array := []
 var main_stack := []
+
+var changes := {}
+var key_name #TODO for multi-note editing: : String = revision number + _ + action ([a]dd,[d]elete, or [m]ove
+var d_note : Note
+
+var please_come_back = false
+var deleted = false
+### Dew's variables ###
+
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
