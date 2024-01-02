@@ -93,10 +93,7 @@ func _do_preview():
 	player.stop()
 
 	if !settings.section_length:
-		if settings.snap_time:
-			settings.playhead_pos = snapped(song_position, chart.current_subdiv)
-		else:
-			settings.playhead_pos = song_position
+		settings.playhead_pos = song_position
 	
 	song_position = -1.0
 	chart.queue_redraw()
