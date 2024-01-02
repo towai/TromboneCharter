@@ -699,6 +699,7 @@ layout_mode = 2
 tooltip_text = "Playhead Position"
 focus_mode = 2
 step = 2.08165e-12
+custom_arrow_step = 1.0
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
