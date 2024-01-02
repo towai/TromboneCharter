@@ -14,7 +14,10 @@ func _ready():
 	bar_changed.connect(%Settings.section_handle_dragged)
 
 func _on_mouse_entered():
-	Input.set_custom_mouse_cursor(grabby_hand, Input.CURSOR_POINTING_HAND, Vector2(9, 3))
+	Input.set_custom_mouse_cursor(
+		grabbing_hand if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) else grabby_hand,
+		Input.CURSOR_POINTING_HAND, Vector2(9, 3)
+	)
 func _on_mouse_exited():
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		Input.set_custom_mouse_cursor(null, Input.CURSOR_POINTING_HAND)
@@ -25,7 +28,7 @@ func update_pos(bar:float): position.x = %Chart.bar_to_x(bar) - 3
 
 func _gui_input(event):
 	var bar = chart.x_to_bar(event.position.x + position.x)
-	if %Settings.snap_time: bar = snapped(bar, chart.current_subdiv)
+	if %Settings.snap_time && self != %PlayheadHandle: bar = snapped(bar, chart.current_subdiv)
 	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT:
 		var rect := Rect2(Vector2.ZERO, size)
 		Input.set_custom_mouse_cursor(grabbing_hand if event.pressed

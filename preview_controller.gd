@@ -31,8 +31,11 @@ func _do_preview():
 	var previous_time : float
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
-	var startpoint_in_stream : float = Global.beat_to_time(settings.section_start)
-	var start_beat = settings.section_start
+	var startpoint_in_stream : float = Global.beat_to_time(settings.playhead_pos)
+	var start_beat : float = settings.playhead_pos
+	if settings.section_length:
+		startpoint_in_stream = Global.beat_to_time(settings.section_start)
+		start_beat = settings.section_start
 	var slide_start : float
 	var get_note_ons = func() -> Array[float]:
 		var arr : Array[float] = []
@@ -47,8 +50,10 @@ func _do_preview():
 		var elapsed_time = time - initial_time
 		
 		song_position = elapsed_time * (bpm / 60.0) + start_beat
-		if song_position > settings.section_start + settings.section_length \
-				|| Input.is_key_pressed(KEY_ESCAPE): break
+		if (settings.section_length && song_position > settings.section_start + settings.section_length):
+			break
+		if song_position >= settings.length.value:
+			break
 		
 		if int(last_position) != int(song_position) && %MetroChk.button_pressed:
 			metronome.play()
@@ -86,6 +91,9 @@ func _do_preview():
 	
 	StreamPlayer.stop()
 	player.stop()
+
+	if !settings.section_length:
+		settings.playhead_pos = song_position
 	
 	song_position = -1.0
 	chart.queue_redraw()
