@@ -249,6 +249,12 @@ func _draw():
 		if get_rect().has_point(mouse_pos):
 			draw_line(Vector2(mouse_pos.x,0), Vector2(mouse_pos.x,size.y),
 						Color.ORANGE_RED, 1 )
+		# no way to change the delay on a per-node basis, it seems
+		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0)
+		tooltip_text = ("%.4f" % %Chart.x_to_bar(mouse_pos.x)).rstrip('0.')
+	else:
+		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0.5)
+		tooltip_text = ""
 	if %PreviewController.is_playing:
 		if settings.section_length:
 			draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
