@@ -50,8 +50,10 @@ func _do_preview():
 		var elapsed_time = time - initial_time
 		
 		song_position = elapsed_time * (bpm / 60.0) + start_beat
-		if (settings.section_length && song_position > settings.section_start + settings.section_length) \
-				|| Input.is_key_pressed(KEY_ESCAPE): break
+		if (settings.section_length && song_position > settings.section_start + settings.section_length):
+			break
+		if song_position >= settings.length.value:
+			break
 		
 		if int(last_position) != int(song_position) && %MetroChk.button_pressed:
 			metronome.play()
@@ -90,8 +92,11 @@ func _do_preview():
 	StreamPlayer.stop()
 	player.stop()
 
-	if settings.snap_time && !settings.section_length:
-		settings.playhead_pos = snapped(song_position, chart.current_subdiv)
+	if !settings.section_length:
+		if settings.snap_time:
+			settings.playhead_pos = snapped(song_position, chart.current_subdiv)
+		else:
+			settings.playhead_pos = song_position
 	
 	song_position = -1.0
 	chart.queue_redraw()

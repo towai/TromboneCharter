@@ -163,11 +163,11 @@ func _update_handles():
 		%PlayheadHandle.update_pos(playhead_pos)
 
 func _force_decimals(box:SpinBox):
-	if box.value == int(box.value):
-		box.tooltip_text = str(box.value)
-		return
 	var lineedit = box.get_line_edit()
-	lineedit.text = ("%.4f" % box.value).rstrip('0')
+	if box.value == int(box.value):
+		lineedit.text = str(box.value)
+	else:
+		lineedit.text = ("%.4f" % box.value).rstrip('0')
 	box.tooltip_text = lineedit.text
 
 #region Sections
