@@ -166,9 +166,10 @@ func _force_decimals(box:SpinBox):
 	var lineedit = box.get_line_edit()
 	if box.value == int(box.value):
 		lineedit.text = str(box.value)
+		box.tooltip_text = lineedit.text
 	else:
-		lineedit.text = ("%.4f" % box.value).rstrip('0')
-	box.tooltip_text = lineedit.text
+		box.tooltip_text = str(box.value)
+		lineedit.text = ("%.4f" % box.value).rstrip('0.')
 
 #region Sections
 const SECT_HANDLE_RADIUS = 3.0
