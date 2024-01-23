@@ -42,9 +42,9 @@ var initial_size = 0
 
 var a_array := []
 var d_array := []
-var main_stack := []
+var active_stack := []
 
-var changes := {}
+var changes := [[Note,[]]]
 var key_name #TODO for multi-note editing: : String = revision number + _ + action ([a]dd,[d]elete, or [m]ove
 var d_note : Note
 

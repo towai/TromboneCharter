@@ -93,6 +93,13 @@ var starting_note : Array
 var added : bool
 var dragged : bool
 var click := false
+var next := Note
+var starting_note_p := []
+var starting_note_n := []
+var prev := Note
+var n_p_s := [Note, Note, Note] #indices: next(0), previous(1), self(2 depending on existence of others)
+var neighbors
+var note_set := []
 ###
 
 # cat rolls the most horrible solution ever, asked to leave the repo
@@ -148,9 +155,8 @@ func _gui_input(event):
 				Global.revision += 1
 				Global.a_array.append(Global.ratio)
 				Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
-				print("current revision: ",Global.revision)
-				Global.key_name = Global.revision# + "_d"
-				Global.changes[Global.key_name] = self
+				print("current index: ",Global.revision)
+				Global.changes.append([moved_notes()])
 				Global.d_note = self
 				chart.update_note_array()
 				### queue_free()
@@ -171,7 +177,7 @@ func _on_handle_input(event, which_handle):
 				click = true
 				Global.old_note = self
 				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
-					
+			print(Global.changes)
 			###
 			dragging = which_handle
 			drag_helper.init_drag()
@@ -185,10 +191,10 @@ func _on_handle_input(event, which_handle):
 			Global.revision += 1
 			Global.a_array.append(Global.ratio)
 			Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
-			print("current revision: ",Global.revision)
-			Global.key_name = Global.revision# + "_d"
-			Global.changes[Global.key_name] = self
+			print("current index: ",Global.revision)
+			Global.changes.append([moved_notes()])
 			Global.d_note = self
+			print(Global.changes)
 			chart.update_note_array()
 			### queue_free()
 
@@ -255,7 +261,6 @@ func _process_drag():
 
 func _end_drag():
 	dragging = DRAG_NONE
-	chart.redo_check()
 	#Dew note-changed check + effected drag-recording
 	click = false
 	#print("prior revision: ",Global.revision)
@@ -263,19 +268,24 @@ func _end_drag():
 	#print(starting_note)
 	#print(proper_note)
 	if starting_note != proper_note :
+		chart.redo_check()
 		if dragged:
 			Global.revision += 1
-			Global.key_name = Global.revision# + "_m"
-			Global.changes[Global.key_name] = self
+			print(Global.revision)
+			Global.changes.append([moved_notes()])
 			Global.a_array.append(Global.respects)
 			Global.d_array.append(starting_note.duplicate(true))
+			print("d: ",Global.changes)
 		if added:
 			Global.revision += 1
-			Global.key_name = Global.revision # + "_a"
-			Global.changes[Global.key_name] = self
+			print(Global.revision)
+			Global.changes.append([moved_notes()])
+			print(note_set)
 			Global.a_array.append(proper_note.duplicate(true))
 			Global.d_array.append(Global.ratio)
-	print("current revision: ",Global.revision)
+			print("a: ",Global.changes)
+	print("current index: ",Global.revision)
+	print("changes: ",Global.changes)
 	###
 	
 	slide_helper.snap_near_pitches()
@@ -298,7 +308,16 @@ func has_slide_neighbor(direction:int,pitch:float):
 		END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
 	
-
+func moved_notes() :
+	neighbors = slide_helper.find_touching_notes()
+	neighbors[2] = self
+	print("NEIGHBORS: ",neighbors)
+	for key in neighbors.keys() :
+		var note = neighbors[key]
+		note_set = [note,[note.bar,note.length,note.pitch_start,note.pitch_delta,note.pitch_start+note.pitch_delta]]
+		print("rev: ",Global.revision)
+		print("indexed note: ",note_set)
+	return note_set
 
 func update_touching_notes():
 	slide_helper.update_touching_notes()

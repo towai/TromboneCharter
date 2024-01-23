@@ -56,6 +56,7 @@ var dumb_copy := []
 var short_stack = 0
 var stuffing := false
 var stuffed_note : Note
+var drag_UR := false
 ###
 
 var EDIT_MODE := 0
@@ -101,13 +102,15 @@ func filicide(child):
 
 #Dew remove future undo/redo chain when overwritten
 func redo_check():
-	print("revision: ", Global.revision)
+	print("rev changes: ", Global.revision)
 	if Global.UR[2] > 0 :
-		var excess = Global.changes.keys()
-		for note in excess.slice(Global.revision+1,excess.size()-1,1,true) :
-			Global.changes.erase(note)
+		print("pre changes: ",Global.changes)
+		Global.changes = Global.changes.slice(0,Global.revision+1,1,true)
+		print("redo changes: ",Global.changes)
 		Global.a_array = Global.a_array.slice(0,Global.revision,1,true)
 		Global.d_array = Global.d_array.slice(0,Global.revision,1,true)
+		
+		
 		Global.UR[2] = 0
 	return
 	###
@@ -116,15 +119,15 @@ func redo_check():
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
-		short_stack = Global.a_array.size() + Global.initial_size - Global.main_stack.size()
+		short_stack = Global.a_array.size() + Global.initial_size - Global.active_stack.size()
 		Global.UR[0] = 1
-		print("undo!")
+		print("undo pressed!")
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
 		Global.UR[0] = 2
 		Global.UR[1] = 2
-		short_stack = Global.a_array.size() + Global.initial_size - Global.main_stack.size()
-		print("redo!")
+		short_stack = Global.a_array.size() + Global.initial_size - Global.active_stack.size()
+		print("redo pressed!")
 		if short_stack == 1 :
 			Global.UR[1] = 1
 		update_note_array()
@@ -206,18 +209,18 @@ func _on_tmb_loaded():
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
-func stuff_note(note_data : Array, child_note : Note) :
+func stuff_note(note := [Note,[]]) :
 	stuffing = true
-	stuffed_note = child_note
+	print(stuffing)
+	stuffed_note = note[0][0]
 	print("stuffed_note: ", stuffed_note)
-	"hi"
-	add_note(false, note_data[0], note_data[1], note_data[2], note_data[3])
+	add_note(false, note[0][1][0], note[0][1][1], note[0][1][2], note[0][1][3])
 	return
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var new_note : Note
 	if !stuffing :
-		redo_check()
+		#redo_check()
 		new_note = note_scn.instantiate()
 	else:
 		stuffing = false
@@ -265,12 +268,12 @@ func update_note_array():
 			note.pitch_start + note.pitch_delta
 		]
 		new_array.append(note_array)
-		Global.main_stack = new_array
+		Global.active_stack = new_array
 	
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
-	print("Global.main_stack: ",Global.main_stack)
-	print("Global.changes: ",Global.changes)
+	#print("Global.active_stack: ",Global.active_stack)
+	#print("Global.changes: ",Global.changes)
 	
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
@@ -320,32 +323,33 @@ func assign_tt_note_ids():
 func UR_handler():
 	print("UR!!!",Global.UR[0])
 	var passed_note = []
-	var changed_note : Note
-	var drag_UR = false
+	drag_UR = false
 	if Global.UR[0] == 1 :
 		print("UR Undo! // [1]: ",Global.UR[1])
 		if Global.revision > 1:
 			if Global.a_array[Global.revision-2] == Global.respects :
+				drag_UR = true
 				print("undo dragged")
 				passed_note = Global.d_array[Global.revision-2]
-				changed_note = Global.changes.get(Global.revision)
 				print("revision: ", Global.revision)
-				print("change: ", changed_note)
-				stuff_note(passed_note, changed_note)
 				
-				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.a_array[Global.revision-1]))
-				Global.main_stack.append(passed_note)
+				for note in Global.changes[Global.revision-2] :
+					stuff_note([note])
+				print("a_stack changes note u_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-2])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.active_stack.append(passed_note)
 				
 				Global.revision -= 2
 				Global.UR[0] = 0
 				Global.UR[2] += 1
-				drag_UR = true
 		if !drag_UR :
 			if Global.d_array[Global.revision-1] == Global.ratio:
 				print("undo added")
-				filicide(Global.changes.get(Global.revision))
-				
-				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.a_array[Global.revision-1]))
+				for note in Global.changes[Global.revision] :
+					print(Global.changes[Global.revision])
+					filicide(note[0])
+				print("a_stack changes note u_a: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.revision -= 1
 				Global.UR[0] = 0
 				Global.UR[2] += 1
@@ -353,17 +357,18 @@ func UR_handler():
 			elif Global.a_array[Global.revision-1] == Global.ratio:
 				print("undo deleted: ", Global.changes)
 				print("revision: ",   Global.revision)
-				print("to be added: ",Global.changes.get(Global.revision))
+				print("to be added: ",Global.changes[Global.revision])
 				passed_note = Global.d_array[Global.revision-1]
 				
-				stuff_note(passed_note,Global.changes.get(Global.revision))
+				for note in Global.changes[Global.revision-1] :
+					stuff_note([note])
 				
 				Global.revision -= 1
 				Global.UR[0] = 0
 				Global.UR[2] += 1
 		
-		print("main_stack: ",Global.main_stack)
-		dumb_copy = Global.main_stack
+		print("active_stack: ",Global.active_stack)
+		dumb_copy = Global.active_stack
 		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = dumb_copy
 		
@@ -371,50 +376,52 @@ func UR_handler():
 		print("UR Redo! // [1]: ",Global.UR[1])
 		if Global.UR[1] == 2 :
 			if Global.a_array[Global.revision] == Global.respects :
+				drag_UR = true
 				print("redo dragged")
 				passed_note = Global.a_array[Global.revision+1]
-				changed_note = Global.changes.get(Global.revision)
 				print("revision: ", Global.revision)
-				print("change: ", changed_note)
-				stuff_note(passed_note, changed_note)
 				
-				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.d_array[Global.revision]))
-				Global.main_stack.append(passed_note)
+				for note in Global.changes[Global.revision+1] :
+					stuff_note([note])
+				print("a_stack changes note r_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
+				Global.active_stack.append(passed_note)
 				
 				Global.revision += 2
 				Global.UR[2] -= 1
-				drag_UR = true
 			
 		if Global.UR[1] != 0 && !drag_UR :
 			if Global.d_array[Global.revision] == Global.ratio :
 				print("redo added: ", Global.changes)
 				print("revision: ",   Global.revision+1)
-				print("to be added: ",Global.changes.get(Global.revision+1))
+				print("to be added: ",Global.changes[Global.revision+1])
 				passed_note = Global.a_array[Global.revision]
 				
-				stuff_note(passed_note,Global.changes.get(Global.revision+1))
+				for note in Global.changes[Global.revision+1] :
+					stuff_note([note])
 				
-				Global.main_stack.append(passed_note)
+				Global.active_stack.append(passed_note)
 				
 				Global.revision += 1
 				Global.UR[2] -= 1
 		
 			elif Global.a_array[Global.revision] == Global.ratio :
 				print("redo deleted")
-				filicide(Global.changes.get(Global.revision))
-				
-				
-				Global.main_stack.remove_at(Global.main_stack.bsearch(Global.d_array[Global.revision]))
+				for note in Global.changes[Global.revision]:
+					filicide(note[0])
+				print("a_stack changes note r_d: ",Global.a_array[Global.revision-1])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
 				Global.revision += 1
 				Global.UR[2] -= 1
 				
-
+		
+		print("active_stack: ",Global.active_stack)
 		Global.UR[1] = 0
-		dumb_copy = Global.main_stack.slice(0,Global.revision)
+		dumb_copy = Global.active_stack.slice(0,Global.revision)
 		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = dumb_copy
 	print("revision post-UR: ",Global.revision)
-	print("Global.main_stack: ",Global.main_stack)
+	print("Global.active_stack: ",Global.active_stack)
 	print("Global.changes: ",Global.changes)
 	
 	Global.UR[0] = 0
