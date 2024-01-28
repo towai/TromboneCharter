@@ -50,6 +50,8 @@ var d_note : Note
 
 var please_come_back = false
 var deleted = false
+
+var fresh := true
 ### Dew's variables ###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations

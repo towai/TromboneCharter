@@ -211,10 +211,10 @@ func _on_tmb_loaded():
 
 func stuff_note(note := [Note,[]]) :
 	stuffing = true
-	print(stuffing)
-	stuffed_note = note[0][0]
+	print(note)
+	stuffed_note = note[0]
 	print("stuffed_note: ", stuffed_note)
-	add_note(false, note[0][1][0], note[0][1][1], note[0][1][2], note[0][1][3])
+	add_note(false, note[1][0], note[1][1], note[1][2], note[1][3])
 	return
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
@@ -328,14 +328,15 @@ func UR_handler():
 		print("UR Undo! // [1]: ",Global.UR[1])
 		if Global.revision > 1:
 			if Global.a_array[Global.revision-2] == Global.respects :
+				print(Global.revision-1,"pre(changes) ",Global.changes[Global.revision-1])
 				drag_UR = true
 				print("undo dragged")
 				passed_note = Global.d_array[Global.revision-2]
 				print("revision: ", Global.revision)
-				
-				for note in Global.changes[Global.revision-2] :
-					stuff_note([note])
-				print("a_stack changes note u_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-2])
+				#print("note(s) @ rev-2: ", Global.changes[Global.revision-2])
+				for note in Global.changes[Global.revision-1] :
+					stuff_note(note)
+				#print("a_stack changes note u_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-2])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.active_stack.append(passed_note)
 				
@@ -345,10 +346,8 @@ func UR_handler():
 		if !drag_UR :
 			if Global.d_array[Global.revision-1] == Global.ratio:
 				print("undo added")
-				for note in Global.changes[Global.revision] :
-					print(Global.changes[Global.revision])
-					filicide(note[0])
-				print("a_stack changes note u_a: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
+				filicide(Global.changes[Global.revision][-1][0])
+				#print("a_stack changes note u_a: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.revision -= 1
 				Global.UR[0] = 0
@@ -361,7 +360,7 @@ func UR_handler():
 				passed_note = Global.d_array[Global.revision-1]
 				
 				for note in Global.changes[Global.revision-1] :
-					stuff_note([note])
+					stuff_note(note)
 				
 				Global.revision -= 1
 				Global.UR[0] = 0
@@ -376,14 +375,15 @@ func UR_handler():
 		print("UR Redo! // [1]: ",Global.UR[1])
 		if Global.UR[1] == 2 :
 			if Global.a_array[Global.revision] == Global.respects :
+				print(Global.revision+2,"pre(changes) ",Global.changes[Global.revision+2])
 				drag_UR = true
 				print("redo dragged")
 				passed_note = Global.a_array[Global.revision+1]
 				print("revision: ", Global.revision)
 				
-				for note in Global.changes[Global.revision+1] :
-					stuff_note([note])
-				print("a_stack changes note r_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
+				for note in Global.changes[Global.revision+	2] :
+					stuff_note(note)
+				#print("a_stack changes note r_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
 				Global.active_stack.append(passed_note)
 				
@@ -398,7 +398,7 @@ func UR_handler():
 				passed_note = Global.a_array[Global.revision]
 				
 				for note in Global.changes[Global.revision+1] :
-					stuff_note([note])
+					stuff_note(note)
 				
 				Global.active_stack.append(passed_note)
 				
@@ -407,9 +407,8 @@ func UR_handler():
 		
 			elif Global.a_array[Global.revision] == Global.ratio :
 				print("redo deleted")
-				for note in Global.changes[Global.revision]:
-					filicide(note[0])
-				print("a_stack changes note r_d: ",Global.a_array[Global.revision-1])
+				filicide(Global.changes[Global.revision][-1][0])
+				#print("a_stack changes note r_d: ",Global.a_array[Global.revision-1])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
 				Global.revision += 1
 				Global.UR[2] -= 1
