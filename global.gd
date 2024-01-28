@@ -37,9 +37,9 @@ var changes := [[Note,[]]] #The nested array which stores all created notes and 
 
 var revision = 0 #number of revisions made to chart since TODO: program start (should be since LOAD; need to reset variables on load)
 
-var d_note : Note # note to be removed by del/r-click/m-click
+var d_note : Note #note to be removed by del/r-click/m-click
 var deleted = false #was a note deleted? if so, run chart.filicide(note) upon reaching update_note_array(), then continue updating the note
-var please_come_back = false #If I remove a child, the note will run _exit_tree(), so I have to redirect the program back to update_note_array()
+var please_come_back = false #if I remove a child, the note will run _exit_tree(), so I have to redirect the program back to update_note_array()
 
 var ratio := ["L","L","L","L","L"] #data injected into a_array on deletion, d_array on addition, and d_array first on move
 var respects := ["F","F","F","F","F"] #data injected into a_array second on move
