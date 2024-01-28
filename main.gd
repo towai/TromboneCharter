@@ -110,6 +110,11 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
+	
+	###Dew size check
+	Global.initial_size = 0
+	###
+	
 	emit_signal("chart_loaded")
 	var err = try_to_load_stream(dir)
 	if err: print("No stream loaded -- %s" % error_string(err))

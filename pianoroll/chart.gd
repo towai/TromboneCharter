@@ -52,8 +52,8 @@ func bar_to_x(bar:float): return bar * bar_spacing
 
 ### Dew's variables ###
 var new_array := []
-var dumb_copy := []
-var short_stack = 0
+var post_UR_copy := []
+var stack_short = 0 #number of revisions behind master array
 var stuffing := false
 var stuffed_note : Note
 var drag_UR := false
@@ -92,7 +92,7 @@ func _on_scroll_change():
 	%WavePreview.calculate_width()
 
 #Dew: Please come back from _exit_tree after removing child note from chart! I added a condition there and everything...
-func filicide(child):
+func filicide(child): #removes note from tree, returns to update_note_array()
 	Global.deleted = false
 	Global.please_come_back = true
 	%Chart.remove_child(child)
@@ -100,36 +100,21 @@ func filicide(child):
 	return
 ###
 
-#Dew remove future undo/redo chain when overwritten
-func redo_check():
-	print("rev changes: ", Global.revision)
-	if Global.UR[2] > 0 :
-		print("pre changes: ",Global.changes)
-		Global.changes = Global.changes.slice(0,Global.revision+1,1,true)
-		print("redo changes: ",Global.changes)
-		Global.a_array = Global.a_array.slice(0,Global.revision,1,true)
-		Global.d_array = Global.d_array.slice(0,Global.revision,1,true)
-		
-		
-		Global.UR[2] = 0
-	return
-	###
-
-#Dew undo/redo-input handler
+#Dew undo/redo shortcut handler: sets indicator values in UR array, then calls update_note_array()
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
-		short_stack = Global.a_array.size() + Global.initial_size - Global.active_stack.size()
+		stack_short = Global.a_array.size() - Global.active_stack.size()
 		Global.UR[0] = 1
 		print("undo pressed!")
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
 		Global.UR[0] = 2
-		Global.UR[1] = 2
-		short_stack = Global.a_array.size() + Global.initial_size - Global.active_stack.size()
-		print("redo pressed!")
-		if short_stack == 1 :
+		Global.UR[1] = 2 #makes sure the UR handler doesn't seek beyond array size
+		stack_short = Global.a_array.size() - Global.active_stack.size()
+		if stack_short == 1 : #if it could go too far, set indicator
 			Global.UR[1] = 1
+		print("redo pressed!")
 		update_note_array()
 ###
 
@@ -209,20 +194,17 @@ func _on_tmb_loaded():
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
-func stuff_note(note := [Note,[]]) :
+func stuff_note(note := [Note,[]]) : #note = reference/data array pairs stored in G.changes
 	stuffing = true
-	print(note)
 	stuffed_note = note[0]
-	print("stuffed_note: ", stuffed_note)
 	add_note(false, note[1][0], note[1][1], note[1][2], note[1][3])
 	return
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var new_note : Note
-	if !stuffing :
-		#redo_check()
+	if !stuffing : #if not altering a moved note, create a new one as normal
 		new_note = note_scn.instantiate()
-	else:
+	else: #if altering a moved note, use the reference!
 		stuffing = false
 		new_note = stuffed_note
 	new_note.bar = bar
@@ -233,7 +215,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	new_note.position.y = pitch_to_height(pitch)
 	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
-	add_child(new_note)
+	add_child(new_note) #throws a C++ error when altering moved notes; need advice.
 	new_note.grab_focus()
 
 # move to ???
@@ -256,7 +238,7 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 
 func update_note_array():
-	if Global.deleted:
+	if Global.deleted: #if we came here by deleting a note, let's remove it and reassess the chart as such
 		filicide(Global.d_note)
 	new_array = []
 	print("Hi, I'm Tom Scott, and today I'm here in func update_note_array()")
@@ -268,8 +250,8 @@ func update_note_array():
 			note.pitch_start + note.pitch_delta
 		]
 		new_array.append(note_array)
-		Global.active_stack = new_array
 	
+	Global.active_stack = new_array
 	print("added notes: ",Global.a_array)
 	print("deleted notes: ",Global.d_array)
 	#print("Global.active_stack: ",Global.active_stack)
@@ -318,25 +300,22 @@ func assign_tt_note_ids():
 
 
 	
-#Dew's closest he will ever get to yandev levels of if/then incompetence
+#Dew's closest he will ever get to yandev levels of if/then incompetence. It's not *that* bad, but it feels clunky.
 #Also Dew's undo/redo handler.
 func UR_handler():
-	print("UR!!!",Global.UR[0])
+	print("UR!!! ",Global.UR[0])
 	var passed_note = []
 	drag_UR = false
 	if Global.UR[0] == 1 :
-		print("UR Undo! // [1]: ",Global.UR[1])
+		print("UR Undo! // UR[1]= ",Global.UR[1])
 		if Global.revision > 1:
 			if Global.a_array[Global.revision-2] == Global.respects :
-				print(Global.revision-1,"pre(changes) ",Global.changes[Global.revision-1])
 				drag_UR = true
 				print("undo dragged")
 				passed_note = Global.d_array[Global.revision-2]
-				print("revision: ", Global.revision)
-				#print("note(s) @ rev-2: ", Global.changes[Global.revision-2])
 				for note in Global.changes[Global.revision-1] :
 					stuff_note(note)
-				#print("a_stack changes note u_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-2])
+					
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.active_stack.append(passed_note)
 				
@@ -347,7 +326,6 @@ func UR_handler():
 			if Global.d_array[Global.revision-1] == Global.ratio:
 				print("undo added")
 				filicide(Global.changes[Global.revision][-1][0])
-				#print("a_stack changes note u_a: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
 				Global.revision -= 1
 				Global.UR[0] = 0
@@ -367,15 +345,14 @@ func UR_handler():
 				Global.UR[2] += 1
 		
 		print("active_stack: ",Global.active_stack)
-		dumb_copy = Global.active_stack
-		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-		tmb.notes = dumb_copy
+		post_UR_copy = Global.active_stack
+		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = post_UR_copy
 		
 	if Global.UR[0] == 2 :
-		print("UR Redo! // [1]: ",Global.UR[1])
+		print("UR Redo! // UR[1]= ",Global.UR[1])
 		if Global.UR[1] == 2 :
 			if Global.a_array[Global.revision] == Global.respects :
-				print(Global.revision+2,"pre(changes) ",Global.changes[Global.revision+2])
 				drag_UR = true
 				print("redo dragged")
 				passed_note = Global.a_array[Global.revision+1]
@@ -404,11 +381,10 @@ func UR_handler():
 				
 				Global.revision += 1
 				Global.UR[2] -= 1
-		
+				
 			elif Global.a_array[Global.revision] == Global.ratio :
 				print("redo deleted")
 				filicide(Global.changes[Global.revision][-1][0])
-				#print("a_stack changes note r_d: ",Global.a_array[Global.revision-1])
 				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
 				Global.revision += 1
 				Global.UR[2] -= 1
@@ -416,15 +392,15 @@ func UR_handler():
 		
 		print("active_stack: ",Global.active_stack)
 		Global.UR[1] = 0
-		dumb_copy = Global.active_stack.slice(0,Global.revision)
-		dumb_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-		tmb.notes = dumb_copy
+		post_UR_copy = Global.active_stack.slice(0,Global.revision)
+		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = post_UR_copy
 	print("revision post-UR: ",Global.revision)
 	print("Global.active_stack: ",Global.active_stack)
 	print("Global.changes: ",Global.changes)
 	
 	Global.UR[0] = 0
-	_on_tmb_updated()
+	update_note_array()
 ###
 
 func _draw():
