@@ -92,7 +92,7 @@ var index_in_slide := 0 # for matching the new, improved look of slides in the g
 var starting_note : Array #initial data of note-to-be-edited
 var old_set := [] #Both old_set and note_set store up to three note ref/data arrays
 
-var added : bool
+var added = true # <-- THIS SOLVED THE LOADED NOTE REGISTRATION!!!
 var dragged : bool
 var click := false
 
@@ -146,16 +146,7 @@ func _gui_input(event):
 		match key.keycode:
 			KEY_DELETE, KEY_BACKSPACE:
 				
-				redo_check()
-				#Dew stores note without deleting yet!!!!!
-				Global.deleted = true
-				Global.d_note = self
-				print("that's deleting")
-				
-				Global.revision += 1
-				Global.a_array.append(Global.ratio)
-				Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
-				Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+				remove_note()
 				chart.update_note_array()
 				### queue_free()
 	
@@ -176,6 +167,9 @@ func _on_handle_input(event, which_handle):
 				click = true
 				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 				old_set = moved_notes(starting_note.duplicate())
+				print("NEIGH", old_set)
+				Global.next_note_data = old_set[0][1].duplicate()
+				print(Global.next_note_data)
 			###
 			dragging = which_handle
 			drag_helper.init_drag()
@@ -183,18 +177,9 @@ func _on_handle_input(event, which_handle):
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
 			
 			#Dew deleted note storage (self)
-			redo_check()
-			Global.deleted = true
-			Global.d_note = self
-			print("that's deleting")
-			
-			Global.revision += 1
-			Global.a_array.append(Global.ratio)
-			Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
-			Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+			remove_note()
 			chart.update_note_array()
 			### queue_free()
-
 
 func _process_drag():
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
@@ -315,6 +300,19 @@ func redo_check(): #Global.UR[2] stores number of available redos, so if it isn'
 	return
 	###
 	
+
+func remove_note():
+	#I could live with one repetition of this code for mouse and keyboard inputs, but the
+	#additional rep needed for handle overlap deletion is one too many. New function it is.
+	redo_check()
+	Global.deleted = true
+	Global.d_note = self
+	print("that's deleting")
+	Global.revision += 1
+	Global.a_array.append(Global.ratio)
+	Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
+	Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+
 #Dew concatenates touching note ref/data array pairs into a nested array "note_set" = [next,prev,self]
 func moved_notes(self_data): #can be used to retrieve data both before and after a note is moved
 	note_set = []
@@ -333,7 +331,13 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: queue_free()
+	if length <= 0:
+		#queue_free() #TODO: make this work with remove_child() instead. Comment in Global.gd by "var next_note_data", line 52
+		#print(Global.next_note_data)
+		#chart.stuff_note([self,Global.next_note_data])
+		#^^^ WHY DOESN'T THIS LINE STUFF THE NOTE FOR UNDO?
+		#vvv WHY DOESN'T THIS FUNCTION WORK THE WAY DELETING A NOTE DOES?
+		remove_note()
 	doot_enabled = true
 
 

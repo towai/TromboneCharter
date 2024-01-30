@@ -49,6 +49,7 @@ var a_array := [] #list of added notes, separated by ratios and respects, denoti
 var d_array := [] #list of deleted notes, separated by ratios denoting added notes in the history
 var active_stack := [] #list of notes in tmb.notes, ordered by which revision it was added/edited during
 
+var next_note_data := [] #TODO: HELP MEEEE: Trying to register a note deleted by dragging endpoint over a neighbor.
 ### Dew's variables ###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
