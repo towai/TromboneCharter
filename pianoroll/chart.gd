@@ -50,6 +50,14 @@ func bar_to_x(bar:float): return bar * bar_spacing
 @onready var tmb : TMBInfo:
 	get: return Global.working_tmb
 
+### Dew's variables ###
+var new_array := []
+var post_UR_copy := []
+var stack_short = 0 #number of revisions behind master array
+var stuffing := false
+var stuffed_note : Note
+var drag_UR := false
+###
 
 var EDIT_MODE := 0
 var SELECT_MODE := 1
@@ -83,6 +91,32 @@ func _on_scroll_change():
 	redraw_notes()
 	%WavePreview.calculate_width()
 
+#Dew: Please come back from _exit_tree after removing child note from chart! I added a condition there and everything...
+func filicide(child): #removes note from tree, returns to update_note_array()
+	Global.deleted = false
+	Global.please_come_back = true
+	%Chart.remove_child(child)
+	Global.please_come_back = false
+	return
+###
+
+#Dew undo/redo shortcut handler: sets indicator values in UR array, then calls update_note_array()
+func _unhandled_key_input(event):
+	var shift = event as InputEventWithModifiers
+	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
+		stack_short = Global.a_array.size() - Global.active_stack.size()
+		Global.UR[0] = 1
+		print("undo pressed!")
+		update_note_array()
+	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
+		Global.UR[0] = 2
+		Global.UR[1] = 2 #makes sure the UR handler doesn't seek beyond array size
+		stack_short = Global.a_array.size() - Global.active_stack.size()
+		if stack_short == 1 : #if it could go too far, set indicator
+			Global.UR[1] = 1
+		print("redo pressed!")
+		update_note_array()
+###
 
 func redraw_notes():
 	for child in get_children():
@@ -160,9 +194,19 @@ func _on_tmb_loaded():
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
+func stuff_note(note := [Note,[]]) : #note = reference/data array pairs stored in G.changes
+	stuffing = true
+	stuffed_note = note[0]
+	add_note(false, note[1][0], note[1][1], note[1][2], note[1][3])
+	return
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-	var new_note : Note = note_scn.instantiate()
+	var new_note : Note
+	if !stuffing : #if not altering a moved note, create a new one as normal
+		new_note = note_scn.instantiate()
+	else: #if altering a moved note, use the reference!
+		stuffing = false
+		new_note = stuffed_note
 	new_note.bar = bar
 	new_note.length = length
 	new_note.pitch_start = pitch
@@ -171,7 +215,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	new_note.position.y = pitch_to_height(pitch)
 	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
-	add_child(new_note)
+	add_child(new_note) #throws a C++ error when altering moved notes; need advice.
 	new_note.grab_focus()
 
 # move to ???
@@ -194,17 +238,36 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 
 func update_note_array():
-	var new_array := []
+	if Global.deleted: #if we came here by deleting a note, let's remove it and reassess the chart as such
+		filicide(Global.d_note)
+	new_array = []
+	print("Hi, I'm Tom Scott, and today I'm here in func update_note_array()")
 	for note in get_children():
-		if !(note is Note) || note.is_queued_for_deletion():
+		if !(note is Note) || note.is_queued_for_deletion() || (Global.UR[0] > 0): #Dew added check for undo/redo
 			continue
 		var note_array := [
 			note.bar, note.length, note.pitch_start, note.pitch_delta,
 			note.pitch_start + note.pitch_delta
 		]
 		new_array.append(note_array)
+	
+	Global.active_stack = new_array
+	print("added notes: ",Global.a_array)
+	print("deleted notes: ",Global.d_array)
+	#print("Global.active_stack: ",Global.active_stack)
+	#print("Global.changes: ",Global.changes)
+	
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
+	
+
+	###Dew directing traffic to undo/redo
+	if Global.UR[0] > 0 :
+		UR_handler()
+	else :
+		queue_redraw()
+		redraw_notes()
+	###
 
 
 func jump_to_note(note: int, use_tt: bool = false):
@@ -235,6 +298,110 @@ func assign_tt_note_ids():
 		count += 1
 		child.tt_note_id = count
 
+
+	
+#Dew's closest he will ever get to yandev levels of if/then incompetence. It's not *that* bad, but it feels clunky.
+#Also Dew's undo/redo handler.
+func UR_handler():
+	print("UR!!! ",Global.UR[0])
+	var passed_note = []
+	drag_UR = false
+	if Global.UR[0] == 1 :
+		print("UR Undo! // UR[1]= ",Global.UR[1])
+		if Global.revision > 1:
+			if Global.a_array[Global.revision-2] == Global.respects :
+				drag_UR = true
+				print("undo dragged")
+				passed_note = Global.d_array[Global.revision-2]
+				for note in Global.changes[Global.revision-1] :
+					stuff_note(note)
+					
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.active_stack.append(passed_note)
+				
+				Global.revision -= 2
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+		if !drag_UR :
+			if Global.d_array[Global.revision-1] == Global.ratio:
+				print("undo added")
+				filicide(Global.changes[Global.revision][-1][0])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.a_array[Global.revision-1]))
+				Global.revision -= 1
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+			
+			elif Global.a_array[Global.revision-1] == Global.ratio:
+				print("undo deleted: ", Global.changes)
+				print("revision: ",   Global.revision)
+				print("to be added: ",Global.changes[Global.revision])
+				passed_note = Global.d_array[Global.revision-1]
+				
+				for note in Global.changes[Global.revision-1] :
+					stuff_note(note)
+				
+				Global.revision -= 1
+				Global.UR[0] = 0
+				Global.UR[2] += 1
+		
+		print("active_stack: ",Global.active_stack)
+		post_UR_copy = Global.active_stack
+		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = post_UR_copy
+		
+	if Global.UR[0] == 2 :
+		print("UR Redo! // UR[1]= ",Global.UR[1])
+		if Global.UR[1] == 2 :
+			if Global.a_array[Global.revision] == Global.respects :
+				drag_UR = true
+				print("redo dragged")
+				passed_note = Global.a_array[Global.revision+1]
+				print("revision: ", Global.revision)
+				
+				for note in Global.changes[Global.revision+	2] :
+					stuff_note(note)
+				#print("a_stack changes note r_m: ",Global.a_array[Global.revision-1]," = ",Global.changes[Global.revision-1])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
+				Global.active_stack.append(passed_note)
+				
+				Global.revision += 2
+				Global.UR[2] -= 1
+			
+		if Global.UR[1] != 0 && !drag_UR :
+			if Global.d_array[Global.revision] == Global.ratio :
+				print("redo added: ", Global.changes)
+				print("revision: ",   Global.revision+1)
+				print("to be added: ",Global.changes[Global.revision+1])
+				passed_note = Global.a_array[Global.revision]
+				
+				for note in Global.changes[Global.revision+1] :
+					stuff_note(note)
+				
+				Global.active_stack.append(passed_note)
+				
+				Global.revision += 1
+				Global.UR[2] -= 1
+				
+			elif Global.a_array[Global.revision] == Global.ratio :
+				print("redo deleted")
+				filicide(Global.changes[Global.revision][-1][0])
+				Global.active_stack.remove_at(Global.active_stack.bsearch(Global.d_array[Global.revision]))
+				Global.revision += 1
+				Global.UR[2] -= 1
+				
+		
+		print("active_stack: ",Global.active_stack)
+		Global.UR[1] = 0
+		post_UR_copy = Global.active_stack.slice(0,Global.revision)
+		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
+		tmb.notes = post_UR_copy
+	print("revision post-UR: ",Global.revision)
+	print("Global.active_stack: ",Global.active_stack)
+	print("Global.changes: ",Global.changes)
+	
+	Global.UR[0] = 0
+	update_note_array()
+###
 
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()

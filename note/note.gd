@@ -88,6 +88,18 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
+### Dew's variables ###
+var starting_note : Array #initial data of note-to-be-edited
+var old_set := [] #Both old_set and note_set store up to three note ref/data arrays
+
+var added : bool
+var dragged : bool
+var click := false
+
+var neighbors : Dictionary
+var note_set := [] #Both old_set and note_set store up to three note ref/data arrays
+###
+
 # cat rolls the most horrible solution ever, asked to leave the repo
 func find_idx_in_slide() -> int:
 	var left_neighbor : Note = touching_notes.get(START_IS_TOUCHING)
@@ -110,7 +122,6 @@ func propagate_to_the_right(f:StringName,args:Array=[]):
 func _ready():
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
-	
 	bar_handle.size = BARHANDLE_SIZE
 	bar_handle.position = -BARHANDLE_SIZE / 2
 	
@@ -123,6 +134,7 @@ func _ready():
 	doot_enabled = true
 
 
+
 func _process(_delta):
 	if dragging: _process_drag()
 
@@ -132,7 +144,20 @@ func _gui_input(event):
 	
 	if key != null && key.pressed:
 		match key.keycode:
-			KEY_DELETE, KEY_BACKSPACE: queue_free()
+			KEY_DELETE, KEY_BACKSPACE:
+				
+				redo_check()
+				#Dew stores note without deleting yet!!!!!
+				Global.deleted = true
+				Global.d_note = self
+				print("that's deleting")
+				
+				Global.revision += 1
+				Global.a_array.append(Global.ratio)
+				Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
+				Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+				chart.update_note_array()
+				### queue_free()
 	
 
 
@@ -144,11 +169,31 @@ func _on_handle_input(event, which_handle):
 	if event == null: return
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
+			
+			#Dew marks note creation to avoid duplication and tracking of interim dragging data,
+			#then stores both initial note data and ref/data array pair in starting_note and old_set, respectively.
+			if !click :
+				click = true
+				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
+				old_set = moved_notes(starting_note.duplicate())
+			###
 			dragging = which_handle
 			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
-			queue_free()
+			
+			#Dew deleted note storage (self)
+			redo_check()
+			Global.deleted = true
+			Global.d_note = self
+			print("that's deleting")
+			
+			Global.revision += 1
+			Global.a_array.append(Global.ratio)
+			Global.d_array.append([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])
+			Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+			chart.update_note_array()
+			### queue_free()
 
 
 func _process_drag():
@@ -162,8 +207,20 @@ func _process_drag():
 	
 	match dragging:
 		DRAG_BAR: # → float
+			
+			#Dew statement
+			dragged = true
+			print("that bar's dragging")
+			###
+			
 			bar = drag_result
 		DRAG_PITCH:  # → float
+			
+			#Dew statement
+			dragged = true
+			print("that pitch's dragging")
+			###
+			
 			pitch_start = drag_result
 			
 			doot_enabled = false
@@ -173,9 +230,21 @@ func _process_drag():
 				pitch_delta = -(13 * Global.SEMITONE) - pitch_start
 			doot_enabled = true
 		DRAG_END: # → Vector2
+			
+			#Dew statement
+			dragged = true
+			print("that end's dragging")
+			###
+			
 			length = drag_result.x
 			pitch_delta = drag_result.y
 		DRAG_INITIAL: # → Vector2
+			
+			#Dew statement
+			added = true
+			print("that's a new note")
+			###
+			
 			pitch_start = drag_result.y
 			# editing notes butted up against each other would be too annoying
 			# if we did this check first
@@ -189,6 +258,32 @@ func _process_drag():
 
 func _end_drag():
 	dragging = DRAG_NONE
+	#Dew note-changed check + drag-recording
+	#Dragging/moving a note is effectively deleting the old placement of a note and adding the new placement.
+	#We do this by marking every action with either an "L" array, for single-edit actions: adding and deleting;
+	#or an "F" array, for the effective double-edit action: dragging. These are checked by the UR_handler() in chart.gd.
+	click = false
+	var proper_note : Array = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
+	if starting_note != proper_note : #if you did more than just click an existing note, then an edit was made
+		redo_check()
+		if dragged: #add a drag marker to a_array, and the initial data to d_array
+			Global.revision += 1
+			print(Global.revision)
+			Global.changes.append(old_set)
+			Global.a_array.append(Global.respects)
+			Global.d_array.append(starting_note.duplicate(true))
+			print(Global.revision,"m (change): ",Global.changes[Global.revision])
+			
+		if added: #add "add" marker to d_array, and final data to a_array
+			Global.revision += 1
+			print(Global.revision)
+			slide_helper.pass_on_slide_propagation()
+			Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+			Global.a_array.append(proper_note.duplicate(true))
+			Global.d_array.append(Global.ratio)
+			print(Global.revision,"a (change): ",Global.changes[Global.revision])
+	###
+	
 	slide_helper.snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		slide_helper.pass_on_slide_propagation()
@@ -209,12 +304,31 @@ func has_slide_neighbor(direction:int,pitch:float):
 		END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
 	
-
+	
+#Dew remove future undo/redo chain when overwritten
+func redo_check(): #Global.UR[2] stores number of available redos, so if it isn't 0 and an edit is made...
+	if Global.UR[2] > 0 : #... gotta clear the chain of edits that existed in the now-overwritten future.
+		Global.changes = Global.changes.slice(0,Global.revision+1,1,true)
+		Global.a_array = Global.a_array.slice(0,Global.revision,1,true)
+		Global.d_array = Global.d_array.slice(0,Global.revision,1,true)
+		Global.UR[2] = 0
+	return
+	###
+	
+#Dew concatenates touching note ref/data array pairs into a nested array "note_set" = [next,prev,self]
+func moved_notes(self_data): #can be used to retrieve data both before and after a note is moved
+	note_set = []
+	neighbors = slide_helper.find_touching_notes()
+	for key in neighbors.keys() :
+		var note = neighbors[key]
+		note_set.append([note,[note.bar,note.length,note.pitch_start,note.pitch_delta,note.pitch_start+note.pitch_delta]])
+	note_set.append([self,self_data])
+	#appends self+data last to fit prev/next note enum
+	return note_set
 
 func update_touching_notes():
 	slide_helper.update_touching_notes()
 	update_handle_visibility()
-
 
 func receive_slide_propagation(from:int):
 	doot_enabled = false
@@ -321,7 +435,8 @@ func _draw():
 
 
 func _exit_tree():
-	bar = -69420.0
 	if chart.clearing_notes: return
 	update_touching_notes()
-	chart.update_note_array()
+	if Global.please_come_back:
+		return
+	else: chart.update_note_array()

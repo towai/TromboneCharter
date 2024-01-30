@@ -21,25 +21,36 @@ const NUM_KEYS = 27
 var settings : Settings
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
-###Dew's variables###
+
+### Dew's variables ###
+
 var UR := [0,0,0]
 	# 0   => normal operation
 	# 1   => undo last action
 	# 2   => redo last action
 	#  ,0 => run no calculations //with addition of UR[2], should never be reached beyond initial declarations
-	#  ,1 => run A/D calculations only
-	#  ,2 => run any calculation
+	#  ,1 => run A/D calculations only (one step forward/backward in history)
+	#  ,2 => run any calculation (one to two steps forward/backward in history)
 	#  ,, => available redos
-var starting_note : Array
-var ratio := ["L","L","L","L","L"]
-var respects := ["F","F","F","F","F"]
-var revision = 0
-var chart_just_loaded : bool
-var initial_size = 0
 
-var a_array := []
-var d_array := []
-var main_stack := []
+var changes := [[Note,[]]] #The nested array which stores all created notes and their data at time of revision, traversed by Global.revision
+
+var revision = 0 #number of revisions made to chart since TODO: program start (should be since LOAD; need to reset variables on load)
+
+var d_note : Note #note to be removed by del/r-click/m-click
+var deleted = false #was a note deleted? if so, run chart.filicide(note) upon reaching update_note_array(), then continue updating the note
+var please_come_back = false #if I remove a child, the note will run _exit_tree(), so I have to redirect the program back to update_note_array()
+
+var ratio := ["L","L","L","L","L"] #data injected into a_array on deletion, d_array on addition, and d_array first on move
+var respects := ["F","F","F","F","F"] #data injected into a_array second on move
+var loaded := ["3","3","3","3","3"] #TODO: data injected into d_array for loaded notes
+
+var a_array := [] #list of added notes, separated by ratios and respects, denoting deletions and moves in the history, respectively
+var d_array := [] #list of deleted notes, separated by ratios denoting added notes in the history
+var active_stack := [] #list of notes in tmb.notes, ordered by which revision it was added/edited during
+
+### Dew's variables ###
+
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
