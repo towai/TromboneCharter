@@ -23,6 +23,16 @@
  * The little handle right below the label can be used to drag it around.
  * The trashcan deletes the note.
  * This is all pretty much self-explanatory, right
+#### Undo/Redo
+ * Does:
+	-use note.gd to read and store all note data, and use chart.gd to parse and edit all note data. [REDO_CHECK MOVED TO NOTE.GD]
+	-propagate undone drags to connected notes. [NICE]
+	-propagate undone drags to tmb_notes. [NICE]
+	-fully function as an undo/redo system for a fresh chart. [***NICE***]
+ * Does not:
+	-register clicked notes when left unedited. [INTENDED]
+	-register clicked notes (which preexisted in a loaded chart) to history log as they are edited. [UNINTENDED]
+	-reset history upon loading any chart. I need a better understanding of the order in which scripts and objects are loaded.
 #### Everything else
  * Hit "Preview" in Editor Settings to preview the selected section, with a metronome if the metronome checkbox is ticked.
 	* Hitting Escape will end the preview early.
