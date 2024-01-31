@@ -167,9 +167,8 @@ func _on_handle_input(event, which_handle):
 				click = true
 				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 				old_set = moved_notes(starting_note.duplicate())
-				print("NEIGH", old_set)
-				Global.next_note_data = old_set[0][1].duplicate()
-				print(Global.next_note_data)
+				Global.overlapped_note = old_set[0]
+				print("NEIGH", Global.overlapped_note)
 			###
 			dragging = which_handle
 			drag_helper.init_drag()
@@ -254,9 +253,13 @@ func _end_drag():
 		if dragged: #add a drag marker to a_array, and the initial data to d_array
 			Global.revision += 1
 			print(Global.revision)
-			Global.changes.append(old_set)
+			Global.changes.append(old_set.duplicate(true))
 			Global.a_array.append(Global.respects)
 			Global.d_array.append(starting_note.duplicate(true))
+			if Global.note_overlapped:
+				Global.overlapped_note[1][0] = -69420
+				Global.changes[Global.revision][0] = Global.overlapped_note.duplicate(true)
+				Global.note_overlapped = false
 			print(Global.revision,"m (change): ",Global.changes[Global.revision])
 			
 		if added: #add "add" marker to d_array, and final data to a_array
@@ -264,8 +267,15 @@ func _end_drag():
 			print(Global.revision)
 			slide_helper.pass_on_slide_propagation()
 			Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
+			print(Global.changes)
 			Global.a_array.append(proper_note.duplicate(true))
 			Global.d_array.append(Global.ratio)
+			if Global.note_overlapped:
+				"sup"
+				Global.overlapped_note[1][0] = -69420
+				Global.changes[Global.revision][0] = Global.overlapped_note.duplicate(true)
+				Global.changes[Global.revision].append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])[0])
+				Global.note_overlapped = false
 			print(Global.revision,"a (change): ",Global.changes[Global.revision])
 	###
 	
@@ -331,13 +341,10 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
+	print("HEY!!!: ",Global.overlapped_note)
 	if length <= 0:
-		#queue_free() #TODO: make this work with remove_child() instead. Comment in Global.gd by "var next_note_data", line 52
-		#print(Global.next_note_data)
-		#chart.stuff_note([self,Global.next_note_data])
-		#^^^ WHY DOESN'T THIS LINE STUFF THE NOTE FOR UNDO?
-		#vvv WHY DOESN'T THIS FUNCTION WORK THE WAY DELETING A NOTE DOES?
-		remove_note()
+		chart.filicide(self)
+		Global.note_overlapped = true
 	doot_enabled = true
 
 

@@ -102,6 +102,7 @@ func _on_new_chart_confirmed():
 	%Settings.use_custom_colors = false
 	%TrackPlayer.stream = null
 	print("new tmb")
+	reset_UR_variables() #Dew
 	emit_signal("chart_loaded")
 
 
@@ -110,6 +111,7 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
+	reset_UR_variables() #Dew
 	emit_signal("chart_loaded")
 	var err = try_to_load_stream(dir)
 	if err: print("No stream loaded -- %s" % error_string(err))
@@ -227,6 +229,15 @@ func _on_rich_text_label_meta_clicked(meta):
 	# DisplayServer is a bit of a weird place to have this but it's the window management ig
 	elif data.has('hash'): DisplayServer.clipboard_set(data['hash'])
 	else: print("meta clicked and idk what to do, here's the data: %s" % data)
+
+#Dew resetting singleton vars for undo/redo on load or new chart
+func reset_UR_variables():
+	Global.UR = [0,0,0]
+	Global.changes = [[Note,[]]]
+	Global.revision = 0
+	Global.a_array = []
+	Global.d_array = []
+	Global.active_stack = []
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
 func _on_diff_calc_about_to_popup():

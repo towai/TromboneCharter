@@ -104,11 +104,13 @@ func filicide(child): #removes note from tree, returns to update_note_array()
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
+		print("REDOS PRE-UNDO: ",Global.UR[2])
 		stack_short = Global.a_array.size() - Global.active_stack.size()
 		Global.UR[0] = 1
 		print("undo pressed!")
 		update_note_array()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
+		print("REDOS PRE-REDO: ",Global.UR[2])
 		Global.UR[0] = 2
 		Global.UR[1] = 2 #makes sure the UR handler doesn't seek beyond array size
 		stack_short = Global.a_array.size() - Global.active_stack.size()
@@ -124,6 +126,7 @@ func redraw_notes():
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
+			child.update_handle_visibility()
 			#child.queue_redraw()
 		else: child.hide()
 
@@ -395,8 +398,8 @@ func UR_handler():
 		post_UR_copy = Global.active_stack.slice(0,Global.revision)
 		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = post_UR_copy
-	print("revision post-UR: ",Global.revision)
-	print("Global.active_stack: ",Global.active_stack)
+	print("REDOS LEFT: ",Global.UR[2])
+	print("REDOS == STACK_SHORT: ",stack_short)
 	print("Global.changes: ",Global.changes)
 	
 	Global.UR[0] = 0
