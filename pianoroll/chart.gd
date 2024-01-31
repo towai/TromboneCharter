@@ -108,7 +108,7 @@ func _unhandled_key_input(event):
 		stack_short = Global.a_array.size() - Global.active_stack.size()
 		Global.UR[0] = 1
 		print("undo pressed!")
-		update_note_array()
+		UR_handler()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
 		print("REDOS PRE-REDO: ",Global.UR[2])
 		Global.UR[0] = 2
@@ -117,7 +117,7 @@ func _unhandled_key_input(event):
 		if stack_short == 1 : #if it could go too far, set indicator
 			Global.UR[1] = 1
 		print("redo pressed!")
-		update_note_array()
+		UR_handler()
 ###
 
 func redraw_notes():
@@ -126,7 +126,7 @@ func redraw_notes():
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
-			child.update_handle_visibility()
+			child.update_touching_notes()
 			#child.queue_redraw()
 		else: child.hide()
 
@@ -265,11 +265,8 @@ func update_note_array():
 	
 
 	###Dew directing traffic to undo/redo
-	if Global.UR[0] > 0 :
-		UR_handler()
-	else :
-		queue_redraw()
-		redraw_notes()
+	queue_redraw()
+	redraw_notes()
 	###
 
 
