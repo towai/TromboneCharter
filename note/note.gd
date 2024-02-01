@@ -168,7 +168,7 @@ func _on_handle_input(event, which_handle):
 				starting_note = [bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]
 				old_set = moved_notes(starting_note.duplicate())
 				Global.overlapped_note = old_set[0]
-				print("NEIGH", Global.overlapped_note)
+				#print("NEIGH", Global.overlapped_note)
 			###
 			dragging = which_handle
 			drag_helper.init_drag()
@@ -194,7 +194,7 @@ func _process_drag():
 			
 			#Dew statement
 			dragged = true
-			print("that bar's dragging")
+			#print("that bar's dragging")
 			###
 			
 			bar = drag_result
@@ -202,7 +202,7 @@ func _process_drag():
 			
 			#Dew statement
 			dragged = true
-			print("that pitch's dragging")
+			#print("that pitch's dragging")
 			###
 			
 			pitch_start = drag_result
@@ -217,7 +217,7 @@ func _process_drag():
 			
 			#Dew statement
 			dragged = true
-			print("that end's dragging")
+			#print("that end's dragging")
 			###
 			
 			length = drag_result.x
@@ -226,7 +226,7 @@ func _process_drag():
 			
 			#Dew statement
 			added = true
-			print("that's a new note")
+			#print("that's a new note")
 			###
 			
 			pitch_start = drag_result.y
@@ -252,7 +252,7 @@ func _end_drag():
 		redo_check()
 		if dragged: #add a drag marker to a_array, and the initial data to d_array
 			Global.revision += 1
-			print(Global.revision)
+			#print(Global.revision)
 			Global.changes.append(old_set.duplicate(true))
 			Global.a_array.append(Global.respects)
 			Global.d_array.append(starting_note.duplicate(true))
@@ -260,14 +260,14 @@ func _end_drag():
 				Global.overlapped_note[1][0] = -69420
 				Global.changes[Global.revision][0] = Global.overlapped_note.duplicate(true)
 				Global.note_overlapped = false
-			print(Global.revision,"m (change): ",Global.changes[Global.revision])
+			#print(Global.revision,"m (change): ",Global.changes[Global.revision])
 			
 		if added: #add "add" marker to d_array, and final data to a_array
 			Global.revision += 1
-			print(Global.revision)
+			#print(Global.revision)
 			slide_helper.pass_on_slide_propagation()
 			Global.changes.append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]))
-			print(Global.changes)
+			#print(Global.changes)
 			Global.a_array.append(proper_note.duplicate(true))
 			Global.d_array.append(Global.ratio)
 			if Global.note_overlapped:
@@ -276,7 +276,7 @@ func _end_drag():
 				Global.changes[Global.revision][0] = Global.overlapped_note.duplicate(true)
 				Global.changes[Global.revision].append(moved_notes([bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta])[0])
 				Global.note_overlapped = false
-			print(Global.revision,"a (change): ",Global.changes[Global.revision])
+			#print(Global.revision,"a (change): ",Global.changes[Global.revision])
 	###
 	
 	slide_helper.snap_near_pitches()
@@ -284,8 +284,8 @@ func _end_drag():
 		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()
-	print("call end_drag from ",bar)
-	print(propagate_to_the_right("find_idx_in_slide"))
+	#print("call end_drag from ",bar)
+	#print(propagate_to_the_right("find_idx_in_slide"))
 	chart.update_note_array()
 
 
@@ -341,7 +341,7 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	print("HEY!!!: ",Global.overlapped_note)
+	#print("HEY!!!: ",Global.overlapped_note)
 	if length <= 0:
 		chart.filicide(self)
 		Global.note_overlapped = true

@@ -104,13 +104,13 @@ func filicide(child): #removes note from tree, returns to update_note_array()
 func _unhandled_key_input(event):
 	var shift = event as InputEventWithModifiers
 	if !shift.shift_pressed && Input.is_action_just_pressed("ui_undo") && Global.revision > 0:
-		print("REDOS PRE-UNDO: ",Global.UR[2])
+		#print("REDOS PRE-UNDO: ",Global.UR[2])
 		stack_short = Global.a_array.size() - Global.active_stack.size()
 		Global.UR[0] = 1
 		print("undo pressed!")
 		UR_handler()
 	if Input.is_action_just_pressed("ui_redo") && Global.UR[2] > 0:
-		print("REDOS PRE-REDO: ",Global.UR[2])
+		#print("REDOS PRE-REDO: ",Global.UR[2])
 		Global.UR[0] = 2
 		Global.UR[1] = 2 #makes sure the UR handler doesn't seek beyond array size
 		stack_short = Global.a_array.size() - Global.active_stack.size()
@@ -255,8 +255,8 @@ func update_note_array():
 		new_array.append(note_array)
 	
 	Global.active_stack = new_array
-	print("added notes: ",Global.a_array)
-	print("deleted notes: ",Global.d_array)
+	#print("added notes: ",Global.a_array)
+	#print("deleted notes: ",Global.d_array)
 	#print("Global.active_stack: ",Global.active_stack)
 	#print("Global.changes: ",Global.changes)
 	
@@ -303,11 +303,11 @@ func assign_tt_note_ids():
 #Dew's closest he will ever get to yandev levels of if/then incompetence. It's not *that* bad, but it feels clunky.
 #Also Dew's undo/redo handler.
 func UR_handler():
-	print("UR!!! ",Global.UR[0])
+	#print("UR!!! ",Global.UR[0])
 	var passed_note = []
 	drag_UR = false
 	if Global.UR[0] == 1 :
-		print("UR Undo! // UR[1]= ",Global.UR[1])
+		#print("UR Undo! // UR[1]= ",Global.UR[1])
 		if Global.revision > 1:
 			if Global.a_array[Global.revision-2] == Global.respects :
 				drag_UR = true
@@ -332,9 +332,9 @@ func UR_handler():
 				Global.UR[2] += 1
 			
 			elif Global.a_array[Global.revision-1] == Global.ratio:
-				print("undo deleted: ", Global.changes)
-				print("revision: ",   Global.revision)
-				print("to be added: ",Global.changes[Global.revision])
+				print("undo deleted")
+				#print("revision: ",   Global.revision)
+				#print("to be added: ",Global.changes[Global.revision])
 				passed_note = Global.d_array[Global.revision-1]
 				
 				for note in Global.changes[Global.revision-1] :
@@ -344,19 +344,19 @@ func UR_handler():
 				Global.UR[0] = 0
 				Global.UR[2] += 1
 		
-		print("active_stack: ",Global.active_stack)
+		#print("active_stack: ",Global.active_stack)
 		post_UR_copy = Global.active_stack
 		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = post_UR_copy
 		
 	if Global.UR[0] == 2 :
-		print("UR Redo! // UR[1]= ",Global.UR[1])
+		#print("UR Redo! // UR[1]= ",Global.UR[1])
 		if Global.UR[1] == 2 :
 			if Global.a_array[Global.revision] == Global.respects :
 				drag_UR = true
 				print("redo dragged")
 				passed_note = Global.a_array[Global.revision+1]
-				print("revision: ", Global.revision)
+				#print("revision: ", Global.revision)
 				
 				for note in Global.changes[Global.revision+	2] :
 					stuff_note(note)
@@ -369,9 +369,9 @@ func UR_handler():
 			
 		if Global.UR[1] != 0 && !drag_UR :
 			if Global.d_array[Global.revision] == Global.ratio :
-				print("redo added: ", Global.changes)
-				print("revision: ",   Global.revision+1)
-				print("to be added: ",Global.changes[Global.revision+1])
+				print("redo added")
+				#print("revision: ",   Global.revision+1)
+				#print("to be added: ",Global.changes[Global.revision+1])
 				passed_note = Global.a_array[Global.revision]
 				
 				for note in Global.changes[Global.revision+1] :
@@ -390,14 +390,14 @@ func UR_handler():
 				Global.UR[2] -= 1
 				
 		
-		print("active_stack: ",Global.active_stack)
+		#print("active_stack: ",Global.active_stack)
 		Global.UR[1] = 0
 		post_UR_copy = Global.active_stack.slice(0,Global.revision)
 		post_UR_copy.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 		tmb.notes = post_UR_copy
-	print("REDOS LEFT: ",Global.UR[2])
-	print("REDOS == STACK_SHORT: ",stack_short)
-	print("Global.changes: ",Global.changes)
+	#print("REDOS LEFT: ",Global.UR[2])
+	#print("REDOS == STACK_SHORT: ",stack_short)
+	#print("Global.changes: ",Global.changes)
 	
 	Global.UR[0] = 0
 	update_note_array()
