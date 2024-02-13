@@ -57,6 +57,15 @@ var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
 
+var act = 0 #normal operation (-1 = undo triggered, 1 = redo triggered)
+var action = -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+var stuffed_note : Note #note to be altered by u/r-ing a drag
+enum {
+	REF,
+	OLD,
+	NEW
+}
+
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
 	player.pitch_scale = Global.pitch_to_scale(pitch / Global.SEMITONE)
@@ -83,6 +92,49 @@ func _on_scroll_change():
 	redraw_notes()
 	%WavePreview.calculate_width()
 
+func _shortcut_input(event):
+	var shift = event as InputEventWithModifiers
+	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
+		print("undo pressed...")
+		if Global.revision != -1:
+			act = -1
+			if Global.actions[Global.revision] < 2:
+				action = !Global.actions[Global.revision] #undoing an add will delete; undoing a delete will add. Keep logic progressing forward through edit chain.
+			else:
+				action = Global.actions[Global.revision]
+			ur_handler()
+	if Input.is_action_just_pressed("ui_redo"):
+		print("redo pressed...")
+		if Global.revision < Global.actions.size()-1: #revision is -1 indexed from fresh chart (0 = revision has 1 existing edit)
+			act = 1
+			action = Global.actions[Global.revision]
+			ur_handler()
+
+func ur_handler():
+	print("UR entered!")
+	match action:
+		0: #add
+			for note in Global.changes[Global.revision]:
+				add_child(note[REF])
+		1: #delete
+			for note in Global.changes[Global.revision]:
+				clearing_notes = true
+				remove_child(note[REF])
+				clearing_notes = false
+		2: #drag
+			if !act: #undo
+				for note in Global.changes[Global.revision]:
+					stuffed_note = note[REF]
+					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
+			else:
+				for note in Global.changes[Global.revision]:
+					stuffed_note = note[REF]
+					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
+	Global.revision += act
+	act = 0
+	update_note_array()
+
+
 
 func redraw_notes():
 	for child in get_children():
@@ -90,7 +142,8 @@ func redraw_notes():
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
-			#child.queue_redraw()
+			child.update_touching_notes()
+			child.update_handle_visibility()
 		else: child.hide()
 
 
@@ -171,7 +224,8 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	new_note.position.y = pitch_to_height(pitch)
 	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
-	add_child(new_note)
+	if act == 0: add_child(new_note)
+	else: return
 	new_note.grab_focus()
 
 # move to ???
@@ -195,6 +249,7 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 func update_note_array():
 	var new_array := []
+	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue

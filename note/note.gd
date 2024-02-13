@@ -88,6 +88,14 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
+var click := false
+var tbd : Note
+var starting_note : Array
+var proper_note : Array
+var package : Array
+var old_package : Array
+
+
 # cat rolls the most horrible solution ever, asked to leave the repo
 func find_idx_in_slide() -> int:
 	var left_neighbor : Note = touching_notes.get(START_IS_TOUCHING)
@@ -132,7 +140,9 @@ func _gui_input(event):
 	
 	if key != null && key.pressed:
 		match key.keycode:
-			KEY_DELETE, KEY_BACKSPACE: queue_free()
+			KEY_DELETE, KEY_BACKSPACE:
+				remove_note()
+				#queue_free()
 	
 
 
@@ -144,11 +154,16 @@ func _on_handle_input(event, which_handle):
 	if event == null: return
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
+			if !click:
+				click = true
+				print(self)
+				starting_note = [self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]
+				old_package = package_neighbors(starting_note)
 			dragging = which_handle
 			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
-			queue_free()
+			remove_note()
 
 
 func _process_drag():
@@ -192,10 +207,38 @@ func _end_drag():
 	slide_helper.snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		slide_helper.pass_on_slide_propagation()
-	
 	update_touching_notes()
+	click = false
+	proper_note = [self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]
+	if starting_note != proper_note:
+		var new_package = package_neighbors(proper_note)
+		print(new_package)
+		var i = 0
+		while i < old_package.size():
+			old_package[i].append(new_package[i][1])
+			i += 1
+		print(old_package)
+	
 	print("call end_drag from ",bar)
 	print(propagate_to_the_right("find_idx_in_slide"))
+	chart.update_note_array()
+
+
+func package_neighbors(self_note):
+	package = []
+	var neighbors = slide_helper.find_touching_notes()
+	for key in neighbors.keys():
+		var note = neighbors[key]
+		package.append([note,[note.bar,note.length,note.pitch_start,note.pitch_delta,note.pitch_start+note.pitch_delta]])
+	package.append(self_note)
+	return package
+
+
+func remove_note():
+	chart.clearing_notes = true
+	tbd = self
+	chart.remove_child(tbd)
+	chart.clearing_notes = false
 	chart.update_note_array()
 
 
@@ -219,7 +262,7 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: queue_free()
+	if length <= 0: remove_note()
 	doot_enabled = true
 
 

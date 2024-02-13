@@ -22,6 +22,14 @@ var settings : Settings
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
+var revision = -1 #unedited chart
+var actions = []	#0 = add, 1 = delete, 2+ = dragged
+var changes = []	#[[[note_ref_a1, note_data_array_a1]], <- end of first edit
+					# [[note_ref_b1, note_data_array_b1],  <- start of second edit
+					#  [note_ref_b2, note_data_array_b2],  <- one note in second edit
+					#  [note_ref_b3, note_data_array_b3]], <- end of second edit
+					#  [note_ref_c1, note_data_array_c1]]] <- end of third edit, end of history chain
+
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 static func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
