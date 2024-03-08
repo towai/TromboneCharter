@@ -93,7 +93,7 @@ var tbd : Note
 var starting_note : Array
 var proper_note : Array
 var package : Array
-var old_package : Array
+var note_package : Array
 
 
 # cat rolls the most horrible solution ever, asked to leave the repo
@@ -158,7 +158,7 @@ func _on_handle_input(event, which_handle):
 				click = true
 				print(self)
 				starting_note = [self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]
-				old_package = package_neighbors(starting_note)
+				note_package = package_neighbors(starting_note)
 			dragging = which_handle
 			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
@@ -211,13 +211,19 @@ func _end_drag():
 	click = false
 	proper_note = [self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]
 	if starting_note != proper_note:
-		var new_package = package_neighbors(proper_note)
-		print(new_package)
-		var i = 0
-		while i < old_package.size():
-			old_package[i].append(new_package[i][1])
-			i += 1
-		print(old_package)
+		if Global.revision < (Global.actions.size() - 1): #0 ALREADY appended to action on creation of fresh note (in chart.gd).
+			Global.changes.append([[self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]])
+		else:
+			var new_package = package_neighbors(proper_note)
+			print("new_package: ",new_package)
+			var i = 0
+			while i < note_package.size():
+				note_package[i].append(new_package[i][1])
+				i += 1
+			print("final_package: ",note_package)
+			Global.actions.append(2)
+			Global.changes.append(note_package)
+		Global.revision += 1
 	
 	print("call end_drag from ",bar)
 	print(propagate_to_the_right("find_idx_in_slide"))
@@ -237,6 +243,9 @@ func package_neighbors(self_note):
 func remove_note():
 	chart.clearing_notes = true
 	tbd = self
+	Global.actions.append(1)
+	Global.changes.append([[self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]])
+	Global.revision += 1
 	chart.remove_child(tbd)
 	chart.clearing_notes = false
 	chart.update_note_array()
@@ -364,7 +373,6 @@ func _draw():
 
 
 func _exit_tree():
-	bar = -69420.0
 	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()

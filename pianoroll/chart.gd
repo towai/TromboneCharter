@@ -57,14 +57,20 @@ var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
 
-var act = 0 #normal operation (-1 = undo triggered, 1 = redo triggered)
-var action = -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
-var stuffed_note : Note #note to be altered by u/r-ing a drag
-enum {
+###Dew variables###
+var rev : int #rev denotes the index fetched upon undoing/redoing (redoing enacts the next edit in line, and undoing enacts the current edit)
+var act := -1 : #normal operation (0 = undo triggered, 1 = redo triggered)
+	set(value):
+		rev = Global.revision + value 
+		act = value
+var action := -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
+enum { #enumerates the three indices of a dragged note set: [note_reference, pre-drag_data, post-drag_data]
 	REF,
 	OLD,
 	NEW
 }
+###Dew variables###
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -97,41 +103,53 @@ func _shortcut_input(event):
 	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
 		print("undo pressed...")
 		if Global.revision != -1:
-			act = -1
-			if Global.actions[Global.revision] < 2:
-				action = !Global.actions[Global.revision] #undoing an add will delete; undoing a delete will add. Keep logic progressing forward through edit chain.
+			act = 0
+			if Global.actions[rev] < 2:
+				action = !Global.actions[rev] #undoing an add will delete; undoing a delete will add. Keep logic progressing forward through edit chain.
 			else:
-				action = Global.actions[Global.revision]
+				action = Global.actions[rev]
+			Global.revision -= 1
+			print(act)
 			ur_handler()
 	if Input.is_action_just_pressed("ui_redo"):
 		print("redo pressed...")
-		if Global.revision < Global.actions.size()-1: #revision is -1 indexed from fresh chart (0 = revision has 1 existing edit)
+		if Global.revision < Global.actions.size()-1: #revision is -1 indexed from fresh chart (0 means revision has 1 existing edit)
 			act = 1
-			action = Global.actions[Global.revision]
+			action = Global.actions[rev]
+			Global.revision += 1
+			print(act)
 			ur_handler()
 
 func ur_handler():
 	print("UR entered!")
+	print("action: ", action)
+	print("Global.revision: ", Global.revision)
+	print("desired index:", rev)
 	match action:
 		0: #add
-			for note in Global.changes[Global.revision]:
+			for note in Global.changes[rev]:
+				print("UR adding!")
 				add_child(note[REF])
 		1: #delete
-			for note in Global.changes[Global.revision]:
+			for note in Global.changes[rev]:
+				print("UR deleting!")
 				clearing_notes = true
 				remove_child(note[REF])
 				clearing_notes = false
 		2: #drag
-			if !act: #undo
-				for note in Global.changes[Global.revision]:
+			print(act)
+			if act == 0: #undo
+				for note in Global.changes[rev]:
+					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
+					print(note)
 					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
 			else:
-				for note in Global.changes[Global.revision]:
+				for note in Global.changes[rev]:
+					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
-	Global.revision += act
-	act = 0
+	act = -1
 	update_note_array()
 
 
@@ -215,18 +233,20 @@ func _on_tmb_loaded():
 
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-	var new_note : Note = note_scn.instantiate()
-	new_note.bar = bar
-	new_note.length = length
-	new_note.pitch_start = pitch
-	new_note.pitch_delta = pitch_delta
-	new_note.position.x = bar_to_x(bar)
-	new_note.position.y = pitch_to_height(pitch)
-	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
+	var note : Note
+	if act == -1: note = note_scn.instantiate()
+	else:         note = stuffed_note
+	note.bar = bar
+	note.length = length
+	note.pitch_start = pitch
+	note.pitch_delta = pitch_delta
+	note.position.x = bar_to_x(bar)
+	note.position.y = pitch_to_height(pitch)
+	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
-	if act == 0: add_child(new_note)
+	if act == -1: add_child(note)
 	else: return
-	new_note.grab_focus()
+	note.grab_focus()
 
 # move to ???
 func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -250,6 +270,8 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 func update_note_array():
 	var new_array := []
 	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
+	print("actions: ",Global.actions)
+	print("changes: ",Global.changes)
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
@@ -425,6 +447,12 @@ func _gui_input(event):
 				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
 				
+				###Dew append note add to actions###
+				Global.actions.append(0)
+				#when the user lets go of an added note, the action stack is already increased.
+				#when the user lets go of a dragged note, the action stack is not yet increased!
+				#With this difference, note.gd can easily decide whether to count the current note as pre-existing or new.
+				###Dew###
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
 				%LyricsEditor.move_to_front()
 				%PlayheadHandle.move_to_front()

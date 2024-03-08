@@ -22,7 +22,7 @@ var settings : Settings
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
-var revision = -1 #unedited chart
+var revision = -1 	#unedited chart
 var actions = []	#0 = add, 1 = delete, 2+ = dragged
 var changes = []	#[[[note_ref_a1, note_data_array_a1]], <- end of first edit
 					# [[note_ref_b1, note_data_array_b1],  <- start of second edit
