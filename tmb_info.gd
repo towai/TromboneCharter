@@ -75,6 +75,7 @@ func clear_section(start:float,length:float):
 			print("%d notes left" % note_array.size())
 			if is_in_section.call(bar) || is_in_section.call(end):
 				print("Erase note @ %.3f" % bar)
+				#TODO: index and save cleared note data for undo/redo
 				note_array.erase(note)
 				if note_array.is_empty(): any_notes_left = false
 				break # start from the beginning of the array

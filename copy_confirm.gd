@@ -19,6 +19,7 @@ func _on_copy_confirmed():
 		return
 	
 	main.tmb.clear_section(target,data.length)
+	#TODO: index and save pasted note data for undo/redo
 	for note in notes:
 		note[TMBInfo.NOTE_BAR] += target
 		main.tmb.notes.append(note)
