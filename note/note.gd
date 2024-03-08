@@ -88,7 +88,7 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
-var fresh := true  #only true for newly-created notes, and is set to false as soon as the fresh note is released.
+
 var click := false #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
 var starting_note : Array #The aforementioned initial data of a dragged note. Compared with proper_note upon note release.
 var proper_note : Array   #The final values of a released note. Compared with starting_note to determine whether the selected note's handle(s) actually changed position.
@@ -217,9 +217,9 @@ func _end_drag():
 	proper_note = [note_reference,note_data]
 	if starting_note != proper_note: #if the user ultimately edited the note instead of just dooting it,
 		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
-		if fresh:                    #if the note was just created, there is no chance that neighbors were edited.
+		if Global.fresh:         #if the note was just created, there is no chance that neighbors were edited.
 			Global.changes.append([[note_reference,note_data]]) #Record edit as an added note, and append its data to Global.changes.
-			fresh = false            #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
+			Global.fresh = false #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
 		else:                        #This note was dragged, not added. We have to check its note_package for neighboring notes.
 			var i = 0                #Append the new position of each note right after its pre-drag position. That way, we can
 			while i < note_package.size():#easily swap between the two sets of note data without introducing an extra revision count.
@@ -228,7 +228,7 @@ func _end_drag():
 				i += 1
 			Global.actions.append(2) #Record edit as a set of dragged notes, and append its data to Global.changes for future use.
 			Global.changes.append(note_package)
-		Global.revision += 1
+			Global.revision += 1
 	chart.update_note_array()
 
 

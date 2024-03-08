@@ -31,6 +31,7 @@ var changes = []	#[[[note_ref_a1, note_data_array_a1]], <- end of first edit
 					#[note_ref_b3, note_data_array_b3]],   <- end of second edit
 					#[note_ref_c1, note_data_array_c1]]]   <- end of third edit, end of history chain
 
+var fresh := false  #only true for newly-created notes, and is set to false as soon as the fresh note is released.
 func clear_future_edits(wipe := false):
 	#input will be Global.revision unless loading a fresh chart, in which case argument passed is -1.
 	#remember that Global.revision is negative-one indexed, where -1 is a blank array of changes.

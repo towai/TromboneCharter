@@ -435,7 +435,7 @@ func _gui_input(event):
 			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
 				@warning_ignore("unassigned_variable")
 				var new_note_pos : Vector2
-				print("HIHIHI")
+				print("actions: ", Global.actions)
 				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 				else: new_note_pos.x = to_unsnapped(event.position).x
 				
@@ -449,7 +449,12 @@ func _gui_input(event):
 				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+				###Dew note add check###
+				Global.clear_future_edits()
 				Global.actions.append(0)
+				Global.revision += 1
+				Global.fresh = true
+				###
 				%LyricsEditor.move_to_front()
 				%PlayheadHandle.move_to_front()
 
