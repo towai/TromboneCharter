@@ -58,12 +58,12 @@ var show_preview : bool = false
 var playhead_preview : float = 0.0
 
 ###Dew variables###
-var rev : int #rev denotes the index fetched upon undoing/redoing (redoing enacts the next edit in line, and undoing enacts the current edit)
+var rev : int   #Denotes the index fetched upon u/r-ing (redoing enacts next edit in line(+1), and undoing enacts current edit(+0))
 var act := -1 : #normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
 		rev = Global.revision + value 
 		act = value
-var action := -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+var action := -1        #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
 var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
 enum { #enumerates the three indices of a dragged note set: [note_reference, pre-drag_data, post-drag_data]
 	REF,
@@ -105,7 +105,7 @@ func _shortcut_input(event):
 		if Global.revision != -1:
 			act = 0
 			if Global.actions[rev] < 2:
-				action = !Global.actions[rev] #undoing an add will delete; undoing a delete will add. Keep logic progressing forward through edit chain.
+				action = !Global.actions[rev] #undoing an add deletes; undoing a delete adds. Keeps logic progressing forward through edit chain.
 			else:
 				action = Global.actions[rev]
 			Global.revision -= 1
@@ -124,17 +124,17 @@ func ur_handler():
 	print("UR entered!")
 	print("action: ", action)
 	print("Global.revision: ", Global.revision)
-	print("desired index:", rev)
+	print("desired index: ", rev)
 	match action:
 		0: #add
 			for note in Global.changes[rev]:
 				print("UR adding!")
-				add_child(note[REF])
+				add_child(note[REF])    #simply shows a hidden note
 		1: #delete
 			for note in Global.changes[rev]:
 				print("UR deleting!")
 				clearing_notes = true
-				remove_child(note[REF])
+				remove_child(note[REF]) #simply hides a select note
 				clearing_notes = false
 		2: #drag
 			print(act)
@@ -150,7 +150,6 @@ func ur_handler():
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
 	act = -1
-	#action = -1
 	update_note_array()
 
 
@@ -436,7 +435,7 @@ func _gui_input(event):
 			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
 				@warning_ignore("unassigned_variable")
 				var new_note_pos : Vector2
-				
+				print("HIHIHI")
 				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 				else: new_note_pos.x = to_unsnapped(event.position).x
 				
@@ -449,15 +448,8 @@ func _gui_input(event):
 				if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
-				
-				###Dew append note add to actions###
-				Global.clear_future_edits()
-				Global.actions.append(0)
-				#when the user lets go of an added note, the action stack is already increased.
-				#when the user lets go of a dragged note, the action stack is not yet increased!
-				#With this difference, note.gd can easily decide whether to count the current note as pre-existing or new.
-				###Dew###
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+				Global.actions.append(0)
 				%LyricsEditor.move_to_front()
 				%PlayheadHandle.move_to_front()
 
