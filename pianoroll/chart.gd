@@ -150,6 +150,7 @@ func ur_handler():
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
 	act = -1
+	#action = -1
 	update_note_array()
 
 
@@ -282,6 +283,8 @@ func update_note_array():
 		new_array.append(note_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
+	queue_redraw()
+	redraw_notes()
 
 
 func jump_to_note(note: int, use_tt: bool = false):
@@ -448,6 +451,7 @@ func _gui_input(event):
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
 				
 				###Dew append note add to actions###
+				Global.clear_future_edits()
 				Global.actions.append(0)
 				#when the user lets go of an added note, the action stack is already increased.
 				#when the user lets go of a dragged note, the action stack is not yet increased!

@@ -20,7 +20,9 @@ func on_load_dialog_file_selected(path:String):
 		%ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
 		main.show_popup(%ErrorPopup)
 		return dir
-	
+	###Dew reset u/r variables
+	Global.clear_future_edits(true)
+	###
 	%SaveDialog.current_dir = dir
 	%SaveDialog.current_path = path
 	cfg.set_value("Config","saved_dir", dir)

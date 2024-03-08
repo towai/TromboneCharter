@@ -88,6 +88,7 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
+var fresh := true
 var click := false
 var tbd : Note
 var starting_note : Array
@@ -211,14 +212,17 @@ func _end_drag():
 	click = false
 	proper_note = [self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]
 	if starting_note != proper_note:
-		if Global.revision < (Global.actions.size() - 1): #0 ALREADY appended to action on creation of fresh note (in chart.gd).
+		Global.clear_future_edits()
+		if fresh:
+			Global.actions.append(0)
 			Global.changes.append([[self,[bar,length,pitch_start,pitch_delta,pitch_start+pitch_delta]]])
+			fresh = false
 		else:
-			var new_package = package_neighbors(proper_note)
-			print("new_package: ",new_package)
+			print(note_package)
 			var i = 0
 			while i < note_package.size():
-				note_package[i].append(new_package[i][1])
+				var note_ref = note_package[i][0]
+				note_package[i].append([note_ref.bar,note_ref.length,note_ref.pitch_start,note_ref.pitch_delta,note_ref.pitch_start+note_ref.pitch_delta])
 				i += 1
 			print("final_package: ",note_package)
 			Global.actions.append(2)
@@ -241,6 +245,7 @@ func package_neighbors(self_note):
 
 
 func remove_note():
+	Global.clear_future_edits()
 	chart.clearing_notes = true
 	tbd = self
 	Global.actions.append(1)
@@ -249,7 +254,6 @@ func remove_note():
 	chart.remove_child(tbd)
 	chart.clearing_notes = false
 	chart.update_note_array()
-
 
 func _snap_near_pitches(): slide_helper.snap_near_pitches()
 
@@ -271,7 +275,7 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: remove_note()
+	if length <= 0: bar = -69420
 	doot_enabled = true
 
 
@@ -373,6 +377,7 @@ func _draw():
 
 
 func _exit_tree():
+	print("exiting tree!")
 	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()
