@@ -1,36 +1,52 @@
-[gd_scene load_steps=20 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=27 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
-[ext_resource type="Script" path="res://PreviewController.gd" id="2_rsc0c"]
+[ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
+[ext_resource type="Script" path="res://preview_controller.gd" id="2_rsc0c"]
 [ext_resource type="AudioStream" uid="uid://bii3beqwflmd" path="res://TRMPT65.wav" id="3_6p5u3"]
-[ext_resource type="Script" path="res://PianoKeys.gd" id="3_132ml"]
-[ext_resource type="Script" path="res://Piano.gd" id="3_mh03t"]
-[ext_resource type="Script" path="res://chart_view.gd" id="4_rrlxc"]
+[ext_resource type="Script" path="res://pianoroll/piano_keys.gd" id="3_132ml"]
+[ext_resource type="Script" path="res://pianoroll/piano.gd" id="3_mh03t"]
 [ext_resource type="AudioStream" uid="uid://bbf50lmoh3a53" path="res://RS.WAV" id="4_wfwxx"]
 [ext_resource type="AudioStream" uid="uid://7p2oa4q0h23t" path="res://chord.wav" id="5_vqfbf"]
-[ext_resource type="Script" path="res://Chart.gd" id="5_yhpph"]
-[ext_resource type="Script" path="res://Settings.gd" id="6_2cfeh"]
+[ext_resource type="Script" path="res://settings.gd" id="6_2cfeh"]
 [ext_resource type="PackedScene" uid="uid://u1i3jv8qhy1e" path="res://text_field.tscn" id="6_hqpqp"]
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
-[ext_resource type="Script" path="res://LyricsEditor.gd" id="9_srvtg"]
-[ext_resource type="Script" path="res://ColorPreview.gd" id="10_14v0o"]
-[ext_resource type="Script" path="res://SectionHandle.gd" id="10_fs4d4"]
+[ext_resource type="Script" path="res://toottally.gd" id="7_h0pqp"]
+[ext_resource type="FontFile" uid="uid://bednem37cigyi" path="res://fonts/SourceCodePro-Regular.ttf" id="7_jt8rs"]
+[ext_resource type="Script" path="res://copy_confirm.gd" id="7_m5n28"]
+[ext_resource type="Script" path="res://pianoroll/chart_view.gd" id="8_j823s"]
+[ext_resource type="Script" path="res://ffmpeg_instructions.gd" id="8_wmpcw"]
+[ext_resource type="Script" path="res://pianoroll/chart.gd" id="9_g46yt"]
+[ext_resource type="Script" path="res://pianoroll/wave_preview.gd" id="10_8jxge"]
+[ext_resource type="Script" path="res://color_preview.gd" id="10_14v0o"]
+[ext_resource type="Script" path="res://section_handle.gd" id="10_fs4d4"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
+[ext_resource type="Script" path="res://pianoroll/lyrics_editor.gd" id="11_nxuar"]
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
-[ext_resource type="Script" path="res://Alert.gd" id="16_yl2q4"]
+[ext_resource type="Script" path="res://alert.gd" id="16_yl2q4"]
 
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecsdr"]
+bg_color = Color(0.25098, 0.25098, 0.25098, 1)
+border_width_left = 8
+border_width_right = 8
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
+
 [node name="Main" type="VBoxContainer"]
-anchors_preset = 15
-anchor_right = 1.0
+anchors_preset = -1
+anchor_right = 1.011
 anchor_bottom = 1.0
+offset_right = -14.0801
 grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_eswg4")
 theme_override_constants/separation = 0
 script = ExtResource("1_4hx5p")
+
+[node name="SaveLoad" type="Node" parent="."]
+script = ExtResource("2_37xub")
 
 [node name="PreviewController" type="Node" parent="."]
 unique_name_in_owner = true
@@ -46,7 +62,7 @@ max_polyphony = 16
 unique_name_in_owner = true
 stream = ExtResource("4_wfwxx")
 
-[node name="WavPlayer" type="AudioStreamPlayer" parent="."]
+[node name="TrackPlayer" type="AudioStreamPlayer" parent="."]
 unique_name_in_owner = true
 volume_db = -5.0
 
@@ -67,12 +83,14 @@ title = "You Sure?"
 position = Vector2i(200, 200)
 size = Vector2i(234, 192)
 unresizable = true
-dialog_text = "Anything that's already there will be deleted.
-
+dialog_text = "Are you sure you want to paste %s notes?
+%s
 Notes with tails going into or out of the section might end up overlapping other notes."
 dialog_autowrap = true
+script = ExtResource("7_m5n28")
 
 [node name="LoadDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
 title = "Load Chart"
 size = Vector2i(600, 360)
 ok_button_text = "Open"
@@ -83,6 +101,7 @@ filters = PackedStringArray("*.tmb")
 show_hidden_files = true
 
 [node name="SaveDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
 title = "Save Chart"
 size = Vector2i(600, 360)
 ok_button_text = "Save"
@@ -92,28 +111,107 @@ filters = PackedStringArray("*.tmb")
 show_hidden_files = true
 
 [node name="ErrorPopup" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
 title = "Error"
 
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 468)
-dialog_text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
+size = Vector2i(720, 600)
+dialog_autowrap = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Instructions"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 712.0
+offset_bottom = 554.0
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
 
 Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. With \"propagate slide changes\" enabled, hold Alt when dragging to break a note away from its neighbor. Note too short to easily grab the pitch handle? Hold Shift to bring it to the front.
 
-On saving, the chart's trackRef field is automatically populated with the directory it was saved to. Keep this in mind if using a working folder other than the one the chart is destined for. You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
+You can hold Shift and click to move the playhead to where your mouse cursor is.
 
-On chart load and save, Trombone Charter will try to load song.wav from the chart's folder. If song.wav is not present and you have ffmpeg, it will try to convert song.ogg into song.wav. This should only take a moment, even for long songs, but you can disable it in Edit Settings. Just be sure not to include song.wav in your release since WAVs are huge compared to Ogg files.
+You can press the [b]S[/b] key to enter Select Mode. In this mode you can click and drag to select a segment of the song to preview. You can also copy and paste the notes you've selected using the usual keyboard shortcuts. You can press [b]E[/b] to return to Edit Mode.
 
-You can pass in a .tmb by dragging it onto the executable, and it will automatically be loaded.
+In the Lyrics Editor, you can double click to insert a new lyric where your mouse cursor is, and you can hit the Return key to insert a new lyric at the next note by default.
 
-Preview timing can be wonky because it can only update at the refresh rate of your monitor. gloat all you like, 144hz bougies
+The \"Track Ref\" field should be unique to your chart; you can use the song's name, or include both the name and the artist. If someone else has charted the same song before then make sure it doesn't clash with the existing chart's [code]trackRef[/code]. It is also best practice to name your chart's folder the same as your [code]trackRef[/code].
+
+You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
+
+On chart load and save, Trombone Charter will try to load [code]song.ogg[/code] from the chart's folder. If [code]song.ogg[/code] is not present then no backing track will play.
+
+You can pass in a [code].tmb[/code] by dragging it onto the executable, and it will automatically be loaded.
+
+Preview timing can be wonky because it can only update at the refresh rate of your monitor. Gloat all you like, 144hz bougies.
 
 
-Created with Godot 4 by twi — twitter/@towaii — github/towai
-I'm in the Trombone Champ Modding Discord if you have issues or potential improvements, or you can submit them as a GitHub issue."
+Created with Godot 4 by twi — [url=\"https://twitter.com/towaii\"]twitter/@towaii[/url] — [url=\"https://github.com/towai\"]github/towai[/url]
+I'm in the [url=\"https://discord.gg/KVzKRsbetJ\"]Trombone Champ Modding Discord[/url] if you have issues or potential improvements, or you can submit them as a [url=\"https://github.com/towai/TromboneCharter\"]GitHub issue[/url]."
+
+[node name="FFmpegInstructions" type="AcceptDialog" parent="."]
+title = "Using Advanced Features with FFmpeg"
+position = Vector2i(200, 48)
+size = Vector2i(720, 350)
 dialog_autowrap = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="FFmpegInstructions"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 712.0
+offset_bottom = 304.0
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "Install FFmpeg to take advantage of extended Trombone Charter features.
+
+[ul]Type into the Command Prompt: [code]winget install ffmpeg[/code][/ul]
+
+Or:
+
+[ul]Download FFmpeg from the official site: [url]https://ffmpeg.org/download.html[/url]
+Then, stick [code]ffmpeg.exe[/code] either in the Trombone Charter folder, or any folder that exists in your [code]%PATH%[/code] variable.
+[ul]You can look at your [code]%PATH%[/code] by opening the Start menu and typing [code]path[/code] to bring up the search, then selecting \\\"Edit system environment variables\\\".
+[ul]There's one specific to your user account, and one for the whole system.
+You can add a custom one and put anything you like in it![/ul][/ul][/ul]"
+script = ExtResource("8_wmpcw")
+
+[node name="DiffCalc" type="Window" parent="."]
+title = "TootTally Difficulty Calculator"
+position = Vector2i(200, 36)
+size = Vector2i(700, 600)
+visible = false
+wrap_controls = true
+transient = true
+content_scale_mode = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc"]
+offset_right = 700.0
+offset_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DiffCalc/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ecsdr")
+
+[node name="CalcInfo" type="RichTextLabel" parent="DiffCalc/PanelContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_fonts/mono_font = ExtResource("7_jt8rs")
+bbcode_enabled = true
+text = "What is Up my Dude"
+tab_size = 2
+
+[node name="Button" type="Button" parent="DiffCalc/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "OK"
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
@@ -149,14 +247,25 @@ layout_mode = 2
 size_flags_horizontal = 3
 horizontal_scroll_mode = 2
 vertical_scroll_mode = 0
-script = ExtResource("4_rrlxc")
+script = ExtResource("8_j823s")
 
 [node name="Chart" type="Control" parent="PianoRoll/ChartView"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
-script = ExtResource("5_yhpph")
+script = ExtResource("9_g46yt")
+
+[node name="WavePreview" type="HBoxContainer" parent="PianoRoll/ChartView/Chart"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.752941)
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("10_8jxge")
 
 [node name="SectStartHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
@@ -178,16 +287,6 @@ grow_vertical = 2
 mouse_default_cursor_shape = 2
 script = ExtResource("10_fs4d4")
 
-[node name="SectTargetHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 6.0
-grow_vertical = 2
-mouse_default_cursor_shape = 2
-script = ExtResource("10_fs4d4")
-
 [node name="LyricsEditor" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 visible = false
@@ -197,9 +296,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("9_srvtg")
+script = ExtResource("11_nxuar")
 
-[node name="AddLyricHandle" type="Control" parent="PianoRoll/ChartView/Chart/LyricsEditor"]
+[node name="PlayheadHandle" type="Control" parent="PianoRoll/ChartView/Chart"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 9
@@ -234,9 +333,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 size_flags_vertical = 2
-tooltip_text = "-tooltip_text = \"Swap between chart info (such as length and bpm) and editor settings (such as timing snap and .wav loading).\"
-text = \"Go to Editor\""
-text = "Go to Info"
+text = "Edit Mode"
 
 [node name="LoadChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 layout_mode = 2
@@ -279,6 +376,12 @@ layout_mode = 2
 json_key = "author"
 field_name = "Author"
 
+[node name="TrackRef" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
+layout_mode = 2
+size_flags_vertical = 6
+json_key = "trackRef"
+field_name = "Track Ref"
+
 [node name="Genre" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo" instance=ExtResource("6_hqpqp")]
 layout_mode = 2
 json_key = "genre"
@@ -286,11 +389,17 @@ field_name = "Genre"
 
 [node name="Description" type="TextEdit" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(240, 70)
 layout_mode = 2
 size_flags_vertical = 3
 placeholder_text = "Description"
 wrap_mode = 1
+
+[node name="TootTallyUpload" type="Button" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo"]
+layout_mode = 2
+tooltip_text = "Uploads the chart to TootTally's Difficulty Calculator, which provides a rough estimate for its difficulty along with some checks to TootTally's rating criteria."
+text = "Calculate Difficulty via TootTally"
+script = ExtResource("7_h0pqp")
 
 [node name="SongInfo2" type="VFlowContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 unique_name_in_owner = true
@@ -302,19 +411,23 @@ theme_override_constants/v_separation = 8
 layout_mode = 2
 json_key = "endpoint"
 field_name = "Length (beats)"
-max_value = 9999
+min_value = 2.0
+max_value = 1e+07
 
 [node name="Tempo" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "tempo"
 field_name = "Tempo"
-max_value = 999
+is_float = true
+min_value = 1.0
+max_value = 9999.0
 
 [node name="TimeSig" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "timesig"
 field_name = "Time Signature"
-max_value = 16
+min_value = 1.0
+max_value = 1e+07
 
 [node name="Control" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
 layout_mode = 2
@@ -323,20 +436,24 @@ layout_mode = 2
 layout_mode = 2
 json_key = "year"
 field_name = "Year"
-min_value = -9999
-max_value = 9999
+min_value = -9999.0
+max_value = 9999.0
 
 [node name="Diff" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "difficulty"
 field_name = "Difficulty"
-max_value = 10
+max_value = 10.0
 
 [node name="NoteSpacing" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2" instance=ExtResource("7_6mp3m")]
 layout_mode = 2
 json_key = "savednotespacing"
 field_name = "Note Spacing"
-max_value = 480
+min_value = 10.0
+max_value = 480.0
+
+[node name="Control2" type="Control" parent="Settings/MarginC/HBoxC/ChartInfo/SongInfo2"]
+layout_mode = 2
 
 [node name="ColorSettings" type="VBoxContainer" parent="Settings/MarginC/HBoxC/ChartInfo"]
 layout_mode = 2
@@ -373,6 +490,7 @@ script = ExtResource("10_14v0o")
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/v_separation = 2
 
 [node name="ZoomEntry" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
@@ -387,8 +505,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 tooltip_text = "1"
-min_value = 0.25
-max_value = 3.0
+min_value = 0.1
+max_value = 4.0
 step = 0.05
 value = 1.0
 
@@ -396,39 +514,37 @@ value = 1.0
 layout_mode = 2
 icon = ExtResource("14_8wa4s")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="TimeSnapping" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
-[node name="TimeSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
+[node name="TimeSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/TimeSnapping"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 
-[node name="TimingSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer"]
+[node name="TimingSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/TimeSnapping"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(204, 0)
 layout_mode = 2
-tooltip_text = "Toggle beat snapping with the checkbox to the left!"
 min_value = 1.0
-max_value = 12.0
+max_value = 16.0
 value = 4.0
 alignment = 2
 prefix = "Timing snap: 1/"
 suffix = "beats"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="PitchSnapping" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
-[node name="PitchSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
+[node name="PitchSnapChk" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/PitchSnapping"]
 unique_name_in_owner = true
 layout_mode = 2
 button_pressed = true
 
-[node name="PitchSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2"]
+[node name="PitchSnap" type="SpinBox" parent="Settings/MarginC/HBoxC/EditSettings/PitchSnapping"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(204, 0)
 layout_mode = 2
-tooltip_text = "Toggle pitch snapping with the checkbox to the left!"
 focus_mode = 2
 min_value = 1.0
 max_value = 12.0
@@ -441,6 +557,12 @@ suffix = "semitones"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Draw Microtones"
+
+[node name="InsertTapNotes" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Insertions with this box checked will be tap notes, instead of using the length of the current subdivision."
+text = "Insert tap notes"
 
 [node name="DootToggle" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
@@ -460,51 +582,52 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
-[node name="TryAutoloadWAV" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
+[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
-button_pressed = true
-text = "On chart load / save:
-Try to load song.wav"
 
-[node name="ConvertOgg" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="BuildWaveform" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
 unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 tooltip_text = "Requires ffmpeg."
 button_pressed = true
-text = "Try to convert song.ogg if wav missing"
+text = "Show audio preview"
 alignment = 2
 
-[node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
-layout_mode = 2
-text = "Vol."
-
-[node name="VolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
+[node name="HiResWave" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-min_value = -12.0
-max_value = 6.0
-step = 0.1
-tick_count = 7
-ticks_on_borders = true
+size_flags_horizontal = 6
+tooltip_text = "This might take a while!"
+text = "Hi-Res"
+alignment = 2
 
-[node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/Vol"]
-layout_mode = 2
-icon = ExtResource("14_8wa4s")
-
-[node name="WAVLoadedLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+[node name="FFmpegHelp" type="Button" parent="Settings/MarginC/HBoxC/EditSettings/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 10
-text = "no song.wav loaded!"
+size_flags_horizontal = 10
+tooltip_text = "How do I use these features?"
+text = "  ?  "
+
+[node name="PreviewLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+layout_mode = 2
+text = "Audio preview type:"
+
+[node name="PreviewType" type="OptionButton" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+layout_mode = 2
+item_count = 2
+selected = 0
+popup/item_0/text = "Waveform"
+popup/item_0/id = 0
+popup/item_1/text = "Spectrogram"
+popup/item_1/id = 1
+
+[node name="PreviewGenLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Generating audio preview..."
 horizontal_alignment = 1
-vertical_alignment = 2
 
 [node name="RefreshButton" type="Button" parent="Settings/MarginC/HBoxC/EditSettings"]
 visible = false
@@ -517,36 +640,41 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
-layout_mode = 2
-alignment = 2
-
-[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
-layout_mode = 2
-text = "Section Start:"
-
-[node name="SectionStart" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
-unique_name_in_owner = true
-layout_mode = 2
-focus_mode = 2
-
 [node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
 alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
 layout_mode = 2
-text = "Section Length:"
+size_flags_horizontal = 3
+text = "Playback Controls:"
 
-[node name="SectionLength" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+[node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+layout_mode = 2
+text = "Start:"
+
+[node name="SectionStart" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
 unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 2
-min_value = 1.0
-value = 1.0
+
+[node name="Label2" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+layout_mode = 2
+text = "Length:"
+
+[node name="SectionLength" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
+size_flags_horizontal = 8
 size_flags_vertical = 6
 alignment = 2
 
@@ -561,22 +689,64 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 2.08165e-12)
 layout_mode = 2
 text = "Preview"
 
-[node name="HBox3" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
-layout_mode = 2
-alignment = 2
-
-[node name="CopyButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
-layout_mode = 2
-tooltip_text = "Hold Shift to bypass confirmation"
-text = "Copy to:"
-
-[node name="CopyTarget" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox3"]
+[node name="PlayheadPos" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
 unique_name_in_owner = true
 layout_mode = 2
+tooltip_text = "Playhead Position"
 focus_mode = 2
+step = 2.08165e-12
+custom_arrow_step = 1.0
+
+[node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/Vol"]
+layout_mode = 2
+text = "Track 🔊"
+
+[node name="TrackVolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/SectionSelection/Vol"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -12.0
+max_value = 6.0
+step = 0.1
+tick_count = 7
+ticks_on_borders = true
+
+[node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/Vol"]
+layout_mode = 2
+icon = ExtResource("14_8wa4s")
+
+[node name="Vol2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/Vol2"]
+layout_mode = 2
+text = "Toot 🔊 "
+
+[node name="TootVolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/SectionSelection/Vol2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -12.0
+max_value = 6.0
+step = 0.1
+tick_count = 7
+ticks_on_borders = true
+
+[node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/Vol2"]
+layout_mode = 2
+icon = ExtResource("14_8wa4s")
 
 [node name="LyricsTools" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
@@ -590,25 +760,34 @@ size_flags_horizontal = 8
 size_flags_vertical = 2
 text = "Show lyrics editor"
 
-[node name="AddLyric" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
-unique_name_in_owner = true
+[node name="Label3" type="Label" parent="Settings/MarginC/HBoxC/LyricsTools"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 size_flags_horizontal = 8
-text = "Add new lyric at..."
+tooltip_text = "Controls what the enter key does when writing lyrics.
 
-[node name="LyricBar" type="SpinBox" parent="Settings/MarginC/HBoxC/LyricsTools"]
+Next Note will insert a new lyric at the next nearest note.
+
+Next Bar will instert a new lyric at the next bar."
+mouse_filter = 1
+text = "Enter key mode:"
+
+[node name="EnterKeyMode" type="OptionButton" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(117, 0)
 layout_mode = 2
 size_flags_horizontal = 8
-focus_mode = 2
-alignment = 2
-prefix = "Beat"
+size_flags_vertical = 4
+item_count = 2
+selected = 0
+popup/item_0/text = "Next Note"
+popup/item_0/id = 0
+popup/item_1/text = "Next Bar"
+popup/item_1/id = 1
 
 [node name="CopyLyrics" type="Button" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 8
 size_flags_vertical = 10
 text = "Copy section lyrics"
 
@@ -619,6 +798,7 @@ tooltip_text = "Info & Usage"
 text = "   ?   "
 
 [node name="Alert" type="Node2D" parent="."]
+unique_name_in_owner = true
 script = ExtResource("16_yl2q4")
 
 [node name="Label" type="Label" parent="Alert"]
@@ -636,35 +816,50 @@ text = "toot toot lol"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
 [connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]
-[connection signal="confirmed" from="CopyConfirm" to="." method="_on_copy_confirmed"]
+[connection signal="confirmed" from="CopyConfirm" to="CopyConfirm" method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]
+[connection signal="meta_clicked" from="Instructions/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="meta_clicked" from="FFmpegInstructions/RichTextLabel" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="about_to_popup" from="DiffCalc" to="." method="_on_diff_calc_about_to_popup"]
+[connection signal="close_requested" from="DiffCalc" to="." method="_on_diff_calc_win_close_requested"]
+[connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
+[connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
+[connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
+[connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/LoadChart" to="." method="_on_load_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/SaveChart" to="." method="_on_save_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="text_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/Description" to="." method="_on_description_text_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" to="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" method="_on_toottally_upload_pressed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/StartColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomReset" to="Settings" method="_on_zoom_reset_pressed"]
-[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer/TimeSnapChk" to="Settings" method="_on_time_snap_toggled"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer/TimingSnap" to="Settings" method="_on_timing_snap_value_changed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/HBoxContainer2/PitchSnap" to="PianoRoll/ChartView" method="_on_pitch_snap_value_changed"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/TimeSnapping/TimeSnapChk" to="Settings" method="_on_time_snap_toggled"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/TimeSnapping/TimingSnap" to="Settings" method="_on_timing_snap_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/PitchSnapping/PitchSnap" to="PianoRoll/ChartView" method="_on_pitch_snap_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/DrawMicrotones" to="PianoRoll/ChartView" method="queue_redraw"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/InsertTapNotes" to="PianoRoll/ChartView" method="queue_redraw"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/Vol/VolSlider" to="Settings" method="_on_volume_changed"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/BuildWaveform" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_build_waveform_toggled"]
+[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/HiResWave" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_hi_res_wave_toggled"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]
+[connection signal="item_selected" from="Settings/MarginC/HBoxC/EditSettings/PreviewType" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_preview_type_item_selected"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/RefreshButton" to="." method="_on_refresh_button_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionStart" to="Settings" method="_on_section_start_value_changed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox2/SectionLength" to="Settings" method="_on_section_length_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyButton" to="." method="_on_copy_button_pressed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox3/CopyTarget" to="Settings" method="_on_copy_target_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PlayheadPos" to="Settings" method="_on_copy_target_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/Vol/TrackVolSlider" to="Settings" method="_on_preview_volume_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/Vol/VolReset" to="Settings" method="_on_preview_vol_reset_pressed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/Vol2/TootVolSlider" to="Settings" method="_on_toot_volume_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/AddLyric" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_add_lyric_pressed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/LyricsTools/LyricBar" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_lyric_bar_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/CopyLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_copy_lyrics_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/HelpButton" to="." method="_on_help_button_pressed"]

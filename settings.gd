@@ -8,6 +8,7 @@ var tmb : TMBInfo:
 @onready var author 	= %SongInfo.get_node("Author")
 @onready var genre		= %SongInfo.get_node("Genre")
 @onready var desc		= %SongInfo.get_node("Description")
+@onready var track_ref  = %SongInfo.get_node("TrackRef")
 @onready var length  = %SongInfo2.get_node("Length")
 @onready var tempo	 = %SongInfo2.get_node("Tempo")
 @onready var timesig = %SongInfo2.get_node("TimeSig")
@@ -17,7 +18,7 @@ var tmb : TMBInfo:
 
 var values : Array:
 	get: return [
-		title,short_name,author,genre,desc,
+		title,short_name,author,genre,desc,track_ref,
 		length,tempo,timesig,year,diff,notespc
 	]
 
@@ -30,10 +31,6 @@ var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
 var propagate_changes : bool:
 	get: return %PropagateChanges.button_pressed
-var load_wav_on_chart_load: bool:
-	get: return %TryAutoloadWAV.button_pressed
-var convert_ogg: bool:
-	get: return %ConvertOgg.button_pressed
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -50,10 +47,13 @@ var default_end_color = Color("#FDCA4B")
 
 var section_start : float:
 	get: return %SectionStart.value
+	set(with):  %SectionStart.value = with
 var section_length : float:
 	get: return %SectionLength.value
-var section_target : float:
-	get: return %CopyTarget.value
+	set(with):  %SectionLength.value = with
+var playhead_pos : float:
+	get: return %PlayheadPos.value
+	set(with):  %PlayheadPos.value = with
 @onready var sect_start_handle = %SectStartHandle
 
 
@@ -67,16 +67,36 @@ var timing_snap : int:
 var snap_time : bool:
 	get: return %TimeSnapChk.button_pressed
 
+var tap_notes : bool:
+	get: return %InsertTapNotes.button_pressed
+
 
 func _ready():
 	start_color = default_start_color
 	end_color = default_end_color
-	_on_volume_changed(0.0)
+	
+	var panel : StyleBoxFlat = get_theme_stylebox("panel")
+	panel.corner_radius_top_left     = 0
+	panel.corner_radius_top_right    = 0
+	panel.corner_radius_bottom_left  = 0
+	panel.corner_radius_bottom_right = 0
+	# i think these are redundant anyway. nevertheless,
+	_on_preview_volume_changed(0.0)
+	_on_toot_volume_changed(0.0)
 	
 	Global.settings = self
 	get_tree().get_current_scene().chart_loaded.connect(_update_values)
 	_update_view()
 	_on_timing_snap_value_changed(timing_snap)
+	_toggle_ffmpeg_features()
+
+
+func _toggle_ffmpeg_features():
+	var disable = !Global.ffmpeg_worker.ffmpeg_exists
+	%BuildWaveform.disabled = disable
+	%HiResWave.disabled = disable
+	%FFmpegHelp.visible = disable
+	%PreviewType.disabled = disable
 
 
 func _update_values():
@@ -85,6 +105,7 @@ func _update_values():
 	author.value = tmb.author
 	genre.value = tmb.genre
 	desc.text = tmb.description
+	track_ref.value = tmb.trackRef
 	
 	length.value = tmb.endpoint
 	tempo.value = tmb.tempo
@@ -92,7 +113,7 @@ func _update_values():
 	year.value = tmb.year
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
-	%CopyTarget.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint
 	_update_handles()
 	
 	if !use_custom_colors:
@@ -112,14 +133,17 @@ func _update_view():
 			%EditSettings.hide()
 			%SectionSelection.hide()
 			%ChartInfo.show()
-			%ViewSwitcher.text = "Go to Info"
+			%ViewSwitcher.text = "Edit Mode"
 		VIEW_EDIT_SETTINGS:
 			%ChartInfo.hide()
 			%LyricsTools.show()
 			%EditSettings.show()
 			%SectionSelection.show()
-			%ViewSwitcher.text = "Go to Editor"
-		_: print("oh no!! what the fuck. settings view set to a wrong value")
+			%ViewSwitcher.text = "Chart Info"
+		_:
+			print("Somehow tried to set Settings pane view to a wrong value (%d)"
+					% current_view)
+			assert(false)
 
 
 func _on_zoom_level_changed(value:float):
@@ -136,54 +160,61 @@ func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 func _update_handles():
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
-		%SectTargetHandle.update_pos(section_target)
-		%AddLyricHandle.update_pos(%LyricBar.value)
+		%PlayheadHandle.update_pos(playhead_pos)
 
 func _force_decimals(box:SpinBox):
-	if box.value == int(box.value):
-		box.tooltip_text = str(box.value)
-		return
 	var lineedit = box.get_line_edit()
-	lineedit.text = ("%.4f" % box.value).rstrip('0')
-	box.tooltip_text = lineedit.text
+	if box.value == int(box.value):
+		lineedit.text = str(box.value)
+		box.tooltip_text = lineedit.text
+	else:
+		box.tooltip_text = str(box.value)
+		lineedit.text = ("%.4f" % box.value).rstrip('0.')
 
+#region Sections
 const SECT_HANDLE_RADIUS = 3.0
-
-func _on_section_start_value_changed(value):
-	%SectionStart.value = value
-	%SectionLength.max_value = max(1,tmb.endpoint - value)
-	_force_decimals(%SectionStart)
-	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
-	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
-	%Chart.queue_redraw()
-
-func _on_section_length_value_changed(value):
-	%SectionLength.value = value
-	_force_decimals(%SectionLength)
-	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
-	%Chart.queue_redraw()
-
-func _on_copy_target_value_changed(value):
-	%CopyTarget.value = value
-	_force_decimals(%CopyTarget)
-	%SectTargetHandle.position.x = %Chart.bar_to_x(section_target) - SECT_HANDLE_RADIUS
-	%Chart.queue_redraw()
-
 
 func section_handle_dragged(value:float,which:Node):
 	if which == %SectStartHandle:
 		_on_section_start_value_changed(value)
 	elif which == %SectEndHandle: 
 		_on_section_length_value_changed(value - section_start)
-	elif which == %SectTargetHandle: 
+	elif which == %PlayheadHandle: 
 		_on_copy_target_value_changed(value)
-	if which == %AddLyricHandle:
-		%LyricsEditor._on_lyric_bar_value_changed(value)
 
+func _on_section_start_value_changed(value):
+	section_start = value
+	%SectionLength.max_value = tmb.endpoint - value
+	_force_decimals(%SectionStart)
+	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
+	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
+	%Chart.queue_redraw()
 
-func _on_volume_changed(value:float):
-	%VolSlider.tooltip_text = str(value)
-	%WavPlayer.volume_db = value
+func _on_section_length_value_changed(value):
+	section_length = value
+	_force_decimals(%SectionLength)
+	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
+	%Chart.queue_redraw()
+
+func _on_copy_target_value_changed(value):
+	playhead_pos = value
+	_force_decimals(%PlayheadPos)
+	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
+	%Chart.queue_redraw()
+
+#endregion
+
+func _on_preview_vol_reset_pressed() -> void:
+	%TrackVolSlider.value = 0 # the below gets called iff volume wasn't already 0
+func _on_preview_volume_changed(value: float) -> void:
+	%TrackVolSlider.tooltip_text = str(value)
+	%TrackPlayer.volume_db = value
+
+func _on_toot_vol_reset_pressed() -> void:
+	%TootVolSlider.value = 0
+func _on_toot_volume_changed(value: float) -> void:
+	%TootVolSlider.tooltip_text = str(value)
+	%TrombPlayer.volume_db = value
 
 
 func _on_timing_snap_value_changed(value):
@@ -191,8 +222,6 @@ func _on_timing_snap_value_changed(value):
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
-	%CopyTarget.step = snap
-	%LyricBar.step = snap
 
 
 func _on_time_snap_toggled(button_pressed):
@@ -201,10 +230,6 @@ func _on_time_snap_toggled(button_pressed):
 		true: 
 			%SectionStart.step	= snap
 			%SectionLength.step = snap
-			%CopyTarget.step	= snap
-			%LyricBar.step		= snap
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
-			%CopyTarget.step = 0.0001
-			%LyricBar.step = 0.0001

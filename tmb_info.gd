@@ -9,26 +9,35 @@ enum {
 	NOTE_PITCH_DELTA,
 	NOTE_PITCH_END
 }
-var notes := []
-# { bar:float, lyric:string }
-var lyrics := []
-var title		:= ""
-var shortName	:= ""
-var author		:= ""
-var genre		:= ""
-var description := ""
-var year		: int = 1999
-var tempo		: int = 120
-var endpoint	: int = 4
-var timesig 	: int = 4
-var difficulty	: int = 5
-var savednotespacing : int = 120
-
 enum LoadResult {
 	SUCCESS,
 	TMB_INVALID,
 	FILE_ACCESS_ERROR,
 }
+var notes := []
+# { bar:float, lyric:string }
+var lyrics := []
+var improv_zones := []
+var bgdata := []
+var title		:= ""
+var shortName	:= ""
+var author		:= ""
+var genre		:= ""
+var description := ""
+var trackRef    := ""
+var year		: int = 1999
+var tempo		: float = 120
+var endpoint	: int = 4
+var timesig 	: int = 2
+var difficulty	: int = 5
+var savednotespacing : int = 120
+
+
+func has_note_touching_endpoint() -> bool:
+	if notes.is_empty(): return false
+	var last_note = notes[-1]
+	return (last_note[NOTE_BAR] + last_note[NOTE_LENGTH] == endpoint)
+
 
 static func load_result_string(result:int) -> String:
 	match result:
@@ -36,6 +45,7 @@ static func load_result_string(result:int) -> String:
 		LoadResult.TMB_INVALID: return "Invalid TMB"
 		LoadResult.FILE_ACCESS_ERROR: return "File access error (see console)"
 		_: return "Unknown error %d" % result
+
 
 func find_all_notes_in_section(start:float,length:float) -> Array:
 	var result := []
@@ -65,6 +75,7 @@ func clear_section(start:float,length:float):
 			print("%d notes left" % note_array.size())
 			if is_in_section.call(bar) || is_in_section.call(end):
 				print("Erase note @ %.3f" % bar)
+				#TODO: index and save cleared note data for undo/redo
 				note_array.erase(note)
 				if note_array.is_empty(): any_notes_left = false
 				break # start from the beginning of the array
@@ -101,6 +112,7 @@ func load_from_file(filename:String) -> int:
 	author		= data.author
 	genre		= data.genre
 	description = data.description
+	trackRef    = data.trackRef
 	
 	year		= data.year
 	tempo		= data.tempo
@@ -108,6 +120,15 @@ func load_from_file(filename:String) -> int:
 	timesig 	= data.timesig
 	difficulty	= data.difficulty
 	savednotespacing = data.savednotespacing
+
+	if data.has('bgdata'):
+		bgdata = data.bgdata
+	else:
+		bgdata = []
+	if data.has('improv_zones') && data['improv_zones'] is Array:
+		improv_zones = data.improv_zones
+	else:
+		improv_zones = []
 	
 	if data.has("note_color_start"):
 		Global.settings.use_custom_colors = true
@@ -125,7 +146,7 @@ func load_from_file(filename:String) -> int:
 	return LoadResult.SUCCESS
 
 
-func save_to_file(filename : String, dir : String) -> int:
+func save_to_file(filename : String) -> int:
 	print("try save tmb to %s" % filename)
 	var f = FileAccess.open(filename,FileAccess.WRITE)
 	if f == null:
@@ -133,17 +154,28 @@ func save_to_file(filename : String, dir : String) -> int:
 		print(error_string(err))
 		return err
 	
+	var dict := to_dict()
+	f.store_string(JSON.stringify(dict))
+	print("finished saving")
+	return OK
+
+
+func to_dict() -> Dictionary:
 	var dict := {}
+	
 	for value in Global.settings.values:
 		if !(value is TextField || value is NumField): continue
 		dict[value.json_key] = value.value
+	
 	for note in notes: if (note[NOTE_BAR] + note[NOTE_LENGTH]) > endpoint: notes.erase(note)
 	for lyric in lyrics: if lyric.bar > endpoint: lyrics.erase(lyric)
-	dict["notes"] = notes
 	dict["description"] = description
+	dict["notes"] = notes
 	dict["lyrics"] = lyrics
+	dict["improv_zones"] = improv_zones
+	dict["bgdata"] = bgdata
 	dict["UNK1"] = 0
-	dict["trackRef"] = dir.split("/")[-1]
+	
 	if Global.settings.use_custom_colors:
 		var start_color =  Global.settings.start_color
 		var end_color =  Global.settings.end_color
@@ -157,6 +189,6 @@ func save_to_file(filename : String, dir : String) -> int:
 			end_color[1],
 			end_color[2],
 		]
-	f.store_string(JSON.stringify(dict))
-	print("finished saving")
-	return OK
+	
+	return dict
+

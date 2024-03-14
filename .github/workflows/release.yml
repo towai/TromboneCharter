@@ -1,0 +1,38 @@
+name: Build for Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  Godot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: Windows
+            extension: exe
+          - platform: Windows.OpenGL
+            extension: exe
+          - platform: Linux
+            extension: x86-64
+          - platform: macOS
+            extension: zip
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        id: build
+        uses: DerpyChap/build-godot-action@4117f9a9b07d1a919a1665ee5c69044a31d84056        
+        with:
+          name: TromboneCharter.${{ matrix.platform }}.${{ matrix.extension }}
+          preset: ${{ matrix.platform }}
+          subdirectory: github
+          debugMode: false
+      - name: Publish to Release
+        uses: xresloader/upload-to-github-release@v1.4.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: ${{ github.workspace }}/${{ steps.build.outputs.build }}
+          tags: true
