@@ -217,14 +217,14 @@ func _on_toot_volume_changed(value: float) -> void:
 	%TrombPlayer.volume_db = value
 
 
-func _on_timing_snap_value_changed(value):
+func _on_timing_snap_value_changed(_value):
 	if !snap_time: return
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
 
 
-func _on_time_snap_toggled(button_pressed):
+func _on_time_snap_toggled(_button_pressed):
 	var snap = 1.0 / timing_snap
 	match snap_time:
 		true: 

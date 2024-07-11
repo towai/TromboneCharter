@@ -130,6 +130,8 @@ func _ready():
 	
 	end_handle.size = ENDHANDLE_SIZE
 	
+	if Global.pasting:
+		Global.copied_selection.append(self)
 	update_touching_notes()
 	_update()
 	doot_enabled = true
@@ -376,7 +378,7 @@ func _draw():
 
 
 func _exit_tree():
+	if chart.clearing_notes : return
 	print("exiting tree!")
-	if chart.clearing_notes: return
 	update_touching_notes()
 	chart.update_note_array()

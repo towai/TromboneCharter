@@ -16,7 +16,7 @@ class ViewBounds:	# effectively a vector2 with nicer code completion
 	var center: float:
 		get: return (left + right) / 2.0
 		set(_with): assert(false)
-	func _init(left:float,right:float):
+	func _init(left,right):
 		self.left = left
 		self.right = right
 
@@ -58,14 +58,16 @@ var show_preview : bool = false
 var playhead_preview : float = 0.0
 
 ###Dew variables###
-var rev : int   #Denotes the index fetched upon u/r-ing (redoing enacts next edit in line(+1), and undoing enacts current edit(+0))
+var rev : int   #Denotes the index fetched 
+#Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
+#Paste and drag edits are stored as pair of ARRAYS, each array containing a list of note references and note data
 var act := -1 : #normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
 		rev = Global.revision + value 
 		act = value
 var action := -1        #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
 var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
-enum { #enumerates the three indices of a dragged note set: [note_reference, pre-drag_data, post-drag_data]
+enum { #enumerates the three indices of a DRAGGED note set: [note_reference, pre-drag_data, post-drag_data]
 	REF,
 	OLD,
 	NEW
@@ -122,9 +124,10 @@ func _shortcut_input(event):
 
 func ur_handler():
 	print("UR entered!")
-	print("action: ", action)
+	print("action: ", action) #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision)
-	print("desired index: ", rev)
+	print("input: ", rev)
+	print("desired note set:", Global.changes[rev])
 	match action:
 		0: #add
 			for note in Global.changes[rev]:
@@ -137,21 +140,41 @@ func ur_handler():
 				remove_child(note[REF]) #simply hides a select note
 				clearing_notes = false
 		2: #drag
-			print(act)
 			if act == 0: #undo
 				for note in Global.changes[rev]:
 					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
 					print(note)
 					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
-			else:
+			else:		#
 				for note in Global.changes[rev]:
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
+		3: #paste
+			print()
+			var notes_new = Global.changes[rev][act]
+			print(notes_new)
+			print("UR the copypasta (replace)!")
+			clearing_notes = true
+			if notes_new.size() > 0:
+				for note in notes_new:
+					print("confirm this new note: ",note)
+					add_child(note)
+			clearing_notes = false
+			act = !act
+			var notes_old = Global.changes[rev][act]
+			print(notes_old)
+			print("UR the copypasta (remove)!")
+			if notes_old.size() > 0:
+				clearing_notes = true
+				for note in notes_old:
+					remove_child(note) #simply hides a select note
+				clearing_notes = false
+			print("copied: ",Global.copied_selection)
+			print("overwritten: ",Global.overwritten_selection)
 	act = -1
 	update_note_array()
-
 
 
 func redraw_notes():
@@ -269,9 +292,14 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 func update_note_array():
 	var new_array := []
+	var i := -1
 	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
 	print("actions: ",Global.actions)
 	print("changes: ",Global.changes)
+	for change in Global.changes:
+		i += 1
+		print(i,": ",change)
+	print("terminal revision: ",Global.revision)
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
@@ -433,12 +461,9 @@ func _gui_input(event):
 			event = event as InputEventMouseButton
 			if event == null || !event.pressed: return
 			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-				@warning_ignore("unassigned_variable")
-				var new_note_pos : Vector2
-				print("actions: ", Global.actions)
+				var new_note_pos = Vector2() #explcitly constructs a default Vector2 as opposed to only defining variable type
 				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 				else: new_note_pos.x = to_unsnapped(event.position).x
-				
 				# Current length of tap notes
 				var note_length = 0.0625 if settings.tap_notes else current_subdiv
 				

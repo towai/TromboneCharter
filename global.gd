@@ -6,7 +6,7 @@ const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 # mainly significant for updates to Ogg loading
 @onready var version := "%d.%d" % [Engine.get_version_info().major,
 								 Engine.get_version_info().minor]
-static func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
+func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)#Why was this static?
 # range goes from -13 to 13, c3 to c5
 const BLACK_KEYS = [
 	-11, -9, -6,
@@ -24,7 +24,7 @@ func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
 ###Dew's globals###
 var revision = -1 	#unedited chart
-var actions = []	#0 = add, 1 = delete, 2+ = dragged
+var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
 var changes = []	#[[[note_ref_a1, note_data_array_a1]], <- end of first edit
 					#[[note_ref_b1, note_data_array_b1],   <- start of second edit
 					#[note_ref_b2, note_data_array_b2],    <- a note within second edit
@@ -41,10 +41,15 @@ func clear_future_edits(wipe := false):
 		changes = changes.slice(0,revision+1)
 	return
 
+var clearing_notes := false
+var pasting := false
+var copy_data : Array
+var copied_selection : Array
+var overwritten_selection : Array
 ###Dew's globals###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
-static func smootherstep(from:float, to:float, x:float) -> float:
+func smootherstep(from:float, to:float, x:float) -> float: #Why was this static?
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
 	return x * x * x * (x * (x * 6 - 15) + 10)
 
