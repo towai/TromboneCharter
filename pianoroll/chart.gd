@@ -103,7 +103,7 @@ func _on_scroll_change():
 func _shortcut_input(event):
 	var shift = event as InputEventWithModifiers
 	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
-		print(Global.revision,": undo pressed...","\n")
+		print("\n",Global.revision,": undo pressed...","\n")
 		if Global.revision != -1: #if we're at the beginning of edit history, there are no changes to undo!
 			act = 0
 			if Global.actions[rev] < 2:		  #If we aren't undoing a drag or copy-paste, we can just swap the original action taken.
@@ -113,13 +113,14 @@ func _shortcut_input(event):
 			Global.revision -= 1
 			ur_handler()
 	if Input.is_action_just_pressed("ui_redo"):
-		print(Global.revision,": redo pressed...","\n")
+		print("\n",Global.revision,": redo pressed...","\n")
 		if Global.revision < Global.actions.size()-1: #revision count is -1 indexed (0 means revision has 1 existing edit; revision = *index* of latest action)
 			act = 1
 			action = Global.actions[rev]	  #redoing a manual add(0) adds the note(still 0), redoing a manual delete(1) deletes the note(still 1).
 			Global.revision += 1
 			ur_handler()
 
+##Dew's favorite function :)
 func ur_handler():
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
@@ -165,8 +166,6 @@ func ur_handler():
 					remove_child(note)
 					print("removed old note at bar: ",note.bar)
 				clearing_notes = false
-			#print("copied: ",Global.copied_selection)
-			#print("overwritten: ",Global.overwritten_selection)
 	act = -1
 	update_note_array()
 
@@ -252,7 +251,7 @@ func _on_tmb_loaded():
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var note : Note
 	if act == -1: note = note_scn.instantiate()
-	else:         note = stuffed_note
+	else:         note = stuffed_note #Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
 	note.bar = bar
 	note.length = length
 	note.pitch_start = pitch
@@ -261,7 +260,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled: doot(pitch)
-	if act == -1: add_child(note)
+	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
 
@@ -286,6 +285,7 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 func update_note_array():
 	var new_array := []
+	###Dew timeline tracker
 	var i := -1
 	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
 	print("action timeline: ",Global.actions)
@@ -293,6 +293,7 @@ func update_note_array():
 		i += 1
 		print(i,": ",change)
 	print("terminal revision: ",Global.revision)
+	###
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
@@ -454,7 +455,7 @@ func _gui_input(event):
 			event = event as InputEventMouseButton
 			if event == null || !event.pressed: return
 			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-				var new_note_pos = Vector2() #explcitly constructs a default Vector2 as opposed to only defining variable type
+				var new_note_pos = Vector2() #explicitly constructs a default Vector2 as opposed to only defining variable type
 				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 				else: new_note_pos.x = to_unsnapped(event.position).x
 				# Current length of tap notes

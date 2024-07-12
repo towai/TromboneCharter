@@ -46,7 +46,7 @@ func clear_future_edits(wipe := false):
 var clearing_notes := false
 var pasting := false
 var copy_data : Array
-var copied_selection : Array
+var pasted_selection : Array
 var overwritten_selection : Array
 ###Dew's globals###
 

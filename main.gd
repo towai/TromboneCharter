@@ -180,9 +180,7 @@ func try_cfg_save():
 
 func _on_copy():
 	var start = Global.settings.section_start
-	print(start)
 	var length = Global.settings.section_length
-	print(length)
 	var end = start + length
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
@@ -194,14 +192,6 @@ func _on_copy():
 		"length": length,
 		"notes": notes
 	}
-	print("notes copied: ",data.notes)
-	#Dew store copied note data in G.c_s
-	Global.copied_selection = %Chart.get_children().filter(func(child) : if !(child is Note):
-		return false
-		else: return child.bar >= start && child.bar < end
-		)
-	print("G.copy: ",Global.copied_selection)
-	#
 	DisplayServer.clipboard_set(JSON.stringify(data))
 	$Alert.alert("Copied %s notes to clipboard" % notes.size(), Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)
@@ -222,9 +212,8 @@ func _on_paste():
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
 						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
-			Global.copy_data = data.notes
+			Global.copy_data = data.notes #Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
-			
 			
 			$CopyConfirm.set_values(copy_target, data)
 			$CopyConfirm.show()
