@@ -181,7 +181,6 @@ func try_cfg_save():
 func _on_copy():
 	var start = Global.settings.section_start
 	var length = Global.settings.section_length
-	var end = start + length
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
