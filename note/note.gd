@@ -88,12 +88,11 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
-
-var click := false #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
+var click := false 		  #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
 var starting_note : Array #The aforementioned initial data of a dragged note. Compared with proper_note upon note release.
 var proper_note : Array   #The final values of a released note. Compared with starting_note to determine whether the selected note's handle(s) actually changed position.
-var note_package : Array #The collected data of a note and its editable neighbors. Appended to Global.changes.
-var note_data : Array       #Data of the note targeted by the note_reference setter.
+var note_package : Array  #The collected data of a note and its editable neighbors. Appended to Global.changes.
+var note_data : Array     #Data of the note targeted by the note_reference setter.
 var note_reference : Note : #A nice and tidy concatenator for a note ref's data.
 	set(note_ref):
 		note_reference = note_ref
@@ -129,7 +128,6 @@ func _ready():
 	pitch_handle.size = Vector2.DOWN * TAIL_HEIGHT
 	
 	end_handle.size = ENDHANDLE_SIZE
-	
 	if Global.pasting:
 		Global.copied_selection.append(self)
 	update_touching_notes()
@@ -160,7 +158,7 @@ func _on_handle_input(event, which_handle):
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
 			if !click:        #If this isn't here, the "initial" note data will continue updating itself as we drag/
-				click = true  #We need this initial data to determine not only whether the note has actually been changed by the user,
+				click = true  #We need this "initial" data to determine not only whether the note has actually been changed by the user,
 				note_reference = self #but also whether it had neighboring notes to go with it.
 				starting_note = [note_reference,note_data]
 				note_package = package_neighbors(starting_note)
@@ -217,11 +215,11 @@ func _end_drag():
 	click = false
 	note_reference = self 
 	proper_note = [note_reference,note_data]
-	if starting_note != proper_note: #if the user ultimately edited the note instead of just dooting it,
+	if starting_note != proper_note: #if the user created or ultimately edited the note instead of just dooting it,
 		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
-		if Global.fresh:         #if the note was just created, there is no chance that neighbors were edited.
-			Global.changes.append([[note_reference,note_data]]) #Record edit as an added note, and append its data to Global.changes.
-			Global.fresh = false #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
+		if Global.fresh:					 #Global.fresh denotes that a note has been dragged, and must be freshly added to the timeline of changes.
+			Global.changes.append([[note_reference,note_data]]) #Record edit as an added note, and append its information to Global.changes.
+			Global.fresh = false 			 #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
 		else:                        #This note was dragged, not added. We have to check its note_package for neighboring notes.
 			var i = 0                #Append the new position of each note right after its pre-drag position. That way, we can
 			while i < note_package.size():#easily swap between the two sets of note data without introducing an extra revision count.
@@ -235,6 +233,7 @@ func _end_drag():
 
 
 func package_neighbors(self_note): #The initial creation of the revision package, taking the argument: [reference,data_array].
+	print(self_note)
 	var package = []               #We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
 	var neighbors = slide_helper.find_touching_notes()#and then append the note passed by the argument (the note that the user moved).
 	for key in neighbors.keys():   #This function is structured so that we should be able to track and undo copy/pasted note sets.

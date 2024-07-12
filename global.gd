@@ -25,13 +25,15 @@ func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 ###Dew's globals###
 var revision = -1 	#unedited chart
 var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
-var changes = []	#[[[note_ref_a1, note_data_array_a1]], <- end of first edit
-					#[[note_ref_b1, note_data_array_b1],   <- start of second edit
-					#[note_ref_b2, note_data_array_b2],    <- a note within second edit
-					#[note_ref_b3, note_data_array_b3]],   <- end of second edit
-					#[note_ref_c1, note_data_array_c1]]]   <- end of third edit, end of history chain
+var changes = []	#current timeline of past and future revisions in order; see below
+var revision_format = [
+	"ADD/DEL: [[reference, [list of data]]]",
+	"ADD/DEL: [[reference, [list of data]]]",
+	"DRAGGED SET: [[reference_1, [list of 1's old data], [list of 1's new data]](, [reference_n, [list of n's old data], [list of n's new data]])]",
+	"PASTED SET: [[overwritten_reference_1(, overwritten_reference_n)], [pasted_reference_1(, pasted_reference_n)]] (array of overwrittens can be empty)"
+]
 
-var fresh := false  #only true for newly-created notes, and is set to false as soon as the fresh note is released.
+var fresh := false  #only true for notes that have been DRAGGED, by mouse or by neighboring note, and is set to false as soon as the note is catalogued.
 func clear_future_edits(wipe := false):
 	#input will be Global.revision unless loading a fresh chart, in which case argument passed is -1.
 	#remember that Global.revision is negative-one indexed, where -1 is a blank array of changes.

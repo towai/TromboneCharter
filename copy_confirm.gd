@@ -33,14 +33,12 @@ func _on_copy_confirmed():
 	%Chart.clearing_notes = false
 	
 	Global.pasting = true
-	Global.fresh = true
 	Global.copied_selection = []
 	for note in Global.copy_data:
 		print("sup")
 		print(note[0])
 		%Chart.add_note(false,note[0]+target,note[1],note[2],note[3])
 	Global.pasting = false
-	Global.fresh = false
 	
 	print(Global.copied_selection)
 	print(Global.overwritten_selection)
