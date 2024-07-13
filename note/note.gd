@@ -220,7 +220,7 @@ func _end_drag():
 	proper_note = [note_reference,note_data]
 	if starting_note != proper_note: #Dew: If the user created or ultimately edited the note instead of just dooting it,
 		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
-		if Global.fresh:					 #Global.fresh denotes that a note has been dragged, and must be freshly added to the timeline of changes.
+		if Global.fresh:					 #Global.fresh denotes that a note has been freshly added to the timeline of changes.
 			Global.changes.append([[note_reference,note_data]]) #Record edit as an added note, and append its information to Global.changes.
 			Global.fresh = false 			 #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
 		else:                        #This note was dragged, not added. We have to check its note_package for neighboring notes.
