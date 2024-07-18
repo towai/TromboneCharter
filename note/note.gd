@@ -89,9 +89,9 @@ var show_end_handle : bool:
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
 ###Dew variables###
-var click := false 		  #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
-var starting_note : Array #The aforementioned initial data of a dragged note. Compared with proper_note upon note release.
-var proper_note : Array   #The final values of a released note. Compared with starting_note to determine whether the selected note's handle(s) actually changed position.
+var clicking := false 		  #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
+var initial_note_data : Array #The aforementioned initial data of a dragged note. Compared with final_note_data upon note release.
+var final_note_data : Array   #The final values of a released note. Compared with initial_note_data to determine whether the selected note's handle(s) actually changed position.
 var note_package : Array  #The collected data of a note and its editable neighbors. Appended to Global.changes.
 var note_data : Array     #Data of the note targeted by the note_reference setter.
 var note_reference: Note: #A nice and tidy concatenator for a note ref's data.
@@ -148,8 +148,8 @@ func _gui_input(event):
 	if key != null && key.pressed:
 		match key.keycode:
 			KEY_DELETE, KEY_BACKSPACE:
-				remove_note() #We can't use queue_free(), because we need these notes to reappear when deletion is undone.
-							  #remove_note() is my function which runs remove_child() on the note and logs the deletion.
+				remove_note() #Dew: We can't use queue_free(), because we need these notes to reappear when deletion is undone.
+							  #remove_note() is Dew's function which runs remove_child() on the note and logs the deletion.
 
 
 func _on_handle_input(event, which_handle):
@@ -160,11 +160,11 @@ func _on_handle_input(event, which_handle):
 	if event == null: return
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
-			if !click:        #Dew: If this isn't here, the "initial" note data will continue updating itself as we drag/
-				click = true  #We need this "initial" data to determine not only whether the note has actually been changed by the user,
-				note_reference = self #but also whether it had neighboring notes to go with it.
-				starting_note = [note_reference,note_data]
-				note_package = package_neighbors(starting_note)
+			if !clicking:        #Dew: If this isn't here, the "initial" note data will continue updating itself as we drag/
+				clicking = true  #We need this "initial" data to determine not only whether the note has actually been changed by the user,
+				note_reference = self #see setter
+				initial_note_data = [note_reference,note_data]
+				note_package = package_neighbors(initial_note_data)
 			dragging = which_handle
 			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
@@ -211,23 +211,26 @@ func _process_drag():
 
 func _end_drag():
 	dragging = DRAG_NONE
+	print("Fresh note? ",Global.fresh)
 	slide_helper.snap_near_pitches()
 	if !Input.is_key_pressed(KEY_ALT):
 		slide_helper.pass_on_slide_propagation()
 	update_touching_notes()
-	click = false
-	note_reference = self 
-	proper_note = [note_reference,note_data]
-	if starting_note != proper_note: #Dew: If the user created or ultimately edited the note instead of just dooting it,
+	clicking = false
+	note_reference = self #see setter
+	final_note_data = [note_reference,note_data]
+	if initial_note_data != final_note_data: #Dew: If the user created or ultimately edited the note instead of just dooting it,
 		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
-		if Global.fresh:					 #Global.fresh denotes that a note has been freshly added to the timeline of changes.
-			Global.changes.append([[note_reference,note_data]]) #Record edit as an added note, and append its information to Global.changes.
-			Global.fresh = false 			 #note is no longer fresh. it will never be fresh again, no matter how hard it tries.
-		else:                        #This note was dragged, not added. We have to check its note_package for neighboring notes.
-			var i = 0                #Append the new position of each note right after its pre-drag position. That way, we can
-			while i < note_package.size():#easily swap between the two sets of note data without introducing an extra revision count.
-				note_reference = note_package[i][0]#Here, we iterate through each set of individual note data within the package.
-				note_package[i].append(note_data)  #[reference,pre-drag_data_array] => [reference,pre-drag_data_array,post-drag_data_array]
+		if Global.fresh:			 #Global.fresh, set true by chart._gui_input, denotes that a note has been freshly added to the timeline.
+			Global.changes.append([[note_reference]]) #Record edit as an added note, and append its information to Global.changes.
+			Global.fresh = false 	 #Only true from the moment the user creates a note to this moment that they release left-click.
+			
+		else: #If Global.fresh is not set by clicking a blank space in the chart, then this note was *dragged*, not added.
+			  #Therefore, we have to add data for potential neighboring notes as well as the note itself.
+			var i = 0
+			while i < note_package.size():          #Here, we iterate through each set of individual note data within the package,
+				note_reference = note_package[i][0] #adding the new note data to the end of each individual data set via setter.
+				note_package[i].append(note_data)   #[reference,pre-drag_data_array] => [reference,pre-drag_data_array,post-drag_data_array]
 				i += 1
 			Global.actions.append(2) #Record edit as a set of dragged notes, and append its data to Global.changes for future use.
 			Global.changes.append(note_package)
@@ -238,8 +241,8 @@ func _end_drag():
 func package_neighbors(self_note): #Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
 	var package = []               #We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
 	var neighbors = slide_helper.find_touching_notes()#and then append the note passed by the argument (the note that the user moved).
-	for key in neighbors.keys():   #This function is structured so that we should be able to track and undo copy/pasted note sets.
-		note_reference = neighbors[key]
+	for key in neighbors.keys():   #package_neighbors() can properly log chart- and clipboard-loaded note sets that have been dragged.
+		note_reference = neighbors[key] #see setter
 		package.append([note_reference,note_data])
 	package.append(self_note)
 	return package                 #in the format: [[reference_1, data_array_1],[reference_2,data_array_2],...,[reference_n,data_array_n]]
@@ -247,12 +250,11 @@ func package_neighbors(self_note): #Dew: The initial creation of the revision pa
 
 func remove_note():                #Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
 	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing.
-	chart.clearing_notes = true    #mark the chart as clearing notes so that remove_child() doesn't fully eject us the tree, allowing
-	note_reference = self          #us to continue recording our edit history via the note object.
-	Global.actions.append(1)
-	Global.changes.append([[note_reference,note_data]])
+	chart.clearing_notes = true    #Mark the chart as clearing notes so that remove_child() doesn't fully eject us from the tree...
+	Global.actions.append(1)       #... allowing us to continue recording our edit history...
+	Global.changes.append([[self]])#... via the note's object reference.
 	Global.revision += 1
-	chart.remove_child(note_reference)
+	chart.remove_child(self)
 	chart.clearing_notes = false
 	chart.update_note_array()
 

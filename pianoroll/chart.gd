@@ -57,14 +57,14 @@ var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
 ###Dew variables###
-var rev : int   #Denotes the index fetched
+var rev : int   #the "act" setter determines which revision is to be activated by adding 1 if redoing.
 #Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
 #Drag edits are stored as an array containing 1-3 arrays, each subarray containing a note reference and its old+new note data
 var act := -1 : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
 		rev = Global.revision + value 
 		act = value
-var action := -1#initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+var action := -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
 var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
 enum { #enumerates the three indices of a DRAGGED note set: [note_reference, pre-drag_data, post-drag_data]
 	REF,
@@ -470,7 +470,7 @@ func _gui_input(event):
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
 				###Dew note add check###
 				Global.clear_future_edits()
-				Global.actions.append(0)
+				Global.actions.append(0) #Record edit as an added note. The note's script will append the *self* reference to Global.changes.
 				Global.revision += 1
 				Global.fresh = true
 				###

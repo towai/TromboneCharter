@@ -37,8 +37,8 @@ func _on_copy_confirmed():
 	Global.pasting = false
 	
 	Global.clear_future_edits()
-	Global.actions.append(3)
-	Global.changes.append([Global.overwritten_selection,Global.pasted_selection]) #copie
+	Global.actions.append(3) #Record edit as a set of [overwritten,pasted] notes...
+	Global.changes.append([Global.overwritten_selection,Global.pasted_selection]) #... and append its data to Global.changes for future use.
 	Global.revision += 1
 	
 	for note in notes:
