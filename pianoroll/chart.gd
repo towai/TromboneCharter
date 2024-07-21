@@ -58,7 +58,7 @@ var show_preview : bool = false
 var playhead_preview : float = 0.0
 ###Dew variables###
 var rev : int   #the "act" setter determines which revision is to be activated by adding 1 if redoing.
-#Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
+#Redoing enacts next edit in line(+1), and undoing enacts current edit(+0).
 #Drag edits are stored as an array containing 1-3 arrays, each subarray containing a note reference and its old+new note data
 var act := -1 : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
