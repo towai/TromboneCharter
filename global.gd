@@ -27,8 +27,8 @@ var revision = -1 	#unedited chart
 var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
 var changes = []	#current timeline of past and future revisions in order; see below
 var revision_format = [
-	"ADD/DEL: [*[reference]*]",
-	"ADD/DEL: [*[reference]*]",
+	"ADD: [*[reference, old bar value]*]",
+	"DEL: [*[reference, old bar value]*]",
 	"DRAGGED SET: [*[reference_1, [list of 1's old data], [list of 1's new data]]*(, *[reference_n, [list of n's old data], [list of n's new data]]*)]",
 	"PASTED SET: [*[overwritten_reference_1(, overwritten_reference_n)]*, *[pasted_reference_1(, pasted_reference_n)]*] (array of overwrittens can be empty)"
 ]

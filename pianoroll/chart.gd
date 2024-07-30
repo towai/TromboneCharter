@@ -131,6 +131,8 @@ func ur_handler():
 			for note in Global.changes[rev]:
 				print("UR adding!")
 				add_child(note[REF])    #simply shows a hidden note
+				note[REF].bar = note[OLD]
+				
 		1: #delete
 			for note in Global.changes[rev]:
 				print("UR deleting!")
@@ -151,12 +153,10 @@ func ur_handler():
 		3: #paste
 			var notes_new = Global.changes[rev][act]
 			print("URing the copypasta (replace)!")
-			clearing_notes = true
 			if notes_new.size() > 0:
 				for note in notes_new:
 					add_child(note)
 					print("confirm new note at bar: ",note.bar)
-			clearing_notes = false
 			act = !act
 			var notes_old = Global.changes[rev][act]
 			print("URing the copypasta (remove)!")

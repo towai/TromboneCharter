@@ -222,7 +222,7 @@ func _end_drag():
 	if initial_note_data != final_note_data: #Dew: If the user created or ultimately edited the note instead of just dooting it,
 		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
 		if Global.fresh:			 #Global.fresh, set true by chart._gui_input, denotes that a note has been freshly added to the timeline.
-			Global.changes.append([[note_reference]]) #Record edit as an added note, and append its information to Global.changes.
+			Global.changes.append([[note_reference,note_data[0]]]) #Record edit as an added note w/ bar, and append its information to Global.changes.
 			Global.fresh = false 	 #Only true from the moment the user creates a note to this moment that they release left-click.
 			
 		else: #If Global.fresh is not set by clicking a blank space in the chart, then this note was *dragged*, not added.
@@ -249,13 +249,11 @@ func package_neighbors(self_note): #Dew: The initial creation of the revision pa
 
 
 func remove_note():                #Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
-	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing.
-	chart.clearing_notes = true    #Mark the chart as clearing notes so that remove_child() doesn't fully eject us from the tree...
+	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing...
 	Global.actions.append(1)       #... allowing us to continue recording our edit history...
-	Global.changes.append([[self]])#... via the note's object reference.
+	Global.changes.append([[self,self.bar]]) #... via the note's object reference.
 	Global.revision += 1
 	chart.remove_child(self)
-	chart.clearing_notes = false
 	chart.update_note_array()
 
 
@@ -381,6 +379,7 @@ func _draw():
 
 
 func _exit_tree():
+	bar = -69420.0
 	if chart.clearing_notes : return
 	print("exiting tree!")
 	update_touching_notes()
