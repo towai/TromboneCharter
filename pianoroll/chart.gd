@@ -58,8 +58,8 @@ var show_preview : bool = false
 var playhead_preview : float = 0.0
 ###Dew variables###
 var rev : int   #the "act" setter determines which revision is to be activated by adding 1 if redoing.
-#Redoing enacts next edit in line(+1), and undoing enacts current edit(+0).
-#Drag edits are stored as an array containing 1-3 arrays, each subarray containing a note reference and its old+new note data
+				#Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
+				#Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
 var act := -1 : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
 		rev = Global.revision + value 
@@ -114,9 +114,9 @@ func _shortcut_input(event):
 			ur_handler()
 	if Input.is_action_just_pressed("ui_redo"):
 		print("\n",Global.revision,": redo pressed...","\n")
-		if Global.revision < Global.actions.size()-1: #revision count is -1 indexed (0 means revision has 1 existing edit; revision = *index* of latest action)
+		if Global.revision < Global.actions.size()-1: #revision count is -1 indexed (0 means revision has 1 existing edit; revision = *index* of timeline action)
 			act = 1
-			action = Global.actions[rev]	  #redoing a manual add(0) adds the note(still 0), redoing a manual delete(1) deletes the note(still 1).
+			action = Global.actions[rev] #redoing a manual add(0) adds the note(still 0), redoing a manual delete(1) deletes the note(still 1).
 			Global.revision += 1
 			ur_handler()
 
