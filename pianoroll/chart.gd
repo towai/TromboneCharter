@@ -144,12 +144,12 @@ func ur_handler():
 				for note in Global.changes[rev]:
 					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
-					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
+					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3], true)
 			else:		#redo
 				for note in Global.changes[rev]:
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
-					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
+					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3], true)
 		3: #paste
 			var notes_new = Global.changes[rev][act]
 			print("URing the copypasta (replace)!")
@@ -248,7 +248,7 @@ func _on_tmb_loaded():
 	_on_tmb_updated()
 
 
-func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
+func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0, never_doot:=false):
 	var note : Note
 	if act == -1: note = note_scn.instantiate()
 	else:         note = stuffed_note #Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
@@ -259,7 +259,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.x = bar_to_x(bar)
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
-	if doot_enabled: doot(pitch)
+	if doot_enabled && !never_doot: doot(pitch)
 	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
