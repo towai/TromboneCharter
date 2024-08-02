@@ -180,9 +180,7 @@ func try_cfg_save():
 
 func _on_copy():
 	var start = Global.settings.section_start
-	print(start)
 	var length = Global.settings.section_length
-	print(length)
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
@@ -213,9 +211,9 @@ func _on_paste():
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
 						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
-			
+			Global.copy_data = data.notes #Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
-
+			
 			$CopyConfirm.set_values(copy_target, data)
 			$CopyConfirm.show()
 
