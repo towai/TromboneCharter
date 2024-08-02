@@ -99,7 +99,7 @@ func _on_scroll_change():
 	redraw_notes()
 	%WavePreview.calculate_width()
 
-###Dew u/r shortcut inputs
+##Dew u/r shortcut inputs
 func _shortcut_input(event):
 	var shift = event as InputEventWithModifiers
 	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
@@ -120,26 +120,26 @@ func _shortcut_input(event):
 			Global.revision += 1
 			ur_handler()
 
-##Dew's favorite function :)
+##Dew's favorite child :)
 func ur_handler():
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
 	print("Selected data:", Global.changes[rev])
 	print("Expected format: ",Global.revision_format[action])
 	match action:
-		0: #add
+		0: #add desired note(s)
 			for note in Global.changes[rev]:
 				print("UR adding!")
 				add_child(note[REF])    #simply shows a hidden note
 				note[REF].bar = note[OLD]
 				
-		1: #delete
+		1: #delete desired note(s)
 			for note in Global.changes[rev]:
 				print("UR deleting!")
 				clearing_notes = true
 				remove_child(note[REF]) #simply hides a select note
 				clearing_notes = false
-		2: #drag
+		2: #drag desired note(s)
 			if act == 0: #undo
 				for note in Global.changes[rev]:
 					print("UR dragging (undo)!")
@@ -150,7 +150,7 @@ func ur_handler():
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
-		3: #paste
+		3: #paste desired note(s)
 			var notes_new = Global.changes[rev][act]
 			print("URing the copypasta (replace)!")
 			if notes_new.size() > 0:

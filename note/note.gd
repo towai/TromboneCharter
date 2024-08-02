@@ -129,10 +129,10 @@ func _ready():
 	pitch_handle.size = Vector2.DOWN * TAIL_HEIGHT
 	
 	end_handle.size = ENDHANDLE_SIZE
-	#Dew grabbing the creation of newly pasted notes for the timeline
+	###Dew grabbing the creation of newly pasted notes for the timeline
 	if Global.pasting:
 		Global.pasted_selection.append(self)
-	#
+	###
 	update_touching_notes()
 	_update()
 	doot_enabled = true
@@ -238,9 +238,9 @@ func _end_drag():
 	chart.update_note_array()
 
 
-func package_neighbors(self_note): #Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
-	var package = []               #We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
-	var neighbors = slide_helper.find_touching_notes()#and then append the note passed by the argument (the note that the user moved).
+func package_neighbors(self_note) -> Array:				#Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
+	var package = []               						#We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
+	var neighbors = slide_helper.find_touching_notes()	#and then append the note passed by the argument (the note that the user moved).
 	for key in neighbors.keys():   #package_neighbors() can properly log chart- and clipboard-loaded note sets that have been dragged.
 		note_reference = neighbors[key] #see setter
 		package.append([note_reference,note_data])
@@ -277,8 +277,8 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: bar = -69420   #Dew: genuinely vital. We can't remove the child outright, because it still needs to be referenced as a
-	doot_enabled = true            #neighbor to the note which the user dragged over it. Thus, we simply yeet in into the ether.
+	if length <= 0: bar = -69420   #Dew: genuinely vital (thanks twi). We can't remove the child outright, because it still needs to be
+	doot_enabled = true            #referenced as a neighbor of the note which the user dragged over it. Thus, we simply yeet in into the ether.
 
 
 func update_handle_visibility():

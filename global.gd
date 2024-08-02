@@ -33,9 +33,9 @@ var revision_format = [
 	"PASTED SET: [*[overwritten_reference_1(, overwritten_reference_n)]*, *[pasted_reference_1(, pasted_reference_n)]*] (array of overwrittens can be empty)"
 ]
 
-var fresh := false  #only true for notes that have been DRAGGED, by mouse or by neighboring note, and is set to false as soon as the note is catalogued.
+var fresh := false  #only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
 func clear_future_edits(wipe := false):
-	#input will be Global.revision unless loading a fresh chart, in which case argument passed is -1.
+	#input will be Global.revision unless loading a fresh chart (wipe = true), in which case argument passed is -1.
 	#remember that Global.revision is negative-one indexed, where -1 is a blank array of changes.
 	if revision < actions.size()-1 || wipe:
 		if wipe: revision = -1
@@ -43,11 +43,11 @@ func clear_future_edits(wipe := false):
 		changes = changes.slice(0,revision+1)
 	return
 
-var clearing_notes := false
-var pasting := false
-var copy_data : Array
-var pasted_selection : Array
-var overwritten_selection : Array
+var clearing_notes := false #Set to true during the load of a new chart, wherein the notes of the previous chart, if any, are discarded.
+var pasting := false #Set to true during the pasting of a copied selection, during which all created note refs are concatenated into p_sel.
+var copy_data : Array #Stores the latest copied note data to insert into the chart via chart.add_note(...) on paste.
+var pasted_selection : Array #Container for pasted-note refs, inserted into Global.changes on paste.
+var overwritten_selection : Array #Container for paste-overwritten note refs, inserted into Global.changes when pasted.
 ###Dew's globals###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
