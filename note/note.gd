@@ -379,7 +379,7 @@ func _draw():
 
 
 func _exit_tree():
-	bar = -69420.0
+	#bar = -69420.0 Let this be a warning. Whomsoever memes in vain shall themselves be memed til break of script.
 	if chart.clearing_notes : return
 	print("exiting tree!")
 	update_touching_notes()

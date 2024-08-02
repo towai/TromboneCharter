@@ -154,9 +154,11 @@ func ur_handler():
 			var notes_new = Global.changes[rev][act]
 			print("URing the copypasta (replace)!")
 			if notes_new.size() > 0:
+				clearing_notes = true
 				for note in notes_new:
 					add_child(note)
 					print("confirm new note at bar: ",note.bar)
+				clearing_notes = false
 			act = !act
 			var notes_old = Global.changes[rev][act]
 			print("URing the copypasta (remove)!")
