@@ -87,6 +87,8 @@ func update_touching_notes():
 					else null
 			next_note.bar = owner.end
 			next_note.update_handle_visibility()
+	
+	owner.propagate_to_the_right("find_idx_in_slide",[])
 
 
 func pass_on_slide_propagation():

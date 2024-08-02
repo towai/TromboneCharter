@@ -194,7 +194,6 @@ func _end_drag():
 		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()
-	print(propagate_to_the_right("find_idx_in_slide"))
 	chart.update_note_array()
 
 
