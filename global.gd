@@ -6,7 +6,7 @@ const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 # mainly significant for updates to Ogg loading
 @onready var version := "%d.%d" % [Engine.get_version_info().major,
 								 Engine.get_version_info().minor]
-func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)#Why was this static?
+func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 # range goes from -13 to 13, c3 to c5
 const BLACK_KEYS = [
 	-11, -9, -6,
@@ -51,9 +51,9 @@ var overwritten_selection : Array #Container for paste-overwritten note refs, in
 ###Dew's globals###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
-func smootherstep(from:float, to:float, x:float) -> float: #Why was this static?
+func smootherstep(from:float, to:float, x:float) -> float:
 	x = clamp((x - from) / (to - from), 0.0, 1.0)
-	return x * x * x * (x * (x * 6 - 15) + 10)
+	return pow(x,3) * (x * (x * 6 - 15) + 10)
 
 
 func overlaps_any_note(time:float, exclude : Array = []) -> bool:
