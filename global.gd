@@ -6,8 +6,7 @@ const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 # mainly significant for updates to Ogg loading
 @onready var version := "%d.%d" % [Engine.get_version_info().major,
 								 Engine.get_version_info().minor]
-func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
-# range goes from -13 to 13, c3 to c5
+# range goes from -13 to 13, b3 to c#5
 const BLACK_KEYS = [
 	-11, -9, -6,
 	-4, -2,
@@ -19,6 +18,7 @@ const NUM_KEYS = 27
 @onready var working_tmb = TMBInfo.new()
 @onready var ffmpeg_worker = FFmpegWorker.new(self)
 var settings : Settings
+func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
