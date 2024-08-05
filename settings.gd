@@ -51,9 +51,9 @@ var section_start : float:
 var section_length : float:
 	get: return %SectionLength.value
 	set(with):  %SectionLength.value = with
-var section_target : float:
-	get: return %CopyTarget.value
-	set(with):  %CopyTarget.value = with
+var playhead_pos : float:
+	get: return %PlayheadPos.value
+	set(with):  %PlayheadPos.value = with
 @onready var sect_start_handle = %SectStartHandle
 
 
@@ -123,7 +123,7 @@ func _update_values():
 	year.value = tmb.year
 	diff.value = tmb.difficulty
 	notespc.value = tmb.savednotespacing
-	%CopyTarget.max_value = tmb.endpoint - 1
+	%PlayheadPos.max_value = tmb.endpoint
 	_update_handles()
 	
 	if !use_custom_colors:
@@ -170,16 +170,16 @@ func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 func _update_handles():
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
-		%SectTargetHandle.update_pos(section_target)
-		%AddLyricHandle.update_pos(%LyricBar.value)
+		%PlayheadHandle.update_pos(playhead_pos)
 
 func _force_decimals(box:SpinBox):
-	if box.value == int(box.value):
-		box.tooltip_text = str(box.value)
-		return
 	var lineedit = box.get_line_edit()
-	lineedit.text = ("%.4f" % box.value).rstrip('0')
-	box.tooltip_text = lineedit.text
+	if box.value == int(box.value):
+		lineedit.text = str(box.value)
+		box.tooltip_text = lineedit.text
+	else:
+		box.tooltip_text = str(box.value)
+		lineedit.text = ("%.4f" % box.value).rstrip('0.')
 
 #region Sections
 const SECT_HANDLE_RADIUS = 3.0
@@ -189,14 +189,12 @@ func section_handle_dragged(value:float,which:Node):
 		_on_section_start_value_changed(value)
 	elif which == %SectEndHandle: 
 		_on_section_length_value_changed(value - section_start)
-	elif which == %SectTargetHandle: 
+	elif which == %PlayheadHandle: 
 		_on_copy_target_value_changed(value)
-	if which == %AddLyricHandle:
-		%LyricsEditor._on_lyric_bar_value_changed(value)
 
 func _on_section_start_value_changed(value):
 	section_start = value
-	%SectionLength.max_value = max(1,tmb.endpoint - value)
+	%SectionLength.max_value = tmb.endpoint - value
 	_force_decimals(%SectionStart)
 	%SectStartHandle.position.x = %Chart.bar_to_x(section_start) - SECT_HANDLE_RADIUS
 	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
@@ -209,28 +207,11 @@ func _on_section_length_value_changed(value):
 	%Chart.queue_redraw()
 
 func _on_copy_target_value_changed(value):
-	section_target = value
-	_force_decimals(%CopyTarget)
-	%SectTargetHandle.position.x = %Chart.bar_to_x(section_target) - SECT_HANDLE_RADIUS
+	playhead_pos = value
+	_force_decimals(%PlayheadPos)
+	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
-func _on_section_to_view_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	var min_bar = ceil(  bounds.left )
-	var max_bar = floor( bounds.right )
-	if (section_start >= min_bar) && ( section_start <= max_bar): return
-	section_start = min_bar
-	# not totally sure we should do this part
-	var max_len = max_bar - min_bar
-	section_length = min(section_length,max_len)
-
-func _on_copy_here_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	%SectTargetHandle.set_bar( bounds.center )
-
-func _on_lyric_here_button_pressed() -> void:
-	var bounds = %Chart.view_bounds
-	%AddLyricHandle.set_bar( bounds.center )
 #endregion
 
 func _on_preview_vol_reset_pressed() -> void:
@@ -251,8 +232,6 @@ func _on_timing_snap_value_changed(value):
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
-	%CopyTarget.step = snap
-	%LyricBar.step = snap
 
 
 func _on_time_snap_toggled(button_pressed):
@@ -261,10 +240,6 @@ func _on_time_snap_toggled(button_pressed):
 		true: 
 			%SectionStart.step	= snap
 			%SectionLength.step = snap
-			%CopyTarget.step	= snap
-			%LyricBar.step		= snap
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
-			%CopyTarget.step = 0.0001
-			%LyricBar.step = 0.0001
