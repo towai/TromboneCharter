@@ -190,7 +190,7 @@ func _process_drag():
 func _end_drag():
 	dragging = DRAG_NONE
 	slide_helper.snap_near_pitches()
-	if !Input.is_key_pressed(KEY_ALT):
+	if Global.settings.propagate_slide_changes:
 		slide_helper.pass_on_slide_propagation()
 	
 	update_touching_notes()

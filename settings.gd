@@ -29,8 +29,8 @@ enum {
 
 var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
-var propagate_changes : bool:
-	get: return %PropagateChanges.button_pressed
+var propagate_slide_changes : bool:
+	get: return %PropagateChanges.button_pressed != Input.is_action_pressed("hold_slide_prop")
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -89,6 +89,16 @@ func _ready():
 	_update_view()
 	_on_timing_snap_value_changed(timing_snap)
 	_toggle_ffmpeg_features()
+
+func _input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey # i want my type hints
+	if key_event == null: return
+	if key_event.is_action_pressed("toggle_slide_prop"):
+		%PropagateChanges.button_pressed = !%PropagateChanges.button_pressed
+	elif key_event.is_action_pressed("toggle_snap_pitch"):
+		%PitchSnapChk.button_pressed = !%PitchSnapChk.button_pressed 
+	elif key_event.is_action_pressed("toggle_snap_time"):
+		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed 
 
 
 func _toggle_ffmpeg_features():
@@ -154,7 +164,7 @@ func _on_zoom_level_changed(value:float):
 	await(get_tree().process_frame)
 	%Chart._on_scroll_change()
 	zoom = value
-# _on_zoom_level_changed is called automatically
+# _on_zoom_level_changed is called automatically when reset is pressed
 func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
 func _update_handles():
