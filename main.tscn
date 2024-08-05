@@ -220,7 +220,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 0
 
 [node name="Piano" type="Control" parent="PianoRoll"]
-custom_minimum_size = Vector2(144, 0)
+custom_minimum_size = Vector2(64, 0)
 layout_mode = 2
 mouse_filter = 1
 script = ExtResource("3_mh03t")
@@ -234,12 +234,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 script = ExtResource("3_132ml")
-
-[node name="Button" type="Button" parent="PianoRoll/Piano"]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
-text = "> <"
 
 [node name="ChartView" type="ScrollContainer" parent="PianoRoll"]
 unique_name_in_owner = true
@@ -826,9 +820,6 @@ text = "toot toot lol"
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
 [connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
-[connection signal="pressed" from="PianoRoll/Piano/Button" to="PianoRoll/Piano" method="_on_button_pressed"]
-[connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
-[connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/LoadChart" to="." method="_on_load_chart_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/SaveChart" to="." method="_on_save_chart_pressed"]

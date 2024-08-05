@@ -1,13 +1,10 @@
 extends Control
 
 const border_color = Color(0.5, 0.5, 0.5)
-var collapsed := true
 @onready var keyboard = $Keys
 
 
-func _ready():
-	keyboard.redraw_board.connect(queue_redraw)
-	resize()
+func _ready(): keyboard.redraw_board.connect(queue_redraw)
 
 
 func _draw():
@@ -23,12 +20,3 @@ func _draw():
 func draw_bordered_rect(rect:Rect2, color:Color, width:float):
 	draw_rect(rect, color)
 	draw_rect(rect, border_color, false, width)
-
-
-func _on_button_pressed():
-	collapsed = !collapsed
-	resize()
-
-func resize():
-	custom_minimum_size.x = 64 if collapsed else 144
-	$Button.text = "< >" if collapsed else "> <"

@@ -92,6 +92,7 @@ func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
 
 
 func show_popup(window:Window):
+	window.current_screen = get_window().current_screen
 	window.position = popup_location
 	window.show()
 
