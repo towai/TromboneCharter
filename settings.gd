@@ -3,18 +3,18 @@ extends PanelContainer
 
 var tmb : TMBInfo:
 	get: return Global.working_tmb
-@onready var title		= %SongInfo.get_node("Title")
-@onready var short_name = %SongInfo.get_node("ShortTitle")
-@onready var author 	= %SongInfo.get_node("Author")
-@onready var genre		= %SongInfo.get_node("Genre")
-@onready var desc		= %SongInfo.get_node("Description")
-@onready var track_ref  = %SongInfo.get_node("TrackRef")
-@onready var length  = %SongInfo2.get_node("Length")
-@onready var tempo	 = %SongInfo2.get_node("Tempo")
-@onready var timesig = %SongInfo2.get_node("TimeSig")
-@onready var year	 = %SongInfo2.get_node("Year")
-@onready var diff	 = %SongInfo2.get_node("Diff")
-@onready var notespc = %SongInfo2.get_node("NoteSpacing")
+@onready var title		:TextField= %SongInfo.get_node("Title")
+@onready var short_name :TextField= %SongInfo.get_node("ShortTitle")
+@onready var author 	:TextField= %SongInfo.get_node("Author")
+@onready var genre		:TextField= %SongInfo.get_node("Genre")
+@onready var desc		:TextField= %SongInfo.get_node("Description")
+@onready var track_ref  :TextField= %SongInfo.get_node("TrackRef")
+@onready var length  :NumField= %SongInfo2.get_node("Length")
+@onready var tempo	 :NumField= %SongInfo2.get_node("Tempo")
+@onready var timesig :NumField= %SongInfo2.get_node("TimeSig")
+@onready var year	 :NumField= %SongInfo2.get_node("Year")
+@onready var diff	 :NumField= %SongInfo2.get_node("Diff")
+@onready var notespc :NumField= %SongInfo2.get_node("NoteSpacing")
 
 var values : Array:
 	get: return [
@@ -118,6 +118,7 @@ func _update_values():
 	track_ref.value = tmb.trackRef
 	
 	length.value = tmb.endpoint
+	length.min_value = 2
 	tempo.value = tmb.tempo
 	timesig.value = tmb.timesig
 	year.value = tmb.year
@@ -243,3 +244,7 @@ func _on_time_snap_toggled(_button_pressed):
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
+
+
+func _on_length_value_changed(_v) -> void:
+	length.min_value = max(2,ceilf(tmb.get_last_note_off()))
