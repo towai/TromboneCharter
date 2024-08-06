@@ -23,7 +23,7 @@ var pitch_start : float:
 		_update()
 var pitch_delta : float:
 	set(value):
-		if value != pitch_delta && doot_enabled:
+		if value != pitch_delta && doot_enabled && !Global.in_ur:
 			chart.doot(pitch_start + value)
 		pitch_delta = value
 		_update()

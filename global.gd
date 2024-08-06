@@ -32,6 +32,7 @@ var revision_format = [
 	"DRAGGED SET: [*[reference_1, [list of 1's old data], [list of 1's new data]]*(, *[reference_n, [list of n's old data], [list of n's new data]]*)]",
 	"PASTED SET: [*[overwritten_reference_1(, overwritten_reference_n)]*, *[pasted_reference_1(, pasted_reference_n)]*] (array of overwrittens can be empty)"
 ]
+var in_ur := false
 
 var fresh := false  #only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
 func clear_future_edits(wipe := false):

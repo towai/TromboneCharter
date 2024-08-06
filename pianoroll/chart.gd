@@ -123,6 +123,7 @@ func _shortcut_input(event):
 
 ##Dew's favorite child :)
 func ur_handler():
+	Global.in_ur = true
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
 	print("Selected data:", Global.changes[rev])
@@ -145,12 +146,12 @@ func ur_handler():
 				for note in Global.changes[rev]:
 					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
-					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3], true)
+					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
 			else:		#redo
 				for note in Global.changes[rev]:
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
-					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3], true)
+					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
 		3: #paste desired note(s)
 			var notes_new = Global.changes[rev][act]
 			print("URing the copypasta (replace)!")
@@ -171,6 +172,7 @@ func ur_handler():
 				clearing_notes = false
 	act = -1
 	update_note_array()
+	Global.in_ur = false
 
 
 func redraw_notes():
@@ -251,7 +253,7 @@ func _on_tmb_loaded():
 	_on_tmb_updated()
 
 
-func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0, never_doot:=false):
+func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var note : Note
 	if act == -1: note = note_scn.instantiate()
 	else:         note = stuffed_note #Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
@@ -262,7 +264,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.x = bar_to_x(bar)
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
-	if doot_enabled && !never_doot: doot(pitch)
+	if doot_enabled && !Global.in_ur && !Global.pasting: doot(pitch)
 	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
