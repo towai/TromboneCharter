@@ -3,12 +3,12 @@ extends PanelContainer
 
 var tmb : TMBInfo:
 	get: return Global.working_tmb
-@onready var title		:TextField= %SongInfo.get_node("Title")
-@onready var short_name :TextField= %SongInfo.get_node("ShortTitle")
-@onready var author 	:TextField= %SongInfo.get_node("Author")
-@onready var genre		:TextField= %SongInfo.get_node("Genre")
-@onready var desc		:TextField= %SongInfo.get_node("Description")
-@onready var track_ref  :TextField= %SongInfo.get_node("TrackRef")
+@onready var title		= %SongInfo.get_node("Title")
+@onready var short_name = %SongInfo.get_node("ShortTitle")
+@onready var author 	= %SongInfo.get_node("Author")
+@onready var genre		= %SongInfo.get_node("Genre")
+@onready var track_ref  = %SongInfo.get_node("TrackRef")
+@onready var desc		= %SongInfo.get_node("Description")
 @onready var length  :NumField= %SongInfo2.get_node("Length")
 @onready var tempo	 :NumField= %SongInfo2.get_node("Tempo")
 @onready var timesig :NumField= %SongInfo2.get_node("TimeSig")
