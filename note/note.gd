@@ -261,11 +261,7 @@ func _snap_near_pitches(): slide_helper.snap_near_pitches()
 
 
 func has_slide_neighbor(direction:int,pitch:float):
-	match direction:
-		START_IS_TOUCHING:
-			return touching_notes.has(direction) && touching_notes[direction].end_pitch == pitch
-		END_IS_TOUCHING:
-			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
+	return slide_helper.has_slide_neighbor(direction,pitch)
 
 
 func update_touching_notes():

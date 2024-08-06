@@ -13,7 +13,9 @@ var drag_start := Vector2.ZERO
 var settings := Global.settings
 
 
-func _init(caller:Note): owner = caller
+func _init(caller:Note):
+	owner = caller
+	init_drag()
 
 
 func init_drag():
