@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         id: build
-        uses: yeslayla/build-godot-action@master
+        uses: DerpyChap/build-godot-action@8b73ce192fc5ac52639e4a4abb5ced822e2c7682
         with:
           name: TromboneCharter.${{ matrix.platform }}.${{ matrix.extension }}
           preset: ${{ matrix.platform }}
