@@ -23,9 +23,9 @@ func snap_near_pitches():
 
 
 func handle_slide_propagation(from:int):
+	var neighbor = touching_notes[from]
 	match from:
 		Note.START_IS_TOUCHING:
-			var neighbor = touching_notes[from]
 			var length_change = owner.bar - neighbor.end
 			var pitch_change = owner.pitch_start - neighbor.end_pitch
 			owner.bar -= length_change
@@ -33,7 +33,6 @@ func handle_slide_propagation(from:int):
 			owner.pitch_start -= pitch_change
 			owner.pitch_delta += pitch_change
 		Note.END_IS_TOUCHING:
-			var neighbor = touching_notes[from]
 			var length_change = owner.end - neighbor.bar
 			var pitch_change = owner.end_pitch - neighbor.pitch_start
 			owner.length -= length_change
@@ -92,11 +91,11 @@ func update_touching_notes():
 
 
 func pass_on_slide_propagation():
-		if has_slide_neighbor(Note.START_IS_TOUCHING, owner.drag_helper.old_pitch):
-			touching_notes[Note.START_IS_TOUCHING].receive_slide_propagation(Note.END_IS_TOUCHING)
-		
-		if has_slide_neighbor(Note.END_IS_TOUCHING, owner.drag_helper.old_end_pitch):
-			touching_notes[Note.END_IS_TOUCHING].receive_slide_propagation(Note.START_IS_TOUCHING)
+	if has_slide_neighbor(Note.START_IS_TOUCHING, owner.drag_helper.old_pitch):
+		touching_notes[Note.START_IS_TOUCHING].receive_slide_propagation(Note.END_IS_TOUCHING)
+	
+	if has_slide_neighbor(Note.END_IS_TOUCHING, owner.drag_helper.old_end_pitch):
+		touching_notes[Note.END_IS_TOUCHING].receive_slide_propagation(Note.START_IS_TOUCHING)
 
 
 func has_slide_neighbor(direction:int,pitch:float):
