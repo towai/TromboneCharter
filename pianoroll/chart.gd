@@ -294,11 +294,11 @@ func update_note_array():
 	var new_array := []
 	###Dew timeline tracker
 	var i := -1
-	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
+	#print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
 	print("action timeline: ",Global.actions)
-	for change in Global.changes:
-		i += 1
-		print(i,": ",change)
+	#for change in Global.changes:
+		#i += 1
+		#print(i,": ",change)
 	print("terminal revision: ",Global.revision)
 	###
 	for note in get_children():
