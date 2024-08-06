@@ -68,7 +68,7 @@ var snap_time : bool:
 	get: return %TimeSnapChk.button_pressed
 
 var tap_notes : bool:
-	get: return %InsertTapNotes.button_pressed
+	get: return %InsertTapNotes.button_pressed || Input.is_action_pressed("hold_insert_taps")
 
 
 func _ready():
