@@ -50,9 +50,10 @@ func bar_to_x(bar:float): return bar * bar_spacing
 @onready var tmb : TMBInfo:
 	get: return Global.working_tmb
 
-
-var EDIT_MODE := 0
-var SELECT_MODE := 1
+enum {
+	EDIT_MODE,
+	SELECT_MODE,
+}
 var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0

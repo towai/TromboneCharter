@@ -213,7 +213,7 @@ func _end_drag():
 	dragging = DRAG_NONE
 	print("Fresh note? ",Global.fresh)
 	slide_helper.snap_near_pitches()
-	if !Input.is_key_pressed(KEY_ALT):
+	if Global.settings.propagate_slide_changes:
 		slide_helper.pass_on_slide_propagation()
 	update_touching_notes()
 	clicking = false
@@ -266,7 +266,6 @@ func has_slide_neighbor(direction:int,pitch:float):
 			return touching_notes.has(direction) && touching_notes[direction].end_pitch == pitch
 		END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
-	
 
 
 func update_touching_notes():
