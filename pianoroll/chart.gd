@@ -422,7 +422,8 @@ func count_onscreen_notes() -> int:
 	return accum
 
 func update_playhead(event):
-	var bar = %Chart.x_to_bar(event.position.x)
+	var bar = x_to_bar(event.position.x)
+	if settings.snap_time: bar = snapped(bar,current_subdiv)
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
@@ -460,7 +461,7 @@ func _gui_input(event):
 			var bar = %Chart.x_to_bar(event.position.x)
 			if bar < 0:
 				bar = 0
-			if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
+			if settings.snap_time: bar = snapped(bar, current_subdiv)
 			if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
 				prev_section_start = bar
 				settings.section_start = bar
@@ -518,8 +519,7 @@ func _on_mouse_exited():
 	show_preview = false
 	queue_redraw()
 
-
-func _on_mouse_entered():
-	if Input.is_key_pressed(KEY_SHIFT):
-		show_preview = true
-		queue_redraw()
+#func _on_mouse_entered():
+	#if Input.is_key_pressed(KEY_SHIFT):
+		#show_preview = true
+		#queue_redraw()

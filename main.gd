@@ -54,7 +54,7 @@ func _input(event):
 	if (		(get_viewport().gui_get_focus_owner() is TextEdit)
 			||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
-	if event.keycode == KEY_SHIFT:
+	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
 		if event.pressed:
 			%Chart.show_preview = true
 		else:
