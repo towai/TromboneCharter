@@ -827,7 +827,7 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="text_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/Description" to="." method="_on_description_text_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" to="Settings/MarginC/HBoxC/ChartInfo/SongInfo/TootTallyUpload" method="_on_toottally_upload_pressed"]
-[connection signal="value_changed" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo2/Length" to="Settings" method="_on_length_value_changed"]
+[connection signal="gui_input" from="Settings/MarginC/HBoxC/ChartInfo/SongInfo2/Length" to="Settings" method="_on_length_gui_input"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/StartColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="color_changed" from="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/Colors/EndColor" to="Settings/MarginC/HBoxC/ChartInfo/ColorSettings/ColorPreview" method="_on_colors_changed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/EditSettings/ZoomEntry/ZoomLevel" to="Settings" method="_on_zoom_level_changed"]

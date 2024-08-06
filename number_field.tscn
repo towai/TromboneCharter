@@ -16,3 +16,5 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
+
+[connection signal="gui_input" from="SpinBox" to="." method="_on_spin_box_gui_input"]

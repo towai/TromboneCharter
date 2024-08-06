@@ -246,5 +246,5 @@ func _on_time_snap_toggled(button_pressed):
 			%SectionLength.step = 0.0001
 
 
-func _on_length_value_changed(_v) -> void:
+func _on_length_gui_input(_e) -> void:
 	length.min_value = max(2,ceilf(tmb.get_last_note_off()))
