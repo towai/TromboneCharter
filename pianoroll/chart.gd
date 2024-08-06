@@ -265,6 +265,8 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
 	if doot_enabled && !Global.in_ur && !Global.pasting: doot(pitch)
+	if Global.in_ur && settings.length.value < tmb.get_last_note_off():
+		settings.length.value = max(2,ceilf(tmb.get_last_note_off()))
 	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
