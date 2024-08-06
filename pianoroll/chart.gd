@@ -240,22 +240,20 @@ func assign_tt_note_ids():
 func _draw():
 	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
-	if settings.section_length:
-		var section_rect = Rect2(bar_to_x(settings.section_start), 1,
-				bar_to_x(settings.section_length), size.y)
-		draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
-		draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
-	if show_preview:
-		var mouse_pos = get_local_mouse_position()
-		if get_rect().has_point(mouse_pos):
-			draw_line(Vector2(mouse_pos.x,0), Vector2(mouse_pos.x,size.y),
-						Color.ORANGE_RED, 1 )
-		# no way to change the delay on a per-node basis, it seems
-		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0)
-		tooltip_text = ("%.4f" % %Chart.x_to_bar(mouse_pos.x)).rstrip('0.')
-	else:
-		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0.5)
-		tooltip_text = ""
+	var section_rect = Rect2(bar_to_x(settings.section_start), 1,
+			bar_to_x(settings.section_length), size.y)
+	draw_rect(section_rect, Color(0.3, 0.9, 1.0, 0.1))
+	draw_rect(section_rect, Color.CORNFLOWER_BLUE, false, 3.0)
+	var rect_bumps_pos = Vector2(section_rect.position.x+0.5,size.y/2+3)
+	draw_line(rect_bumps_pos+Vector2(-5,-5),
+			rect_bumps_pos+Vector2(0,-5),Color.CORNFLOWER_BLUE,3.0)
+	draw_line(rect_bumps_pos+Vector2(-5,5),
+			rect_bumps_pos+Vector2(0,5),Color.CORNFLOWER_BLUE,3.0)
+	rect_bumps_pos.x += section_rect.size.x
+	draw_line(rect_bumps_pos+Vector2(0,-5),
+			rect_bumps_pos+Vector2(4,-5),Color.CORNFLOWER_BLUE,3.0)
+	draw_line(rect_bumps_pos+Vector2(0,5),
+			rect_bumps_pos+Vector2(4,5),Color.CORNFLOWER_BLUE,3.0)
 	if %PreviewController.is_playing:
 		if settings.section_length:
 			draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
@@ -263,6 +261,7 @@ func _draw():
 					Color.CORNFLOWER_BLUE, 2 )
 		else:
 			settings.playhead_pos = %PreviewController.song_position
+	# Draw bar lines
 	for i in tmb.endpoint + 1:
 		var line_x = i * bar_spacing
 		var next_line_x = (i + 1) * bar_spacing
@@ -288,9 +287,29 @@ func _draw():
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
 					str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
-		draw_line(Vector2(bar_to_x(%PlayheadPos.value), 0),
-				Vector2(bar_to_x(%PlayheadPos.value), size.y),
-				Color.ORANGE_RED, 2.0)
+	# End drawing bar lines
+	if show_preview:
+		var mouse_pos = get_local_mouse_position()
+		if get_rect().has_point(mouse_pos):
+			draw_line(Vector2(mouse_pos.x,0), Vector2(mouse_pos.x,size.y),
+						Color.ORANGE_RED, 1 )
+		# no way to change the delay on a per-node basis, it seems
+		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0)
+		tooltip_text = ("%.4f" % x_to_bar(mouse_pos.x)).rstrip('0.')
+	else:
+		ProjectSettings.set_setting('gui/timers/tooltip_delay_sec', 0.5)
+		tooltip_text = ""
+	var playhead_pos = Vector2(bar_to_x(%PlayheadPos.value),0)
+	draw_line(playhead_pos,
+			playhead_pos + Vector2.DOWN*size.y,
+			Color.ORANGE_RED, 2.0)
+	if !%PreviewController.is_playing:
+		var play_symbol_size := 10
+		var play_symbol := [ playhead_pos,
+							playhead_pos+Vector2(play_symbol_size/1.33,play_symbol_size/2),
+							playhead_pos+Vector2(0,play_symbol_size) ]
+		draw_colored_polygon(play_symbol, Color.ORANGE_RED)
+		draw_polyline(play_symbol, Color.ORANGE_RED,0.5,true)
 
 
 func count_onscreen_notes() -> int:
@@ -300,7 +319,8 @@ func count_onscreen_notes() -> int:
 	return accum
 
 func update_playhead(event):
-	var bar = %Chart.x_to_bar(event.position.x)
+	var bar = x_to_bar(event.position.x)
+	if settings.snap_time: bar = snapped(bar,current_subdiv)
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
@@ -338,7 +358,7 @@ func _gui_input(event):
 			var bar = %Chart.x_to_bar(event.position.x)
 			if bar < 0:
 				bar = 0
-			if settings.snap_time: bar = snapped(bar, %Chart.current_subdiv)
+			if settings.snap_time: bar = snapped(bar, current_subdiv)
 			if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
 				prev_section_start = bar
 				settings.section_start = bar
@@ -394,8 +414,7 @@ func _on_mouse_exited():
 	show_preview = false
 	queue_redraw()
 
-
-func _on_mouse_entered():
-	if Input.is_key_pressed(KEY_SHIFT):
-		show_preview = true
-		queue_redraw()
+#func _on_mouse_entered():
+	#if Input.is_key_pressed(KEY_SHIFT):
+		#show_preview = true
+		#queue_redraw()
