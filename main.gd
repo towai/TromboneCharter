@@ -54,7 +54,7 @@ func _input(event):
 	if (		(get_viewport().gui_get_focus_owner() is TextEdit)
 			||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
-	if event.keycode == KEY_SHIFT:
+	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
 		if event.pressed:
 			%Chart.show_preview = true
 		else:
@@ -76,18 +76,11 @@ func _input(event):
 				Alert.LV_SUCCESS)
 	#if event.pressed && event.keycode == KEY_C:
 		#print(%Chart.count_onscreen_notes()," notes being drawn")
-	#if event.pressed && event.keycode == KEY_I:
-		#for note in %Chart.get_children():
-			#if !(note is Note): continue
-			#print(note.bar," \t→ ",note.index_in_slide)
 
 
 func _on_description_text_changed(): tmb.description = %Description.text
-
 func _on_refresh_button_pressed(): emit_signal("chart_loaded")
-
 func _on_help_button_pressed(): show_popup($Instructions)
-
 func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
 
 

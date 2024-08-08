@@ -28,7 +28,8 @@ func update_pos(bar:float): position.x = %Chart.bar_to_x(bar) - 3
 
 func _gui_input(event):
 	var bar = chart.x_to_bar(event.position.x + position.x)
-	if %Settings.snap_time && self != %PlayheadHandle: bar = snapped(bar, chart.current_subdiv)
+	if %Settings.snap_time && !(self == %PlayheadHandle && !dragging):
+		bar = snapped(bar, chart.current_subdiv)
 	if event is InputEventMouseButton && event.button_index == MOUSE_BUTTON_LEFT:
 		var rect := Rect2(Vector2.ZERO, size)
 		Input.set_custom_mouse_cursor(grabbing_hand if event.pressed
@@ -36,6 +37,7 @@ func _gui_input(event):
 				else null, # thankfully hotspot does not take effect on system cursors
 				Input.CURSOR_POINTING_HAND, Vector2(9, 3))
 		dragging = event.pressed
+		if event.pressed && self == %PlayheadHandle: chart.show_preview = false 
 		if event.double_click: emit_signal("double_clicked",bar)
 	elif event is InputEventMouseMotion && dragging:
 		set_bar(bar)

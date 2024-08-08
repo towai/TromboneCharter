@@ -7,14 +7,14 @@ var tmb : TMBInfo:
 @onready var short_name = %SongInfo.get_node("ShortTitle")
 @onready var author 	= %SongInfo.get_node("Author")
 @onready var genre		= %SongInfo.get_node("Genre")
-@onready var desc		= %SongInfo.get_node("Description")
 @onready var track_ref  = %SongInfo.get_node("TrackRef")
-@onready var length  = %SongInfo2.get_node("Length")
-@onready var tempo	 = %SongInfo2.get_node("Tempo")
-@onready var timesig = %SongInfo2.get_node("TimeSig")
-@onready var year	 = %SongInfo2.get_node("Year")
-@onready var diff	 = %SongInfo2.get_node("Diff")
-@onready var notespc = %SongInfo2.get_node("NoteSpacing")
+@onready var desc		= %SongInfo.get_node("Description")
+@onready var length  :NumField= %SongInfo2.get_node("Length")
+@onready var tempo	 :NumField= %SongInfo2.get_node("Tempo")
+@onready var timesig :NumField= %SongInfo2.get_node("TimeSig")
+@onready var year	 :NumField= %SongInfo2.get_node("Year")
+@onready var diff	 :NumField= %SongInfo2.get_node("Diff")
+@onready var notespc :NumField= %SongInfo2.get_node("NoteSpacing")
 
 var values : Array:
 	get: return [
@@ -29,8 +29,8 @@ enum {
 
 var current_view : int = VIEW_CHART_INFO
 var zoom : float = 1.0
-var propagate_changes : bool:
-	get: return %PropagateChanges.button_pressed
+var propagate_slide_changes : bool:
+	get: return %PropagateChanges.button_pressed != Input.is_action_pressed("hold_slide_prop")
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -68,7 +68,7 @@ var snap_time : bool:
 	get: return %TimeSnapChk.button_pressed
 
 var tap_notes : bool:
-	get: return %InsertTapNotes.button_pressed
+	get: return %InsertTapNotes.button_pressed || Input.is_action_pressed("hold_insert_taps")
 
 
 func _ready():
@@ -90,6 +90,16 @@ func _ready():
 	_on_timing_snap_value_changed(timing_snap)
 	_toggle_ffmpeg_features()
 
+func _input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey # i want my type hints
+	if key_event == null: return
+	if key_event.is_action_pressed("toggle_slide_prop"):
+		%PropagateChanges.button_pressed = !%PropagateChanges.button_pressed
+	elif key_event.is_action_pressed("toggle_snap_pitch"):
+		%PitchSnapChk.button_pressed = !%PitchSnapChk.button_pressed 
+	elif key_event.is_action_pressed("toggle_snap_time"):
+		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed 
+
 
 func _toggle_ffmpeg_features():
 	var disable = !Global.ffmpeg_worker.ffmpeg_exists
@@ -108,6 +118,7 @@ func _update_values():
 	track_ref.value = tmb.trackRef
 	
 	length.value = tmb.endpoint
+	length.min_value = 2
 	tempo.value = tmb.tempo
 	timesig.value = tmb.timesig
 	year.value = tmb.year
@@ -154,7 +165,7 @@ func _on_zoom_level_changed(value:float):
 	await(get_tree().process_frame)
 	%Chart._on_scroll_change()
 	zoom = value
-# _on_zoom_level_changed is called automatically
+# _on_zoom_level_changed is called automatically when reset is pressed
 func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
 func _update_handles():
@@ -233,3 +244,7 @@ func _on_time_snap_toggled(_button_pressed):
 		false:
 			%SectionStart.step = 0.0001
 			%SectionLength.step = 0.0001
+
+
+func _on_length_gui_input(_e) -> void:
+	length.min_value = max(2,ceilf(tmb.get_last_note_off()))

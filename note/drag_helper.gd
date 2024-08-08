@@ -10,9 +10,12 @@ var old_end : float
 var old_pitch : float
 var old_end_pitch : float
 var drag_start := Vector2.ZERO
+var settings := Global.settings
 
 
-func _init(caller:Note): owner = caller
+func _init(caller:Note):
+	owner = caller
+	init_drag()
 
 
 func init_drag():
@@ -34,7 +37,7 @@ func process_drag(drag_type=Note.DRAG_NONE):
 				new_time = chart.tmb.endpoint - owner.length
 			
 			var exclude = [old_bar]
-			if !Input.is_key_pressed(KEY_ALT):
+			if settings.propagate_slide_changes:
 				exclude.append_array(SlideHelper.find_slide_neighbors(owner))
 			
 			if chart.continuous_note_overlaps(new_time,owner.length,exclude): return(null)
@@ -64,7 +67,7 @@ func process_drag(drag_type=Note.DRAG_NONE):
 			
 			var exclude = [old_bar]
 			if owner.has_slide_neighbor(Note.END_IS_TOUCHING, old_end_pitch) \
-					&& !Input.is_key_pressed(KEY_ALT):
+					&& settings.propagate_slide_changes:
 				exclude.append(owner.touching_notes[Note.END_IS_TOUCHING].bar)
 			
 			if chart.continuous_note_overlaps(owner.bar, new_end.x, exclude) \

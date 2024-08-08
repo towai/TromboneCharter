@@ -53,3 +53,7 @@ func _ready():
 
 func _on_spinbox_changed(new_value):
 	value = new_value
+
+
+func _on_spin_box_gui_input(_e) -> void:
+	emit_signal("gui_input",_e)
