@@ -57,7 +57,7 @@ func find_all_notes_in_section(start:float,length:float) -> Array:
 	var result := []
 	var note_array = notes.duplicate(true)
 	var is_in_section := func(bar:float) -> bool:
-		return (bar > start && bar < start + length)
+		return (bar >= start && bar < start + length)
 	for note in note_array:
 		var bar = note[NOTE_BAR]
 		var end = bar + note[NOTE_LENGTH]
@@ -67,13 +67,16 @@ func find_all_notes_in_section(start:float,length:float) -> Array:
 	return result
 
 
+"""
 func clear_section(start:float,length:float):
 	var is_in_section := func(bar:float) -> bool:
-		return (bar > start && bar < start + length)
+		return (bar >= start && bar < start + length)
 	print("Clear section %d - %d" % [start,length + start])
 	var note_array = notes.duplicate(true)
+	print("note_array: ",note_array)
 	
 	var any_notes_left : bool = true
+	if note_array == [] : any_notes_left = false
 	while any_notes_left:
 		for note in note_array:
 			var bar = note[NOTE_BAR]
@@ -81,17 +84,19 @@ func clear_section(start:float,length:float):
 			print("%d notes left" % note_array.size())
 			if is_in_section.call(bar) || is_in_section.call(end):
 				print("Erase note @ %.3f" % bar)
+				#TODO: index and save cleared note data for undo/redo
 				note_array.erase(note)
 				if note_array.is_empty(): any_notes_left = false
 				break # start from the beginning of the array
 			
 			if note == note_array.back(): any_notes_left = false
 	notes = note_array
+"""
 
 
 func load_from_file(filename:String) -> int:
 	var f = FileAccess.open(filename,FileAccess.READ)
-	var err = f.get_open_error()
+	var err = FileAccess.get_open_error() #no need to act on f; function already applies to latest open() call
 	if err:
 		print(error_string(err))
 		return LoadResult.FILE_ACCESS_ERROR
@@ -164,6 +169,7 @@ func save_to_file(filename : String) -> int:
 	print("finished saving")
 	return OK
 
+
 func to_dict() -> Dictionary:
 	var dict := {}
 	
@@ -195,3 +201,4 @@ func to_dict() -> Dictionary:
 		]
 	
 	return dict
+

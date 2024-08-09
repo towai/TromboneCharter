@@ -27,8 +27,7 @@ func _do_preview():
 	
 	var bpm : float = tmb.tempo
 	var time : float
-	@warning_ignore("unused_variable")
-	var previous_time : float
+	var _previous_time : float #TODO: add option to toggle returning playhead to previous location
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
 	var startpoint_in_stream : float = Global.beat_to_time(settings.playhead_pos)
@@ -41,7 +40,7 @@ func _do_preview():
 		var arr : Array[float] = []
 		for note in tmb.notes: arr.append(note[TMBInfo.NOTE_BAR])
 		return arr
-	var note_ons : Array[float] = get_note_ons.call()
+	var _note_ons : Array[float] = get_note_ons.call()
 	
 	StreamPlayer.play(startpoint_in_stream)
 	%PreviewButton.text = "Stop"
@@ -83,7 +82,8 @@ func _do_preview():
 			player.play()
 			slide_start = note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE
 #			print(slide_start)
-		previous_time = time
+		
+		_previous_time = time
 		await(get_tree().process_frame)
 	
 	is_playing = false

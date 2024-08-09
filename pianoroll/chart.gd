@@ -16,9 +16,9 @@ class ViewBounds:	# effectively a vector2 with nicer code completion
 	var center: float:
 		get: return (left + right) / 2.0
 		set(_with): assert(false)
-	func _init(left:float,right:float):
-		self.left = left
-		self.right = right
+	func _init(left_bound, right_bound):
+		self.left = left_bound
+		self.right = right_bound
 
 var bar_spacing : float = 1.0
 #	get: return tmb.savednotespacing * %ZoomLevel.value
@@ -57,6 +57,22 @@ enum {
 var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
+###Dew variables###
+var rev : int   #the "act" setter determines which revision is to be activated by adding 1 if redoing.
+				#Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
+				#Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
+var act := -1 : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
+	set(value):
+		rev = Global.revision + value 
+		act = value
+var action := -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
+enum { #enumerates the three indices of a DRAGGED note set: [note_reference, pre-drag_data, post-drag_data]
+	REF,
+	OLD,
+	NEW
+}
+###Dew variables###
 
 func doot(pitch:float):
 	if !doot_enabled || %PreviewController.is_playing: return
@@ -84,6 +100,78 @@ func _on_scroll_change():
 	redraw_notes()
 	%WavePreview.calculate_width()
 
+##Dew u/r shortcut inputs
+func _shortcut_input(event):
+	var shift = event as InputEventWithModifiers
+	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
+		print("\n",Global.revision,": undo pressed...","\n")
+		if Global.revision != -1: #if we're at the beginning of edit history, there are no changes to undo!
+			act = 0
+			if Global.actions[rev] < 2:		  #If we aren't undoing a drag or copy-paste, we can just swap the original action taken.
+				action = !Global.actions[rev] #Undoing an added note(0) deletes it(1); undoing a deleted note(1) adds it back(0).
+			else:							  #Negating these manual actions keeps logic progressing forward through edit chain.
+				action = Global.actions[rev]  #Drag and copy-paste store both their prior and former states side-by-side, so we deal with the swap later.
+			Global.revision -= 1
+			ur_handler()
+	if Input.is_action_just_pressed("ui_redo"):
+		print("\n",Global.revision,": redo pressed...","\n")
+		if Global.revision < Global.actions.size()-1: #revision count is -1 indexed (0 means revision has 1 existing edit; revision = *index* of timeline action)
+			act = 1
+			action = Global.actions[rev] #redoing a manual add(0) adds the note(still 0), redoing a manual delete(1) deletes the note(still 1).
+			Global.revision += 1
+			ur_handler()
+
+##Dew's favorite child :)
+func ur_handler():
+	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
+	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
+	print("Selected data:", Global.changes[rev])
+	print("Expected format: ",Global.revision_format[action])
+	match action:
+		0: #add desired note(s)
+			for note in Global.changes[rev]:
+				print("UR adding!")
+				add_child(note[REF])    #simply shows a hidden note
+				note[REF].bar = note[OLD]
+				
+		1: #delete desired note(s)
+			for note in Global.changes[rev]:
+				print("UR deleting!")
+				clearing_notes = true
+				remove_child(note[REF]) #simply hides a select note
+				clearing_notes = false
+		2: #drag desired note(s)
+			if act == 0: #undo
+				for note in Global.changes[rev]:
+					print("UR dragging (undo)!")
+					stuffed_note = note[REF]
+					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3], true)
+			else:		#redo
+				for note in Global.changes[rev]:
+					print("UR dragging (redo)!")
+					stuffed_note = note[REF]
+					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3], true)
+		3: #paste desired note(s)
+			var notes_new = Global.changes[rev][act]
+			print("URing the copypasta (replace)!")
+			if notes_new.size() > 0:
+				clearing_notes = true
+				for note in notes_new:
+					add_child(note)
+					print("confirm new note at bar: ",note.bar)
+				clearing_notes = false
+			act = !act
+			var notes_old = Global.changes[rev][act]
+			print("URing the copypasta (remove)!")
+			if notes_old.size() > 0:
+				clearing_notes = true
+				for note in notes_old:
+					remove_child(note)
+					print("removed old note at bar: ",note.bar)
+				clearing_notes = false
+	act = -1
+	update_note_array()
+
 
 func redraw_notes():
 	for child in get_children():
@@ -91,7 +179,8 @@ func redraw_notes():
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
-			#child.queue_redraw()
+			child.update_touching_notes()
+			child.update_handle_visibility()
 		else: child.hide()
 
 
@@ -162,18 +251,21 @@ func _on_tmb_loaded():
 	_on_tmb_updated()
 
 
-func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
-	var new_note : Note = note_scn.instantiate()
-	new_note.bar = bar
-	new_note.length = length
-	new_note.pitch_start = pitch
-	new_note.pitch_delta = pitch_delta
-	new_note.position.x = bar_to_x(bar)
-	new_note.position.y = pitch_to_height(pitch)
-	new_note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
-	if doot_enabled: doot(pitch)
-	add_child(new_note)
-	new_note.grab_focus()
+func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0, never_doot:=false):
+	var note : Note
+	if act == -1: note = note_scn.instantiate()
+	else:         note = stuffed_note #Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
+	note.bar = bar
+	note.length = length
+	note.pitch_start = pitch
+	note.pitch_delta = pitch_delta
+	note.position.x = bar_to_x(bar)
+	note.position.y = pitch_to_height(pitch)
+	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
+	if doot_enabled && !never_doot: doot(pitch)
+	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
+	else: return
+	note.grab_focus()
 
 # move to ???
 func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -196,6 +288,15 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 
 func update_note_array():
 	var new_array := []
+	###Dew timeline tracker
+	var i := -1
+	print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
+	print("action timeline: ",Global.actions)
+	for change in Global.changes:
+		i += 1
+		print(i,": ",change)
+	print("terminal revision: ",Global.revision)
+	###
 	for note in get_children():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
@@ -206,6 +307,8 @@ func update_note_array():
 		new_array.append(note_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
+	queue_redraw()
+	redraw_notes()
 
 
 func jump_to_note(note: int, use_tt: bool = false):
@@ -375,12 +478,9 @@ func _gui_input(event):
 			event = event as InputEventMouseButton
 			if event == null || !event.pressed: return
 			if event.button_index == MOUSE_BUTTON_LEFT && !%PreviewController.is_playing:
-				@warning_ignore("unassigned_variable")
-				var new_note_pos : Vector2
-				
+				var new_note_pos = Vector2() #explicitly constructs a default Vector2 as opposed to only defining variable type
 				if settings.snap_time: new_note_pos.x = to_snapped(event.position).x
 				else: new_note_pos.x = to_unsnapped(event.position).x
-				
 				# Current length of tap notes
 				var note_length = 0.0625 if settings.tap_notes else current_subdiv
 				
@@ -390,8 +490,13 @@ func _gui_input(event):
 				if settings.snap_pitch: new_note_pos.y = to_snapped(event.position).y
 				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
-				
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
+				###Dew note add check###
+				Global.clear_future_edits()
+				Global.actions.append(0) #Record edit as an added note. The note's script will append the *self* reference to Global.changes.
+				Global.revision += 1
+				Global.fresh = true
+				###
 				%LyricsEditor.move_to_front()
 				%PlayheadHandle.move_to_front()
 
