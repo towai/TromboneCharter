@@ -254,6 +254,7 @@ func remove_note():                #Dew: We cannot use queue_free(), because we 
 	Global.changes.append([[self,self.bar]]) #... via the note's object reference.
 	Global.revision += 1
 	chart.remove_child(self)
+	print(propagate_to_the_right("find_idx_in_slide"))
 	chart.update_note_array()
 
 
