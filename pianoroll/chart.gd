@@ -201,7 +201,7 @@ func _do_tmb_update():
 		if !(note is Note) || note.is_queued_for_deletion():
 			continue
 		note.position.x = note.bar * bar_spacing
-		if !note.touching_notes.has(Note.END_IS_TOUCHING): note.find_idx_in_slide()
+		if !note.touching_notes.has(Note.END_IS_TOUCHING): note.update_slide_idx()
 	queue_redraw()
 	redraw_notes()
 	_update_queued = false

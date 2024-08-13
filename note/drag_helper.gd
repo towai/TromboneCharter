@@ -26,7 +26,7 @@ func init_drag():
 	drag_start = owner.get_local_mouse_position()
 
 
-func process_drag(drag_type=Note.DRAG_NONE):
+func process_drag(drag_type=Note.DRAG_NONE): # -> float|Vector2|null
 	match drag_type:
 		Note.DRAG_BAR:
 			var new_time : float

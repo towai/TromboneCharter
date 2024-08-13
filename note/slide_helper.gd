@@ -44,10 +44,10 @@ func find_touching_notes() -> Dictionary:
 	var result := {}
 	
 	var prev_note = get_matching_note_off(owner.bar,[owner])
-	if prev_note: result[Note.START_IS_TOUCHING] = prev_note
+	if prev_note && chart.is_ancestor_of(owner): result[Note.START_IS_TOUCHING] = prev_note # be polite and don't trick your friend
 	
 	var next_note = get_matching_note_on(owner.end,[owner])
-	if next_note: result[Note.END_IS_TOUCHING] = next_note
+	if next_note && chart.is_ancestor_of(owner): result[Note.END_IS_TOUCHING] = next_note # ||
 	
 	return result
 
@@ -83,11 +83,12 @@ func update_touching_notes():
 		null: if old_next_note != null: old_next_note.update_touching_notes()
 		_: 
 			next_note.touching_notes[Note.START_IS_TOUCHING] = owner if owner.bar >= 0 \
+			&& chart.is_ancestor_of(owner) && chart.is_ancestor_of(next_note) \
 					else null
 			next_note.bar = owner.end
 			next_note.update_handle_visibility()
 	
-	owner.propagate_to_the_right("find_idx_in_slide",[])
+	owner.propagate_to_the_right("update_slide_idx",[])
 
 
 func pass_on_slide_propagation():

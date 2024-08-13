@@ -100,16 +100,17 @@ var note_reference: Note: #A nice and tidy concatenator for a note ref's data.
 		note_data = [note_ref.bar,note_ref.length,note_ref.pitch_start,note_ref.pitch_delta,note_ref.pitch_start+note_ref.pitch_delta]
 ###Dew variables###
 
-# cat rolls the most horrible solution ever, asked to leave the repo
-func find_idx_in_slide() -> int:
+
+func update_slide_idx() -> int:
 	var left_neighbor : Note = touching_notes.get(START_IS_TOUCHING)
 	
 	match left_neighbor:
 		null: index_in_slide = 0
-		_:    index_in_slide = (left_neighbor.find_idx_in_slide() + 1)
+		_:    index_in_slide = (left_neighbor.update_slide_idx() + 1)
 	
 	queue_redraw()
 	return index_in_slide
+
 
 func propagate_to_the_right(f:StringName,args:Array=[]):
 	var right_neighbor : Note = touching_notes.get(END_IS_TOUCHING)
@@ -232,7 +233,7 @@ func _end_drag():
 				note_reference = note_package[i][0] #adding the new note data to the end of each individual data set via setter.
 				note_package[i].append(note_data)   #[reference,pre-drag_data_array] => [reference,pre-drag_data_array,post-drag_data_array]
 				i += 1
-			Global.actions.append(2) #Record edit as a set of dragged notes, and append its data to Global.changes for future use.
+			Global.actions.append(Global.ACTION_DRAG) #Record edit as a set of dragged notes, and append its data to Global.changes for future use.
 			Global.changes.append(note_package)
 			Global.revision += 1
 	chart.update_note_array()
@@ -250,11 +251,11 @@ func package_neighbors(self_note) -> Array:				#Dew: The initial creation of the
 
 func remove_note():                #Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
 	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing...
-	Global.actions.append(1)       #... allowing us to continue recording our edit history...
-	Global.changes.append([[self,self.bar]]) #... via the note's object reference.
+	Global.actions.append(Global.ACTION_DELETE) #... allowing us to continue recording our edit history...
+	Global.changes.append([[self,self.bar]])    #... via the note's object reference.
 	Global.revision += 1
 	chart.remove_child(self)
-	print(propagate_to_the_right("find_idx_in_slide"))
+	propagate_to_the_right("update_slide_idx")
 	chart.update_note_array()
 
 
@@ -282,7 +283,7 @@ func update_handle_visibility():
 	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
 	if ((prev_note != null && bar != prev_note.end)
-			|| (next_note != null && end != next_note.bar)):
+	|| (next_note != null && end != next_note.bar)):
 		update_touching_notes()
 	
 	if !show_bar_handle:
@@ -369,7 +370,7 @@ func _draw():
 		draw_polyline_colors(points, colors, 6, true)
 		draw_polyline_colors(points, colors, 6, true)
 	
-	if !is_tap_note || has_focus():_draw_tail.call()
+	if !is_tap_note || has_focus(): _draw_tail.call()
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
 
