@@ -141,6 +141,7 @@ func ur_handler():
 				clearing_notes = true
 				remove_child(note[REF]) #simply hides a select note
 				clearing_notes = false
+				note[REF].bar = -69420
 		2: #drag desired note(s)
 			if act == 0: #undo
 				for note in Global.changes[rev]:

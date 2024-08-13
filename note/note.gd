@@ -254,6 +254,7 @@ func remove_note():                #Dew: We cannot use queue_free(), because we 
 	Global.actions.append(Global.ACTION_DELETE) #... allowing us to continue recording our edit history...
 	Global.changes.append([[self,self.bar]])    #... via the note's object reference.
 	Global.revision += 1
+	self.bar = -69420
 	chart.remove_child(self)
 	propagate_to_the_right("update_slide_idx")
 	chart.update_note_array()
