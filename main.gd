@@ -51,8 +51,8 @@ func _input(event):
 		_on_save_chart_pressed()
 	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
 	# note that, even typing into numerical SpinBoxes, you're using its own child LineEdit
-	if (		(get_viewport().gui_get_focus_owner() is TextEdit)
-			||  (get_viewport().gui_get_focus_owner() is LineEdit)):
+	if ((get_viewport().gui_get_focus_owner() is TextEdit)
+	||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
 	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
 		if event.pressed:
@@ -66,11 +66,11 @@ func _input(event):
 		_on_paste()
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
-	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL):
+	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.SELECT_MODE
 		$Alert.alert("Switched mouse to Select Mode", Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)
-	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL):
+	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.EDIT_MODE
 		$Alert.alert("Switched mouse to Edit Mode", Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)

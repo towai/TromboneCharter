@@ -25,6 +25,13 @@ func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 ###Dew's globals###
 var revision = -1 	#unedited chart
 var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
+enum {
+	ACTION_ADD,
+	ACTION_DELETE,
+	ACTION_DRAG,
+	ACTION_PASTE,
+	ACTION_NONE = -1,
+}
 var changes = []	#current timeline of past and future revisions in order; see below
 var revision_format = [
 	"ADD: [*[reference, old bar value]*]",

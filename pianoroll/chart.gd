@@ -58,14 +58,19 @@ var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
 ###Dew variables###
-var rev : int   #the "act" setter determines which revision is to be activated by adding 1 if redoing.
-				#Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
-				#Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
-var act := -1 : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
+var rev : int   # the "act" setter determines which revision is to be activated by adding 1 if redoing.
+				# Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
+				# Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
+var ur_type : int = UR_NONE : #-1 = normal operation (0 = undo triggered, 1 = redo triggered)
 	set(value):
 		rev = Global.revision + value 
-		act = value
-var action := -1 #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
+		ur_type = value
+enum {
+	UR_NONE = -1,
+	UR_UNDO =  0,
+	UR_REDO =  1,
+}
+var action := Global.ACTION_NONE #initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
 var stuffed_note : Note #note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
 enum { #enumerates the three indices of a DRAGGED note set: [note_reference, pre-drag_data, post-drag_data]
 	REF,
@@ -106,7 +111,7 @@ func _shortcut_input(event):
 	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
 		print("\n",Global.revision,": undo pressed...","\n")
 		if Global.revision != -1: #if we're at the beginning of edit history, there are no changes to undo!
-			act = 0
+			ur_type = UR_UNDO
 			if Global.actions[rev] < 2:		  #If we aren't undoing a drag or copy-paste, we can just swap the original action taken.
 				action = !Global.actions[rev] #Undoing an added note(0) deletes it(1); undoing a deleted note(1) adds it back(0).
 			else:							  #Negating these manual actions keeps logic progressing forward through edit chain.
@@ -116,7 +121,7 @@ func _shortcut_input(event):
 	if Input.is_action_just_pressed("ui_redo"):
 		print("\n",Global.revision,": redo pressed...","\n")
 		if Global.revision < Global.actions.size()-1: #revision count is -1 indexed (0 means revision has 1 existing edit; revision = *index* of timeline action)
-			act = 1
+			ur_type = UR_REDO
 			action = Global.actions[rev] #redoing a manual add(0) adds the note(still 0), redoing a manual delete(1) deletes the note(still 1).
 			Global.revision += 1
 			ur_handler()
@@ -129,21 +134,20 @@ func ur_handler():
 	print("Selected data:", Global.changes[rev])
 	print("Expected format: ",Global.revision_format[action])
 	match action:
-		0: #add desired note(s)
+		Global.ACTION_ADD:
 			for note in Global.changes[rev]:
 				print("UR adding!")
 				add_child(note[REF])    #simply shows a hidden note
 				note[REF].bar = note[OLD]
-				
-		1: #delete desired note(s)
+		Global.ACTION_DELETE:
 			for note in Global.changes[rev]:
 				print("UR deleting!")
 				clearing_notes = true
 				remove_child(note[REF]) #simply hides a select note
 				clearing_notes = false
 				note[REF].bar = -69420
-		2: #drag desired note(s)
-			if act == 0: #undo
+		Global.ACTION_DRAG:
+			if ur_type == UR_UNDO:
 				for note in Global.changes[rev]:
 					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
@@ -153,8 +157,8 @@ func ur_handler():
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
 					add_note(false, note[NEW][0], note[NEW][1], note[NEW][2], note[NEW][3])
-		3: #paste desired note(s)
-			var notes_new = Global.changes[rev][act]
+		Global.ACTION_PASTE: #paste desired note(s)
+			var notes_new = Global.changes[rev][ur_type]
 			print("URing the copypasta (replace)!")
 			if notes_new.size() > 0:
 				clearing_notes = true
@@ -162,8 +166,9 @@ func ur_handler():
 					add_child(note)
 					print("confirm new note at bar: ",note.bar)
 				clearing_notes = false
-			act = !act
-			var notes_old = Global.changes[rev][act]
+			ur_type = !ur_type
+			print(ur_type)
+			var notes_old = Global.changes[rev][ur_type]
 			print("URing the copypasta (remove)!")
 			if notes_old.size() > 0:
 				clearing_notes = true
@@ -171,7 +176,7 @@ func ur_handler():
 					remove_child(note)
 					print("removed old note at bar: ",note.bar)
 				clearing_notes = false
-	act = -1
+	ur_type = UR_NONE
 	update_note_array()
 	Global.in_ur = false
 
@@ -256,7 +261,7 @@ func _on_tmb_loaded():
 
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var note : Note
-	if act == -1: note = note_scn.instantiate()
+	if ur_type == UR_NONE: note = note_scn.instantiate()
 	else:         note = stuffed_note #Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
 	note.bar = bar
 	note.length = length
@@ -268,7 +273,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	if doot_enabled && !Global.in_ur && !Global.pasting: doot(pitch)
 	if Global.in_ur && settings.length.value < tmb.get_last_note_off():
 		settings.length.value = max(2,ceilf(tmb.get_last_note_off()))
-	if act == -1: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
+	if ur_type == UR_NONE: add_child(note) #Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
 

@@ -33,7 +33,7 @@ func _on_copy_confirmed():
 	Global.pasting = true
 	Global.pasted_selection = []
 	for note in Global.copy_data:
-		%Chart.add_note(false,note[0]+target,note[1],note[2],note[3],true)
+		%Chart.add_note(false,note[0]+target,note[1],note[2],note[3])
 	Global.pasting = false
 	
 	Global.clear_future_edits()
