@@ -317,6 +317,7 @@ func update_note_array():
 		new_array.append(note_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array
+	settings.ensure_valid_endpoint()
 	queue_redraw()
 	redraw_notes()
 

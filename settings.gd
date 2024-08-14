@@ -168,10 +168,12 @@ func _on_zoom_level_changed(value:float):
 # _on_zoom_level_changed is called automatically when reset is pressed
 func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
+
 func _update_handles():
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
 		%PlayheadHandle.update_pos(playhead_pos)
+
 
 func _force_decimals(box:SpinBox):
 	var lineedit = box.get_line_edit()
@@ -181,6 +183,10 @@ func _force_decimals(box:SpinBox):
 	else:
 		box.tooltip_text = str(box.value)
 		lineedit.text = ("%.4f" % box.value).rstrip('0.')
+
+
+func ensure_valid_endpoint() -> void:
+	length.min_value = max(2,ceilf(tmb.get_last_note_off()))
 
 #region Sections
 const SECT_HANDLE_RADIUS = 3.0
@@ -246,5 +252,4 @@ func _on_time_snap_toggled(_button_pressed):
 			%SectionLength.step = 0.0001
 
 
-func _on_length_gui_input(_e) -> void:
-	length.min_value = max(2,ceilf(tmb.get_last_note_off()))
+func _on_length_gui_input(_e) -> void: ensure_valid_endpoint()
