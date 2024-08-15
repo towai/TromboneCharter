@@ -307,13 +307,11 @@ func update_note_array():
 		#print(i,": ",change)
 	print("terminal revision: ",Global.revision)
 	###
-	for note in get_children():
-		if !(note is Note) || note.is_queued_for_deletion():
-			continue
-		var note_array := [
-			note.bar, note.length, note.pitch_start, note.pitch_delta,
-			note.pitch_start + note.pitch_delta
-		]
+	for child in get_children():
+		var note := child as Note
+		if note == null || note.is_queued_for_deletion(): continue
+		
+		var note_array := note.as_array()
 		new_array.append(note_array)
 	new_array.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	tmb.notes = new_array

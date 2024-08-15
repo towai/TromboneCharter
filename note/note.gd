@@ -97,8 +97,11 @@ var note_data : Array     #Data of the note targeted by the note_reference sette
 var note_reference: Note: #A nice and tidy concatenator for a note ref's data.
 	set(note_ref):
 		note_reference = note_ref
-		note_data = [note_ref.bar,note_ref.length,note_ref.pitch_start,note_ref.pitch_delta,note_ref.pitch_start+note_ref.pitch_delta]
+		note_data = note_ref.as_array()
 ###Dew variables###
+
+func as_array() -> Array: ## in the format that is stored in TMBs
+	return [ bar, length, pitch_start, pitch_delta, pitch_start+pitch_delta ]
 
 
 func update_slide_idx() -> int:
