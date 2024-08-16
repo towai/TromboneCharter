@@ -3,6 +3,7 @@ extends PanelContainer
 
 var tmb : TMBInfo:
 	get: return Global.working_tmb
+	set(_v): assert(false,"I don't own that!")
 @onready var title		= %SongInfo.get_node("Title")
 @onready var short_name = %SongInfo.get_node("ShortTitle")
 @onready var author 	= %SongInfo.get_node("Author")
