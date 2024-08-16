@@ -6,10 +6,10 @@ enum {
 	RISKY_NEW,
 	RISKY_LOAD,
 }
-var risky_action := RISKY_QUIT
-var grammar : String
-var plural := "edits"
-var unsaved_changes : int:
+static var risky_action := RISKY_QUIT
+static var grammar : String
+static var plural := "edits"
+static var unsaved_changes : int:
 	set(value):
 		grammar = "ahead of" if value < 0 else "behind"
 		plural = "edit" if abs(value) == 1 else "edits"
@@ -28,10 +28,6 @@ func _ready():
 	confirmed.connect(_confirm)
 
 
-#func check_revision():
-	#unsaved_changes = Global.save_point - Global.revision
-
-
 func _set_text():
 	match risky_action:
 			RISKY_QUIT: dialog_text = "Really quit and discard unsaved changes?"
@@ -45,4 +41,3 @@ func _confirm():
 			RISKY_QUIT: get_tree().quit()
 			RISKY_NEW:  confirm_new.emit()
 			RISKY_LOAD: confirm_load.emit()
-	

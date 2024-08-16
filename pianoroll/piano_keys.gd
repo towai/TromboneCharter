@@ -2,6 +2,7 @@ extends VBoxContainer
 
 @onready var player : AudioStreamPlayer = %TrombPlayer
 var current_key : int = 69
+@warning_ignore("unused_signal")
 signal redraw_board
 
 # Called when the node enters the scene tree for the first time.

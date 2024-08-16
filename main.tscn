@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=30 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -26,14 +26,39 @@
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
 [ext_resource type="Script" path="res://alert.gd" id="16_yl2q4"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wopn5"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.225, 0.225, 0.225, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
+Button/styles/hover = SubResource("StyleBoxFlat_wopn5")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecsdr"]
 bg_color = Color(0.25098, 0.25098, 0.25098, 1)
 border_width_left = 8
 border_width_right = 8
 border_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6gi1t"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [node name="Main" type="VBoxContainer"]
 anchors_preset = -1
@@ -146,7 +171,7 @@ You can pass in a [code].tmb[/code] by dragging it onto the executable, and it w
 Preview timing can be wonky because it can only update at the refresh rate of your monitor. Gloat all you like, 144hz bougies.
 
 
-Created with Godot 4 by twi — [url=\"https://twitter.com/towaii\"]twitter/@towaii[/url] — [url=\"https://github.com/towai\"]github/towai[/url]
+Created with Godot 4 by twi — [url=\"https://twitter.com/towaii\"]twitter/@towaii[/url] — [url=\"https://github.com/towai\"]github/towai[/url] — with major contributions by [url=\"https://github.com/DerpyChap\"]DerpyChap[/url] and [url=\"https://github.com/DewOnTheGrass\"]DewOnTheGrass[/url]
 I'm in the [url=\"https://discord.gg/KVzKRsbetJ\"]Trombone Champ Modding Discord[/url] if you have issues or potential improvements, or you can submit them as a [url=\"https://github.com/towai/TromboneCharter\"]GitHub issue[/url]."
 
 [node name="FFmpegInstructions" type="AcceptDialog" parent="."]
@@ -211,6 +236,45 @@ tab_size = 2
 layout_mode = 2
 text = "OK"
 
+[node name="OptsDialog" type="Window" parent="."]
+auto_translate_mode = 1
+title = "Options"
+position = Vector2i(200, 36)
+size = Vector2i(700, 600)
+visible = false
+wrap_controls = true
+transient = true
+content_scale_mode = 1
+
+[node name="TabContainer" type="TabContainer" parent="OptsDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+current_tab = 0
+
+[node name="Keybinds" type="MarginContainer" parent="OptsDialog/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+metadata/_tab_index = 0
+
+[node name="VBoxC" type="VBoxContainer" parent="OptsDialog/TabContainer/Keybinds"]
+layout_mode = 2
+
+[node name="BindEdit" type="HBoxContainer" parent="OptsDialog/TabContainer/Keybinds/VBoxC"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="OptsDialog/TabContainer/Keybinds/VBoxC/BindEdit"]
+layout_mode = 2
+text = "Bind"
+
+[node name="Button" type="Button" parent="OptsDialog/TabContainer/Keybinds/VBoxC/BindEdit"]
+layout_mode = 2
+
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
 layout_mode = 2
@@ -256,6 +320,7 @@ layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/separation = 0
 script = ExtResource("10_8jxge")
 
@@ -332,8 +397,11 @@ layout_mode = 2
 text = "Load Chart"
 
 [node name="SaveChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Hold Shift to bypass Save As dialog."
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_6gi1t")
 text = "Save Chart"
 
 [node name="NewChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
@@ -608,10 +676,9 @@ text = "Audio preview type:"
 [node name="PreviewType" type="OptionButton" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
 layout_mode = 2
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Waveform"
-popup/item_0/id = 0
 popup/item_1/text = "Spectrogram"
 popup/item_1/id = 1
 
@@ -770,10 +837,9 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
-item_count = 2
 selected = 0
+item_count = 2
 popup/item_0/text = "Next Note"
-popup/item_0/id = 0
 popup/item_1/text = "Next Bar"
 popup/item_1/id = 1
 
@@ -784,11 +850,24 @@ size_flags_horizontal = 8
 size_flags_vertical = 10
 text = "Copy section lyrics"
 
-[node name="HelpButton" type="Button" parent="Settings/MarginC/HBoxC"]
+[node name="VBoxC" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
+layout_mode = 2
+
+[node name="OptsButton" type="Button" parent="Settings/MarginC/HBoxC/VBoxC"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "Info & Usage"
-text = "   ?   "
+text = "⚙"
+
+[node name="HelpButton" type="Button" parent="Settings/MarginC/HBoxC/VBoxC"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+size_flags_vertical = 10
+tooltip_text = "Info & Usage"
+text = "❔"
 
 [node name="Alert" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -799,7 +878,7 @@ anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_top = -13.0
-offset_right = 55.0
+offset_right = 92.0
 offset_bottom = 13.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.266667, 0.4, 1)
@@ -854,4 +933,4 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/CopyLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_copy_lyrics_pressed"]
-[connection signal="pressed" from="Settings/MarginC/HBoxC/HelpButton" to="." method="_on_help_button_pressed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/VBoxC/HelpButton" to="." method="_on_help_button_pressed"]

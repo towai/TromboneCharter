@@ -4,6 +4,7 @@ extends Object
 var owner : Note
 var chart : Control:
 	get: return owner.chart
+	set(_v): assert(false,"I don't own that!")
 var touching_notes : Dictionary = {}
 
 

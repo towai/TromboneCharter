@@ -5,6 +5,7 @@ var grabby_hand := load("res://paw_open.svg")
 var grabbing_hand := load("res://paw_closed.svg")
 @onready var chart = %Chart
 signal bar_changed(bar, ref)
+@warning_ignore("unused_signal")
 signal double_clicked(bar)
 
 
@@ -38,7 +39,7 @@ func _gui_input(event):
 				Input.CURSOR_POINTING_HAND, Vector2(9, 3))
 		dragging = event.pressed
 		if event.pressed && self == %PlayheadHandle: chart.show_preview = false 
-		if event.double_click: emit_signal("double_clicked",bar)
+		if event.double_click: emit_signal("double_clicked",bar) # unused?
 	elif event is InputEventMouseMotion && dragging:
 		set_bar(bar)
 

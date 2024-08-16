@@ -201,4 +201,3 @@ func to_dict() -> Dictionary:
 		]
 	
 	return dict
-

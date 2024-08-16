@@ -1,5 +1,7 @@
 extends Control
 
+signal chart_updated
+
 const scrollbar_height : float = 8
 
 var scroll_position : float:
@@ -199,7 +201,7 @@ func _on_tmb_updated():
 func _do_tmb_update():
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
 	%SectionStart.max_value = tmb.endpoint
-	%SectionLength.max_value = max(1, tmb.endpoint - %SectionStart.value)
+	%SectionLength.max_value = tmb.endpoint - %SectionStart.value
 	%PlayheadPos.max_value = tmb.endpoint
 	%LyricsEditor._update_lyrics()
 	%Settings._update_handles()
@@ -318,6 +320,7 @@ func update_note_array():
 	settings.ensure_valid_endpoint()
 	queue_redraw()
 	redraw_notes()
+	chart_updated.emit()
 
 
 func jump_to_note(note: int, use_tt: bool = false):
@@ -402,7 +405,7 @@ func _draw():
 	# End drawing bar lines
 	if show_preview:
 		var mouse_pos = get_local_mouse_position()
-		if get_rect().has_point(mouse_pos):
+		if Rect2(Vector2.ZERO,size).has_point(mouse_pos):
 			draw_line(Vector2(mouse_pos.x,0), Vector2(mouse_pos.x,size.y),
 						Color.ORANGE_RED, 1 )
 		# no way to change the delay on a per-node basis, it seems
@@ -515,10 +518,10 @@ func _notification(what):
 			for note in get_children():
 				if note is Note && !note.is_queued_for_deletion():
 					note._update()
+			_on_scroll_change()
 
 
 func _on_doot_toggle_toggled(toggle): doot_enabled = toggle
-
 
 func _on_show_targets_toggled(toggle):
 	draw_targets = toggle
@@ -527,8 +530,3 @@ func _on_show_targets_toggled(toggle):
 func _on_mouse_exited():
 	show_preview = false
 	queue_redraw()
-
-#func _on_mouse_entered():
-	#if Input.is_key_pressed(KEY_SHIFT):
-		#show_preview = true
-		#queue_redraw()

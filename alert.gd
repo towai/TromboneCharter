@@ -19,6 +19,8 @@ func _ready(): modulate = Color.TRANSPARENT
 
 
 func alert(text:String, pos:Vector2, lvl:int, duration : float = 1.5):
+	label.size.x = 0 # let it handle min size itself
+	queue_redraw()
 	position = pos
 	label.text = text
 	label.add_theme_color_override("font_color", colors[lvl])
@@ -31,5 +33,7 @@ func alert(text:String, pos:Vector2, lvl:int, duration : float = 1.5):
 	tween.set_trans(Tween.TRANS_EXPO)
 	tween.set_ease(Tween.EASE_IN)
 	tween.tween_property(self,"modulate",Color.TRANSPARENT,duration)
-	await(tween.finished)
-	
+
+
+func _draw() -> void:
+	draw_rect(Rect2(Vector2(-2,-15), label.size + (Vector2.ONE*4)), Color(0,0,0,0.3))

@@ -1,13 +1,14 @@
 class_name SaveLoad
 extends Node
-
-@onready var main : Node = get_parent()
+# TODO does this really need to be a Node rather than an Object?
+@onready var main : Node = get_parent():
+	set(_v): assert(false,"We're inseparable!")
 var cfg:ConfigFile:
 	get: return main.cfg
-	set(value): assert(false)
+	set(_v): assert(false,"I don't own that!")
 var tmb:TMBInfo:
 	get: return main.tmb
-	set(value): assert(false)
+	set(_v): assert(false,"I don't own that!")
 
 # TODO  - ton of functions called from main that we should own instead
 #		- this should own chart_loaded signal but i'm not fixing it right now!
@@ -40,7 +41,6 @@ func validate_win_path(path:String):
 				Vector2(12, %ViewSwitcher.global_position.y + 38),
 				Alert.LV_ERROR)
 		return
-		
 	if saved_dir[1] != ':':
 		print("couldn't get drive letter from saved directory in cfg file!")
 		return
@@ -63,3 +63,12 @@ func save_tmb_to_file(filename : String) -> int:
 	f.store_string(JSON.stringify(dict))
 	print("finished saving")
 	return OK
+
+
+func try_cfg_save():
+	print("try cfg save")
+	if !cfg.has_section("Config"): return
+	var err = cfg.save("user://config.cfg")
+	if err:
+		print("Oh noes")
+		print(error_string(err))

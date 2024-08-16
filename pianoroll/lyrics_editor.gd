@@ -101,7 +101,7 @@ func _on_copy_lyrics_pressed():
 		if new_lyric.bar >= Global.working_tmb.endpoint:
 			%Alert.alert("Any more lyrics would go past the chart's endpoint!",
 					Vector2(%SectionSelection.position.x - 12, %Settings.position.y - 12),
-					Alert.LV_ERROR)
+					Alert.LV_ERROR, 2.0)
 			break # lyrics are sorted into bar order in package_lyrics()
 		copied_lyrics.append(new_lyric)
 	

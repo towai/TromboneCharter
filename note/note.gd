@@ -36,13 +36,17 @@ var scaled_length : float:
 	get: return length * chart.bar_spacing
 var end_height : float:
 	get: return -((pitch_delta / Global.SEMITONE) * chart.key_height)
+	set(_v): assert(false,"You can't just set that!")
 var visual_height : float:
 	get: return abs(end_height)
+	set(_v): assert(false,"You can't just set that!")
 var is_slide: bool:
 	get: return pitch_delta != 0
+	set(_v): assert(false,"You can't just set that!")
 var is_in_view : bool:
 	get: return position.x + size.x >= chart.scroll_position \
 			&& position.x <= chart.scroll_end
+	set(_v): assert(false,"use Chart.jump_to_note() ya dingus")
 # n.b. a delta of 1e-18 or -1e-17 in a .tmb will round to 0 when parsed in with the JSON parser
 # (see the note in the JSON class's doc) but still show in the game as a note with length. however,
 # if this happens you definitely did that on purpose and on re-saving from charter
@@ -51,7 +55,7 @@ var is_in_view : bool:
 # by giving them an imperceptible and inconsequential delta value (0.0001 is already only ~0.14¢)
 var is_tap_note: bool:
 	get: return length <= 0.0625 && !is_slide && touching_notes.is_empty()
-	set(_v): assert(false)
+	set(_v): assert(false) # maybe we could implement custom logic but probably not worth
 var dragging := 0
 enum {
 	DRAG_NONE,
@@ -81,12 +85,14 @@ var tt_note_id : int = 0
 var touching_notes : Dictionary:
 	get: return slide_helper.touching_notes
 	set(value): slide_helper.touching_notes = value
-var show_bar_handle : bool:
+var should_show_bar_handle : bool:
 	get: return (touching_notes.get(START_IS_TOUCHING) == null)
-var show_end_handle : bool:
+	set(_v): assert(false,"You can't just set that!")
+var should_show_end_handle : bool:
 	get: return (touching_notes.get(END_IS_TOUCHING) == null
 				&& (!is_tap_note || has_focus())
 			)
+	set(_v): assert(false,"You can't just set that!")
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
 ###Dew variables###
@@ -291,14 +297,14 @@ func update_handle_visibility():
 	|| (next_note != null && end != next_note.bar)):
 		update_touching_notes()
 	
-	if !show_bar_handle:
+	if !should_show_bar_handle:
 		bar_handle.size.x = BARHANDLE_SIZE.x / 2
 		bar_handle.position.x = 0
 	else: 
 		bar_handle.size.x = BARHANDLE_SIZE.x
 		bar_handle.position.x = -BARHANDLE_SIZE.x / 2
 	
-	if !show_end_handle:
+	if !should_show_end_handle:
 		end_handle.size.x = ENDHANDLE_SIZE.x / 2
 	else:
 		end_handle.size.x = ENDHANDLE_SIZE.x
@@ -376,8 +382,8 @@ func _draw():
 		draw_polyline_colors(points, colors, 6, true)
 	
 	if !is_tap_note || has_focus(): _draw_tail.call()
-	if show_bar_handle: _draw_bar_handle.call()
-	if show_end_handle: _draw_end_handle.call()
+	if should_show_bar_handle: _draw_bar_handle.call()
+	if should_show_end_handle: _draw_end_handle.call()
 
 
 func _exit_tree():

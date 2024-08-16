@@ -5,6 +5,7 @@ extends Control
 @onready var settings : Settings = %Settings
 @onready var save_check : SaveCheck = $SaveCheck
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
+@warning_ignore("unused_signal")
 signal chart_loaded
 var tmb : TMBInfo:
 	get: return Global.working_tmb
@@ -43,16 +44,16 @@ func _ready():
 		$LoadDialog.current_dir = dir
 		_on_load_dialog_file_selected(path)
 		return
-	
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir") if !err else "."
 	
 	_on_new_chart_confirmed()
 
+
 func _input(event):
 	event = event as InputEventKey
 	if event == null: return
-	if event.pressed && event.keycode == KEY_S && Input.is_key_pressed(KEY_CTRL):
-		_on_save_chart_pressed()
+	if event.pressed && event.is_action_pressed("save_chart_as",false,true): do_save()
+	if event.pressed && event.is_action_pressed("save_chart"): do_save(true)
 	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
 	# note that, even typing into numerical SpinBoxes, you're using its own child LineEdit
 	if ((get_viewport().gui_get_focus_owner() is TextEdit)
@@ -64,18 +65,16 @@ func _input(event):
 		%Chart.queue_redraw()
 	if event.pressed && event.is_action_pressed("ui_copy"):  _on_copy()
 	if event.pressed && event.is_action_pressed("ui_paste"): _on_paste()
-	if event.pressed && event.is_action_pressed("toggle_playback"):
-		%PreviewController._do_preview()
-	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
+	if event.pressed && event.is_action_pressed("toggle_playback"): %PreviewController._do_preview()
+	if event.is_action("select_mode",true) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.SELECT_MODE
 		$Alert.alert("Switched mouse to Select Mode", Vector2(%ChartView.global_position.x, 10),
-				Alert.LV_SUCCESS)
-	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
+			Alert.LV_SUCCESS)
+	
+	if event.is_action("edit_mode",true) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.EDIT_MODE
 		$Alert.alert("Switched mouse to Edit Mode", Vector2(%ChartView.global_position.x, 10),
-				Alert.LV_SUCCESS)
-	#if event.pressed && event.keycode == KEY_C:
-		#print(%Chart.count_onscreen_notes()," notes being drawn")
+			Alert.LV_SUCCESS)
 
 
 func _notification(what):
@@ -84,7 +83,9 @@ func _notification(what):
 			get_tree().quit()
 			return # otherwise we see the save warning try to pop up lol
 		save_check.risky_action = SaveCheck.RISKY_QUIT
+		
 		show_popup(save_check)
+
 
 func _on_description_text_changed(): tmb.description = %Description.text
 func _on_refresh_button_pressed(): emit_signal("chart_loaded")
@@ -115,7 +116,6 @@ func _on_new_chart_confirmed():
 func _on_load_chart_pressed():
 	if save_check.unsaved_changes:
 		save_check.risky_action = SaveCheck.RISKY_LOAD
-		print("???")
 		show_popup(save_check)
 	else: show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path:String) -> void:
@@ -128,24 +128,24 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
 
 
-func _on_save_chart_pressed():
+func _on_save_chart_pressed(): do_save(Input.is_key_pressed(KEY_SHIFT))
+func do_save(bypass_dialog:=false):
 	tmb.lyrics = %LyricsEditor.package_lyrics()
-	if Input.is_key_pressed(KEY_SHIFT):
-		_on_save_dialog_file_selected($SaveDialog.current_path)
+	if bypass_dialog: _on_save_dialog_file_selected($SaveDialog.current_path)
 	else: show_popup($SaveDialog)
 
 
 func _on_save_dialog_file_selected(path:String) -> void:
 	if OS.get_name() == "Windows": saveload.validate_win_path(path)
-	
+
 	var err = saveload.save_tmb_to_file(path)
 	if err == OK:
 		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
-				Alert.LV_SUCCESS)
-	else: 
+			Alert.LV_SUCCESS)
+	else:
 		$Alert.alert("couldn't save to %s! %s" % [path, error_string(err)],
-				Vector2(72, %NewChart.global_position.y + 20),
-				Alert.LV_ERROR, 2)
+			%Settings.global_position + Vector2(%Chart.global_position.x,-13),
+			Alert.LV_ERROR, 2.5)
 		return
 	
 	var dir = path.substr(0,path.rfind("/"))
@@ -153,8 +153,9 @@ func _on_save_dialog_file_selected(path:String) -> void:
 	try_cfg_save()
 	
 	err = try_to_load_stream(dir)
-	if err: print("No stream loaded -- %s" % error_string(err))
+	if err: print("No stream loaded — %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
+	settings.update_save_button()
 
 #region AudioLoading
 # TODO should we perhaps give the TrackPlayer a script and give it these?
@@ -162,12 +163,12 @@ func try_to_load_ogg(path:String) -> int:
 	print("Try load ogg from %s" % path)
 	var f = FileAccess.open(path,FileAccess.READ)
 	if f == null: return FileAccess.get_open_error()
-	
+
 	var stream := AudioStreamOggVorbis.load_from_file(path)
 	if stream == null || stream.packet_sequence.packet_data.is_empty():
 		print("Ogg load: stream null/no data?")
 		return ERR_FILE_CANT_READ
-	
+
 	%TrackPlayer.stream = stream
 	return OK
 
@@ -175,24 +176,17 @@ func try_to_load_ogg(path:String) -> int:
 func try_to_load_stream(dir) -> int:
 	var err := try_to_load_ogg(dir + "/song.ogg")
 	if err: print("Failed to load song.ogg: %s"
-			% error_string(err))
+		% error_string(err))
 	return err
 #endregion
 
 
-func try_cfg_save():
-	print("try cfg save")
-	if !cfg.has_section("Config"): return
-	var err = cfg.save("user://config.cfg")
-	if err:
-		print("Oh noes")
-		print(error_string(err))
-
+func try_cfg_save(): saveload.try_cfg_save()
 
 func _on_copy():
 	var start = Global.settings.section_start
 	var length = Global.settings.section_length
-	
+
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
 		print("copy section empy")
@@ -203,8 +197,8 @@ func _on_copy():
 		"notes": notes
 	}
 	DisplayServer.clipboard_set(JSON.stringify(data))
-	$Alert.alert("Copied %s notes to clipboard" % notes.size(), Vector2(%ChartView.global_position.x, 10),
-				Alert.LV_SUCCESS)
+	$Alert.alert("Copied %s notes to clipboard" % notes.size(),
+			Vector2(%ChartView.global_position.x, 10), Alert.LV_SUCCESS)
 
 func _on_paste():
 	var clipboard = DisplayServer.clipboard_get()
@@ -220,13 +214,15 @@ func _on_paste():
 		ClipboardType.NOTES:
 			if %PlayheadPos.value + data.length > tmb.endpoint:
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
-						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
+					Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
 			Global.copy_data = data.notes #Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
-			
+
 			$CopyConfirm.set_values(copy_target, data)
-			$CopyConfirm.show()
+			show_popup($CopyConfirm)
+		_: assert(false, "Clipboard has magic key, but of wrong value. How did we get here?\n%s"
+			% [ data ])
 
 func _on_rich_text_label_meta_clicked(meta):
 	var data = JSON.parse_string(meta)

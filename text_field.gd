@@ -10,5 +10,6 @@ var value : String:
 		value = string
 		if !has_node("TextEntry"): return
 		$TextEntry.text = string
+		if is_inside_tree(): Global.emit_signal("tmb_updated")
 
 func _ready(): $Label.text = field_name

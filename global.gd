@@ -1,5 +1,5 @@
 extends Node
-
+@warning_ignore("unused_signal")
 signal tmb_updated
 const SEMITONE := 13.75
 const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )

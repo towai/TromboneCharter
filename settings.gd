@@ -3,6 +3,7 @@ extends PanelContainer
 
 var tmb : TMBInfo:
 	get: return Global.working_tmb
+	set(_v): assert(false,"I don't own that!")
 @onready var title		= %SongInfo.get_node("Title")
 @onready var short_name = %SongInfo.get_node("ShortTitle")
 @onready var author 	= %SongInfo.get_node("Author")
@@ -15,6 +16,7 @@ var tmb : TMBInfo:
 @onready var year	 :NumField= %SongInfo2.get_node("Year")
 @onready var diff	 :NumField= %SongInfo2.get_node("Diff")
 @onready var notespc :NumField= %SongInfo2.get_node("NoteSpacing")
+var tween : Tween
 
 var values : Array:
 	get: return [
@@ -28,7 +30,7 @@ enum {
 }
 
 var current_view : int = VIEW_CHART_INFO
-var zoom : float = 1.0
+var zoom := 1.0
 var propagate_slide_changes : bool:
 	get: return %PropagateChanges.button_pressed != Input.is_action_pressed("hold_slide_prop")
 
@@ -86,6 +88,7 @@ func _ready():
 	
 	Global.settings = self
 	get_tree().get_current_scene().chart_loaded.connect(_update_values)
+	%Chart.chart_updated.connect(update_save_button)
 	_update_view()
 	_on_timing_snap_value_changed(timing_snap)
 	_toggle_ffmpeg_features()
@@ -98,7 +101,7 @@ func _input(event: InputEvent) -> void:
 	elif key_event.is_action_pressed("toggle_snap_pitch"):
 		%PitchSnapChk.button_pressed = !%PitchSnapChk.button_pressed 
 	elif key_event.is_action_pressed("toggle_snap_time"):
-		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed 
+		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed
 
 
 func _toggle_ffmpeg_features():
@@ -133,7 +136,7 @@ func _update_values():
 
 
 func _on_view_switcher_pressed():
-	current_view ^= 1 # check out this fun ligature in fira code
+	current_view ^= 1 # check out this fun ligature in JetBrains Mono (Godot's code editor font)
 	_update_view()
 
 
@@ -198,6 +201,22 @@ func section_handle_dragged(value:float,which:Node):
 		_on_section_length_value_changed(value - section_start)
 	elif which == %PlayheadHandle: 
 		_on_copy_target_value_changed(value)
+
+
+func update_save_button():
+	const default_button_bg := Color("1a1a1a99")
+	const save_hl := Color("26261a99")
+	var style : StyleBoxFlat = %SaveChart.get_theme_stylebox("normal")
+	# tween waits until finished to start a new tween. we can use this to our advantage
+	if SaveCheck.unsaved_changes && style.bg_color != save_hl:
+		tween = create_tween()
+		tween.tween_property(style,"bg_color",save_hl,0.5)
+		tween.parallel().tween_property(%SaveChart,"theme_override_colors/font_color",Color.ANTIQUE_WHITE,0.5)
+	elif !SaveCheck.unsaved_changes && style.bg_color != default_button_bg:
+		tween = create_tween()
+		tween.tween_property(style,"bg_color",default_button_bg,0.5)
+		tween.parallel().tween_property(%SaveChart,"theme_override_colors/font_color",Color.WHITE,0.5)
+
 
 func _on_section_start_value_changed(value):
 	section_start = value
