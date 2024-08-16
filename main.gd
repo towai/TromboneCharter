@@ -3,6 +3,8 @@ extends Control
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
+@onready var save_check : SaveCheck = $SaveCheck
+@onready var ok_check = get_node("SaveCheck")
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -16,6 +18,8 @@ enum ClipboardType {
 }
 
 func _ready():
+	get_tree().set_auto_accept_quit(false)
+	
 	DisplayServer.window_set_min_size(Vector2(1280,600))
 	if OS.get_environment("SteamDeck") == "1":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
@@ -42,7 +46,6 @@ func _ready():
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir") if !err else "."
 	
 	_on_new_chart_confirmed()
-
 
 func _input(event):
 	event = event as InputEventKey
@@ -77,6 +80,12 @@ func _input(event):
 	#if event.pressed && event.keycode == KEY_C:
 		#print(%Chart.count_onscreen_notes()," notes being drawn")
 
+
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_check.save_checker()
+		save_check.show()
+		ok_check.confirmed.connect(func(): get_tree().quit())
 
 func _on_description_text_changed(): tmb.description = %Description.text
 func _on_refresh_button_pressed(): emit_signal("chart_loaded")

@@ -299,7 +299,7 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 func update_note_array():
 	var new_array := []
 	###Dew timeline tracker
-	var i := -1
+	#var i := -1
 	#print("Hi, I'm Tom Scott, and today I'm in func update_note_array()")
 	print("action timeline: ",Global.actions)
 	#for change in Global.changes:

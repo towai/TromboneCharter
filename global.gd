@@ -23,6 +23,7 @@ func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
 ###Dew's globals###
+var in_ur := false	#prevents excessive dootage
 var revision = -1 	#unedited chart
 var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
 enum {
@@ -39,7 +40,6 @@ var revision_format = [
 	"DRAGGED SET: [*[reference_1, [list of 1's old data], [list of 1's new data]]*(, *[reference_n, [list of n's old data], [list of n's new data]]*)]",
 	"PASTED SET: [*[overwritten_reference_1(, overwritten_reference_n)]*, *[pasted_reference_1(, pasted_reference_n)]*] (array of overwrittens can be empty)"
 ]
-var in_ur := false
 
 var fresh := false  #only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
 func clear_future_edits(wipe := false):
@@ -56,6 +56,8 @@ var pasting := false #Set to true during the pasting of a copied selection, duri
 var copy_data : Array #Stores the latest copied note data to insert into the chart via chart.add_note(...) on paste.
 var pasted_selection : Array #Container for pasted-note refs, inserted into Global.changes on paste.
 var overwritten_selection : Array #Container for paste-overwritten note refs, inserted into Global.changes when pasted.
+
+var save_point := -1
 ###Dew's globals###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations

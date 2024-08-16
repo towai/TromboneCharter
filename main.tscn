@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=28 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bu6gxk0umr8do" path="res://number_field.tscn" id="7_6mp3m"]
 [ext_resource type="Script" path="res://toottally.gd" id="7_h0pqp"]
 [ext_resource type="FontFile" uid="uid://bednem37cigyi" path="res://fonts/SourceCodePro-Regular.ttf" id="7_jt8rs"]
+[ext_resource type="Script" path="res://save_check.gd" id="7_kc2fk"]
 [ext_resource type="Script" path="res://copy_confirm.gd" id="7_m5n28"]
 [ext_resource type="Script" path="res://pianoroll/chart_view.gd" id="8_j823s"]
 [ext_resource type="Script" path="res://ffmpeg_instructions.gd" id="8_wmpcw"]
@@ -70,13 +71,27 @@ volume_db = -5.0
 unique_name_in_owner = true
 stream = ExtResource("5_vqfbf")
 
+[node name="SaveCheck" type="ConfirmationDialog" parent="."]
+initial_position = 2
+script = ExtResource("7_kc2fk")
+
 [node name="NewChartConfirm" type="ConfirmationDialog" parent="."]
 title = "You Sure?"
-position = Vector2i(200, 200)
+initial_position = 2
 size = Vector2i(234, 123)
 unresizable = true
 dialog_text = "Really make a new TMB and discard any unsaved changes?"
 dialog_autowrap = true
+script = ExtResource("7_kc2fk")
+
+[node name="LoadChartConfirm" type="ConfirmationDialog" parent="."]
+title = "You Sure?"
+initial_position = 2
+size = Vector2i(234, 123)
+unresizable = true
+dialog_text = "Really make a new TMB and discard any unsaved changes?"
+dialog_autowrap = true
+script = ExtResource("7_kc2fk")
 
 [node name="CopyConfirm" type="ConfirmationDialog" parent="."]
 title = "You Sure?"
@@ -811,6 +826,7 @@ text = "toot toot lol"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
 [connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]
+[connection signal="confirmed" from="LoadChartConfirm" to="." method="_on_new_chart_confirmed"]
 [connection signal="confirmed" from="CopyConfirm" to="CopyConfirm" method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]
