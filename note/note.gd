@@ -23,7 +23,7 @@ var pitch_start : float:
 		_update()
 var pitch_delta : float:
 	set(value):
-		if value != pitch_delta && doot_enabled:
+		if value != pitch_delta && doot_enabled && !Global.in_ur:
 			chart.doot(pitch_start + value)
 		pitch_delta = value
 		_update()
@@ -88,16 +88,32 @@ var show_end_handle : bool:
 			)
 var index_in_slide := 0 # for matching the new, improved look of slides in the game
 
-# cat rolls the most horrible solution ever, asked to leave the repo
-func find_idx_in_slide() -> int:
+###Dew variables###
+var clicking := false 		  #used to ensure that the initial data of a dragged note is only collected once, immediately upon interaction.
+var initial_note_data : Array #The aforementioned initial data of a dragged note. Compared with final_note_data upon note release.
+var final_note_data : Array   #The final values of a released note. Compared with initial_note_data to determine whether the selected note's handle(s) actually changed position.
+var note_package : Array  #The collected data of a note and its editable neighbors. Appended to Global.changes.
+var note_data : Array     #Data of the note targeted by the note_reference setter.
+var note_reference: Note: #A nice and tidy concatenator for a note ref's data.
+	set(note_ref):
+		note_reference = note_ref
+		note_data = note_ref.as_array()
+###Dew variables###
+
+func as_array() -> Array: ## in the format that is stored in TMBs
+	return [ bar, length, pitch_start, pitch_delta, pitch_start+pitch_delta ]
+
+
+func update_slide_idx() -> int:
 	var left_neighbor : Note = touching_notes.get(START_IS_TOUCHING)
 	
 	match left_neighbor:
 		null: index_in_slide = 0
-		_:    index_in_slide = (left_neighbor.find_idx_in_slide() + 1)
+		_:    index_in_slide = (left_neighbor.update_slide_idx() + 1)
 	
 	queue_redraw()
 	return index_in_slide
+
 
 func propagate_to_the_right(f:StringName,args:Array=[]):
 	var right_neighbor : Note = touching_notes.get(END_IS_TOUCHING)
@@ -117,7 +133,10 @@ func _ready():
 	pitch_handle.size = Vector2.DOWN * TAIL_HEIGHT
 	
 	end_handle.size = ENDHANDLE_SIZE
-	
+	###Dew grabbing the creation of newly pasted notes for the timeline
+	if Global.pasting:
+		Global.pasted_selection.append(self)
+	###
 	update_touching_notes()
 	_update()
 	doot_enabled = true
@@ -132,8 +151,9 @@ func _gui_input(event):
 	
 	if key != null && key.pressed:
 		match key.keycode:
-			KEY_DELETE, KEY_BACKSPACE: queue_free()
-	
+			KEY_DELETE, KEY_BACKSPACE:
+				remove_note() #Dew: We can't use queue_free(), because we need these notes to reappear when deletion is undone.
+							  #remove_note() is Dew's function which runs remove_child() on the note and logs the deletion.
 
 
 func _on_handle_input(event, which_handle):
@@ -144,11 +164,17 @@ func _on_handle_input(event, which_handle):
 	if event == null: return
 	if event.pressed: match event.button_index:
 		MOUSE_BUTTON_LEFT:
+			if !clicking:        #Dew: If this isn't here, the "initial" note data will continue updating itself as we drag/
+				clicking = true  #We need this "initial" data to determine not only whether the note has actually been changed by the user,
+				note_reference = self #see setter
+				initial_note_data = [note_reference,note_data]
+				note_package = package_neighbors(initial_note_data)
 			dragging = which_handle
 			drag_helper.init_drag()
 			chart.doot(pitch_start if which_handle != DRAG_END else end_pitch)
 		MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT:
-			queue_free()
+			remove_note() #Dew: We can't use queue_free(), because we need these notes to reappear when deletion is undone.
+						  #remove_note() is my function which runs remove_child() on the note and logs the deletion.
 
 
 func _process_drag():
@@ -189,11 +215,51 @@ func _process_drag():
 
 func _end_drag():
 	dragging = DRAG_NONE
+	print("Fresh note? ",Global.fresh)
 	slide_helper.snap_near_pitches()
 	if Global.settings.propagate_slide_changes:
 		slide_helper.pass_on_slide_propagation()
-	
 	update_touching_notes()
+	clicking = false
+	note_reference = self #see setter
+	final_note_data = [note_reference,note_data]
+	if initial_note_data != final_note_data: #Dew: If the user created or ultimately edited the note instead of just dooting it,
+		Global.clear_future_edits()  #check for future edits, which will be cleared by this function.
+		if Global.fresh:			 #Global.fresh, set true by chart._gui_input, denotes that a note has been freshly added to the timeline.
+			Global.changes.append([[note_reference,note_data[0]]]) #Record edit as an added note w/ bar, and append its information to Global.changes.
+			Global.fresh = false 	 #Only true from the moment the user creates a note to this moment that they release left-click.
+			
+		else: #If Global.fresh is not set by clicking a blank space in the chart, then this note was *dragged*, not added.
+			  #Therefore, we have to add data for potential neighboring notes as well as the note itself.
+			var i = 0
+			while i < note_package.size():          #Here, we iterate through each set of individual note data within the package,
+				note_reference = note_package[i][0] #adding the new note data to the end of each individual data set via setter.
+				note_package[i].append(note_data)   #[reference,pre-drag_data_array] => [reference,pre-drag_data_array,post-drag_data_array]
+				i += 1
+			Global.actions.append(Global.ACTION_DRAG) #Record edit as a set of dragged notes, and append its data to Global.changes for future use.
+			Global.changes.append(note_package)
+			Global.revision += 1
+	chart.update_note_array()
+
+
+func package_neighbors(self_note) -> Array:				#Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
+	var package = []               						#We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
+	var neighbors = slide_helper.find_touching_notes()	#and then append the note passed by the argument (the note that the user moved).
+	for key in neighbors.keys():   #package_neighbors() can properly log chart- and clipboard-loaded note sets that have been dragged.
+		note_reference = neighbors[key] #see setter
+		package.append([note_reference,note_data])
+	package.append(self_note)
+	return package                 #in the format: [[reference_1, data_array_1],[reference_2,data_array_2],...,[reference_n,data_array_n]]
+
+
+func remove_note():                #Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
+	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing...
+	Global.actions.append(Global.ACTION_DELETE) #... allowing us to continue recording our edit history...
+	Global.changes.append([[self,self.bar]])    #... via the note's object reference.
+	Global.revision += 1
+	self.bar = -69420
+	chart.remove_child(self)
+	propagate_to_the_right("update_slide_idx")
 	chart.update_note_array()
 
 
@@ -212,8 +278,8 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: queue_free()
-	doot_enabled = true
+	if length <= 0: bar = -69420   #Dew: genuinely vital (thanks twi). We can't remove the child outright, because it still needs to be
+	doot_enabled = true            #referenced as a neighbor of the note which the user dragged over it. Thus, we simply yeet in into the ether.
 
 
 func update_handle_visibility():
@@ -221,7 +287,7 @@ func update_handle_visibility():
 	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
 	if ((prev_note != null && bar != prev_note.end)
-			|| (next_note != null && end != next_note.bar)):
+	|| (next_note != null && end != next_note.bar)):
 		update_touching_notes()
 	
 	if !show_bar_handle:
@@ -308,13 +374,14 @@ func _draw():
 		draw_polyline_colors(points, colors, 6, true)
 		draw_polyline_colors(points, colors, 6, true)
 	
-	if !is_tap_note || has_focus():_draw_tail.call()
+	if !is_tap_note || has_focus(): _draw_tail.call()
 	if show_bar_handle: _draw_bar_handle.call()
 	if show_end_handle: _draw_end_handle.call()
 
 
 func _exit_tree():
-	bar = -69420.0
-	if chart.clearing_notes: return
+	#bar = -69420.0 Let this be a warning. Whomsoever memes in vain shall themselves be memed til break of script.
+	if chart.clearing_notes : return
+	print("exiting tree!")
 	update_touching_notes()
 	chart.update_note_array()

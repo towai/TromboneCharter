@@ -3,6 +3,8 @@ extends Control
 @onready var cfg = ConfigFile.new()
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
+@onready var save_check : SaveCheck = $SaveCheck
+@onready var ok_check = get_node("SaveCheck")
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -16,6 +18,8 @@ enum ClipboardType {
 }
 
 func _ready():
+	get_tree().set_auto_accept_quit(false)
+	
 	DisplayServer.window_set_min_size(Vector2(1280,600))
 	if OS.get_environment("SteamDeck") == "1":
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
@@ -43,7 +47,6 @@ func _ready():
 	
 	_on_new_chart_confirmed()
 
-
 func _input(event):
 	event = event as InputEventKey
 	if event == null: return
@@ -51,8 +54,8 @@ func _input(event):
 		_on_save_chart_pressed()
 	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
 	# note that, even typing into numerical SpinBoxes, you're using its own child LineEdit
-	if (		(get_viewport().gui_get_focus_owner() is TextEdit)
-			||  (get_viewport().gui_get_focus_owner() is LineEdit)):
+	if ((get_viewport().gui_get_focus_owner() is TextEdit)
+	||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
 	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
 		if event.pressed:
@@ -66,17 +69,23 @@ func _input(event):
 		_on_paste()
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
-	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL):
+	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.SELECT_MODE
 		$Alert.alert("Switched mouse to Select Mode", Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)
-	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL):
+	if event.is_action("edit_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.EDIT_MODE
 		$Alert.alert("Switched mouse to Edit Mode", Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)
 	#if event.pressed && event.keycode == KEY_C:
 		#print(%Chart.count_onscreen_notes()," notes being drawn")
 
+
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		save_check.save_checker()
+		save_check.show()
+		ok_check.confirmed.connect(func(): get_tree().quit())
 
 func _on_description_text_changed(): tmb.description = %Description.text
 func _on_refresh_button_pressed(): emit_signal("chart_loaded")
@@ -174,9 +183,7 @@ func try_cfg_save():
 
 func _on_copy():
 	var start = Global.settings.section_start
-	print(start)
 	var length = Global.settings.section_length
-	print(length)
 	
 	var notes = tmb.find_all_notes_in_section(start,length)
 	if notes.is_empty():
@@ -207,9 +214,9 @@ func _on_paste():
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
 						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
-			
+			Global.copy_data = data.notes #Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
-
+			
 			$CopyConfirm.set_values(copy_target, data)
 			$CopyConfirm.show()
 
