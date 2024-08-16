@@ -11,5 +11,4 @@ var value : String:
 		if !has_node("TextEntry"): return
 		$TextEntry.text = string
 
-func _ready():
-	$Label.text = field_name
+func _ready(): $Label.text = field_name

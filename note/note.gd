@@ -4,6 +4,7 @@ extends Control
 const BARHANDLE_SIZE := Vector2.ONE * 32
 const ENDHANDLE_SIZE := Vector2.ONE * 24
 const TAIL_HEIGHT := 16.0
+
 var bar : float:
 	set(value):
 		bar = value

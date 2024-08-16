@@ -73,24 +73,7 @@ stream = ExtResource("5_vqfbf")
 
 [node name="SaveCheck" type="ConfirmationDialog" parent="."]
 initial_position = 2
-script = ExtResource("7_kc2fk")
-
-[node name="NewChartConfirm" type="ConfirmationDialog" parent="."]
-title = "You Sure?"
-initial_position = 2
-size = Vector2i(234, 123)
 unresizable = true
-dialog_text = "Really make a new TMB and discard any unsaved changes?"
-dialog_autowrap = true
-script = ExtResource("7_kc2fk")
-
-[node name="LoadChartConfirm" type="ConfirmationDialog" parent="."]
-title = "You Sure?"
-initial_position = 2
-size = Vector2i(234, 123)
-unresizable = true
-dialog_text = "Really make a new TMB and discard any unsaved changes?"
-dialog_autowrap = true
 script = ExtResource("7_kc2fk")
 
 [node name="CopyConfirm" type="ConfirmationDialog" parent="."]
@@ -825,8 +808,6 @@ theme_override_constants/outline_size = 6
 text = "toot toot lol"
 
 [connection signal="chart_loaded" from="." to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_chart_loaded"]
-[connection signal="confirmed" from="NewChartConfirm" to="." method="_on_new_chart_confirmed"]
-[connection signal="confirmed" from="LoadChartConfirm" to="." method="_on_new_chart_confirmed"]
 [connection signal="confirmed" from="CopyConfirm" to="CopyConfirm" method="_on_copy_confirmed"]
 [connection signal="file_selected" from="LoadDialog" to="." method="_on_load_dialog_file_selected"]
 [connection signal="file_selected" from="SaveDialog" to="." method="_on_save_dialog_file_selected"]

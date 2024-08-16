@@ -4,7 +4,6 @@ extends Control
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
 @onready var save_check : SaveCheck = $SaveCheck
-@onready var ok_check = get_node("SaveCheck")
 @onready var ffmpeg_worker : FFmpegWorker = Global.ffmpeg_worker
 signal chart_loaded
 var tmb : TMBInfo:
@@ -19,6 +18,8 @@ enum ClipboardType {
 
 func _ready():
 	get_tree().set_auto_accept_quit(false)
+	save_check.confirm_new.connect(_on_new_chart_confirmed)
+	save_check.confirm_load.connect(show_popup.bind($LoadDialog))
 	
 	DisplayServer.window_set_min_size(Vector2(1280,600))
 	if OS.get_environment("SteamDeck") == "1":
@@ -58,15 +59,11 @@ func _input(event):
 	||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
 	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
-		if event.pressed:
-			%Chart.show_preview = true
-		else:
-			%Chart.show_preview = false
+		if event.pressed: %Chart.show_preview = true
+		else: %Chart.show_preview = false
 		%Chart.queue_redraw()
-	if event.pressed && event.is_action_pressed("ui_copy"):
-		_on_copy()
-	if event.pressed && event.is_action_pressed("ui_paste"):
-		_on_paste()
+	if event.pressed && event.is_action_pressed("ui_copy"):  _on_copy()
+	if event.pressed && event.is_action_pressed("ui_paste"): _on_paste()
 	if event.pressed && event.is_action_pressed("toggle_playback"):
 		%PreviewController._do_preview()
 	if event.is_action("select_mode") && !Input.is_key_pressed(KEY_CTRL) && !Input.get_mouse_button_mask():
@@ -83,9 +80,11 @@ func _input(event):
 
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		save_check.save_checker()
-		save_check.show()
-		ok_check.confirmed.connect(func(): get_tree().quit())
+		if !save_check.unsaved_changes:
+			get_tree().quit()
+			return # otherwise we see the save warning try to pop up lol
+		save_check.risky_action = SaveCheck.RISKY_QUIT
+		show_popup(save_check)
 
 func _on_description_text_changed(): tmb.description = %Description.text
 func _on_refresh_button_pressed(): emit_signal("chart_loaded")
@@ -96,19 +95,29 @@ func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
 func show_popup(window:Window):
 	window.current_screen = get_window().current_screen
 	window.position = popup_location
-	window.show()
+	window.popup()
 
 
-func _on_new_chart_pressed(): show_popup($NewChartConfirm)
+func _on_new_chart_pressed():
+	if save_check.unsaved_changes:
+		save_check.risky_action = SaveCheck.RISKY_NEW
+		show_popup(save_check)
+	else: _on_new_chart_confirmed()
 func _on_new_chart_confirmed():
 	tmb = TMBInfo.new()
 	%Settings.use_custom_colors = false
 	%TrackPlayer.stream = null
 	print("new tmb")
+	Global.clear_future_edits(true)
 	emit_signal("chart_loaded")
 
 
-func _on_load_chart_pressed(): show_popup($LoadDialog)
+func _on_load_chart_pressed():
+	if save_check.unsaved_changes:
+		save_check.risky_action = SaveCheck.RISKY_LOAD
+		print("???")
+		show_popup(save_check)
+	else: show_popup($LoadDialog)
 func _on_load_dialog_file_selected(path:String) -> void:
 	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
@@ -165,9 +174,8 @@ func try_to_load_ogg(path:String) -> int:
 
 func try_to_load_stream(dir) -> int:
 	var err := try_to_load_ogg(dir + "/song.ogg")
-	if err:
-		print("Failed to load song.ogg: %s"
-				% error_string(err))
+	if err: print("Failed to load song.ogg: %s"
+			% error_string(err))
 	return err
 #endregion
 
@@ -232,12 +240,7 @@ func _on_rich_text_label_meta_clicked(meta):
 # For some reason I have to manually handle resizing the window contents to fit the window size.
 func _on_diff_calc_about_to_popup():
 	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
-
 func _on_diff_calc_win_size_changed():
 	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
-
-func _on_diff_calc_win_close_requested():
-	$DiffCalc.visible = false
-
-func _on_diff_ok_button_pressed():
-	$DiffCalc.visible = false
+func _on_diff_calc_win_close_requested(): $DiffCalc.visible = false
+func _on_diff_ok_button_pressed(): $DiffCalc.visible = false

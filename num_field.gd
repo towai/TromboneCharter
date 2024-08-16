@@ -26,7 +26,6 @@ signal value_changed(new_value)
 
 @export var value : float:
 	set(with):
-		#print("float set ",with)
 		value = clamp(with, min_value, max_value)
 		if !is_float: value = int(value)
 		if !has_node("SpinBox"): return
@@ -51,9 +50,6 @@ func _ready():
 	if !Engine.is_editor_hint(): value_changed.connect(Global._on_tmb_updated.bind(json_key))
 
 
-func _on_spinbox_changed(new_value):
-	value = new_value
+func _on_spinbox_changed(new_value): value = new_value
 
-
-func _on_spin_box_gui_input(_e) -> void:
-	emit_signal("gui_input",_e)
+func _on_spin_box_gui_input(_e) -> void: emit_signal("gui_input",_e)
