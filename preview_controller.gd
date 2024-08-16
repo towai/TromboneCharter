@@ -36,11 +36,8 @@ func _do_preview():
 		startpoint_in_stream = Global.beat_to_time(settings.section_start)
 		start_beat = settings.section_start
 	var slide_start : float
-	var get_note_ons = func() -> Array[float]:
-		var arr : Array[float] = []
-		for note in tmb.notes: arr.append(note[TMBInfo.NOTE_BAR])
-		return arr
-	var _note_ons : Array[float] = get_note_ons.call()
+	var _note_ons : Array[float] = []
+	for note in tmb.notes: _note_ons.append(note[TMBInfo.NOTE_BAR])
 	
 	StreamPlayer.play(startpoint_in_stream)
 	%PreviewButton.text = "Stop"
