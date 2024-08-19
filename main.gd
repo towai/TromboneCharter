@@ -52,20 +52,25 @@ func _ready():
 func _input(event):
 	event = event as InputEventKey
 	if event == null: return
-	if event.pressed && event.is_action_pressed("save_chart_as",false,true): do_save()
-	if event.pressed && event.is_action_pressed("save_chart"): do_save(true)
+	if event.is_action_pressed("save_chart_as",false,true): do_save()
+	if event.is_action_pressed("save_chart"): do_save(true)
 	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
 	# note that, even typing into numerical SpinBoxes, you're using its own child LineEdit
 	if ((get_viewport().gui_get_focus_owner() is TextEdit)
 	||  (get_viewport().gui_get_focus_owner() is LineEdit)):
 		return
-	if event.keycode == KEY_SHIFT && !%PlayheadHandle.dragging:
-		if event.pressed: %Chart.show_preview = true
-		else: %Chart.show_preview = false
+	if Input.is_action_pressed("hold_drag_playhead") && !%PlayheadHandle.dragging:
+		%Chart.show_preview = true
 		%Chart.queue_redraw()
-	if event.pressed && event.is_action_pressed("ui_copy"):  _on_copy()
-	if event.pressed && event.is_action_pressed("ui_paste"): _on_paste()
-	if event.pressed && event.is_action_pressed("toggle_playback"): %PreviewController._do_preview()
+	elif Input.is_action_just_released("hold_drag_playhead"):
+		%Chart.show_preview = false
+		%Chart.queue_redraw()
+	
+	if event.is_action_pressed("new_chart"):  _on_new_chart_pressed()
+	if event.is_action_pressed("load_chart"): _on_load_chart_pressed()
+	if event.is_action_pressed("ui_copy"):  _on_copy()
+	if event.is_action_pressed("ui_paste"): _on_paste()
+	if event.is_action_pressed("toggle_playback"): %PreviewController._do_preview()
 	if event.is_action("select_mode",true) && !Input.get_mouse_button_mask():
 		%Chart.mouse_mode = %Chart.SELECT_MODE
 		$Alert.alert("Switched mouse to Select Mode", Vector2(%ChartView.global_position.x, 10),
@@ -111,6 +116,7 @@ func _on_new_chart_confirmed():
 	print("new tmb")
 	Global.clear_future_edits(true)
 	emit_signal("chart_loaded")
+	%Chart.chart_updated.emit()
 
 
 func _on_load_chart_pressed():
@@ -126,6 +132,7 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	var err = try_to_load_stream(dir)
 	if err: print("No stream loaded -- %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
+	%Chart.chart_updated.emit()
 
 
 func _on_save_chart_pressed(): do_save(Input.is_key_pressed(KEY_SHIFT))

@@ -110,7 +110,7 @@ func _on_scroll_change():
 ##Dew u/r shortcut inputs
 func _shortcut_input(event):
 	var shift = event as InputEventWithModifiers
-	if Input.is_action_just_pressed("ui_undo") && !shift.shift_pressed:
+	if Input.is_action_just_pressed("ui_undo",true):
 		print("\n",Global.revision,": undo pressed...","\n")
 		if Global.revision != -1: #if we're at the beginning of edit history, there are no changes to undo!
 			ur_type = UR_UNDO
@@ -133,8 +133,8 @@ func ur_handler():
 	Global.in_ur = true
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
-	print("Selected data:", Global.changes[rev])
-	print("Expected format: ",Global.revision_format[action])
+	#print("Selected data:", Global.changes[rev])
+	#print("Expected format: ",Global.revision_format[action])
 	match action:
 		Global.ACTION_ADD:
 			for note in Global.changes[rev]:
@@ -464,7 +464,7 @@ func _gui_input(event):
 		|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
 		|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
 			_on_scroll_change()
-	if Input.is_key_pressed(KEY_SHIFT):
+	if Input.is_action_pressed("hold_drag_playhead"):
 		update_playhead(event)
 		return
 	match mouse_mode:

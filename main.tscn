@@ -237,14 +237,16 @@ layout_mode = 2
 text = "OK"
 
 [node name="OptsDialog" type="Window" parent="."]
+unique_name_in_owner = true
 auto_translate_mode = 1
 title = "Options"
 position = Vector2i(200, 36)
 size = Vector2i(700, 600)
-visible = false
 wrap_controls = true
 transient = true
+unresizable = true
 content_scale_mode = 1
+script = ExtResource("11_vvtum")
 
 [node name="TabContainer" type="TabContainer" parent="OptsDialog"]
 anchors_preset = 15
@@ -266,6 +268,7 @@ metadata/_tab_index = 0
 layout_mode = 2
 
 [node name="BindEdit" type="HBoxContainer" parent="OptsDialog/TabContainer/Keybinds/VBoxC"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="Label" type="Label" parent="OptsDialog/TabContainer/Keybinds/VBoxC/BindEdit"]
