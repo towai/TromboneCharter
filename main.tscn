@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=32 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -23,30 +23,33 @@
 [ext_resource type="Script" path="res://section_handle.gd" id="10_fs4d4"]
 [ext_resource type="Texture2D" uid="uid://by8ljxwwbg8ph" path="res://metronome.svg" id="11_maqbd"]
 [ext_resource type="Script" path="res://pianoroll/lyrics_editor.gd" id="11_nxuar"]
+[ext_resource type="Script" path="res://opts_dialog.gd" id="11_vvtum"]
 [ext_resource type="Texture2D" uid="uid://ca0siccuqmqat" path="res://resetbutton-thick.svg" id="14_8wa4s"]
 [ext_resource type="Script" path="res://alert.gd" id="16_yl2q4"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wopn5"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.225, 0.225, 0.225, 0.6)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
-
 [sub_resource type="Theme" id="Theme_eswg4"]
 default_font_size = 14
-Button/styles/hover = SubResource("StyleBoxFlat_wopn5")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ecsdr"]
 bg_color = Color(0.25098, 0.25098, 0.25098, 1)
 border_width_left = 8
 border_width_right = 8
 border_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lyomx"]
+resource_local_to_scene = true
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.0784314, 0.0784314, 0.0784314, 0.12549)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="LabelSettings" id="LabelSettings_3qd4f"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6gi1t"]
 content_margin_left = 4.0
@@ -240,43 +243,106 @@ text = "OK"
 unique_name_in_owner = true
 auto_translate_mode = 1
 title = "Options"
-position = Vector2i(200, 36)
-size = Vector2i(700, 600)
+position = Vector2i(64, 64)
+size = Vector2i(900, 420)
+visible = false
 wrap_controls = true
 transient = true
+exclusive = true
 unresizable = true
 content_scale_mode = 1
 script = ExtResource("11_vvtum")
 
-[node name="TabContainer" type="TabContainer" parent="OptsDialog"]
+[node name="PanelC" type="PanelContainer" parent="OptsDialog"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_tab = 0
 
-[node name="Keybinds" type="MarginContainer" parent="OptsDialog/TabContainer"]
+[node name="MarginC" type="MarginContainer" parent="OptsDialog/PanelC"]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
-metadata/_tab_index = 0
 
-[node name="VBoxC" type="VBoxContainer" parent="OptsDialog/TabContainer/Keybinds"]
+[node name="HBoxC" type="HBoxContainer" parent="OptsDialog/PanelC/MarginC"]
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
 
-[node name="BindEdit" type="HBoxContainer" parent="OptsDialog/TabContainer/Keybinds/VBoxC"]
+[node name="BindList" type="VFlowContainer" parent="OptsDialog/PanelC/MarginC/HBoxC"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="OptsDialog/TabContainer/Keybinds/VBoxC/BindEdit"]
+[node name="OtherStuff" type="PanelContainer" parent="OptsDialog/PanelC/MarginC/HBoxC"]
+visible = false
 layout_mode = 2
-text = "Bind"
+theme_override_styles/panel = SubResource("StyleBoxFlat_lyomx")
 
-[node name="Button" type="Button" parent="OptsDialog/TabContainer/Keybinds/VBoxC/BindEdit"]
+[node name="MarginC" type="MarginContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff"]
 layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxC" type="VBoxContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Label" type="Label" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "Key Shortcut Presets"
+label_settings = SubResource("LabelSettings_3qd4f")
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="MnemonicBinds" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
+layout_mode = 2
+text = "Mnemonic"
+
+[node name="ClusterBinds" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
+layout_mode = 2
+text = "Left Hand"
+
+[node name="Label2" type="Label" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "Whatever Else"
+label_settings = SubResource("LabelSettings_3qd4f")
+horizontal_alignment = 1
+
+[node name="CheckBox" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "savlaksvlkasdfjasdf"
+
+[node name="CheckBox2" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "savlaksvlkasdfjasdf"
+
+[node name="CheckBox3" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "savlaksvlkasdfjasdf"
+
+[node name="OptSaveButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+size_flags_vertical = 10
+text = "Save Settings"
+
+[node name="OptRevertButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "Revert"
+
+[node name="OptDefaultsButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "Defaults"
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
@@ -861,7 +927,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 size_flags_horizontal = 8
-tooltip_text = "Info & Usage"
+tooltip_text = "Editor Settings"
 text = "⚙"
 
 [node name="HelpButton" type="Button" parent="Settings/MarginC/HBoxC/VBoxC"]
@@ -900,6 +966,7 @@ text = "toot toot lol"
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
 [connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
+[connection signal="close_requested" from="OptsDialog" to="." method="_on_opts_dialog_close_requested"]
 [connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
@@ -936,4 +1003,5 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/Vol2/VolReset" to="Settings" method="_on_toot_vol_reset_pressed"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/LyricsTools/ShowLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_show_lyrics_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/LyricsTools/CopyLyrics" to="PianoRoll/ChartView/Chart/LyricsEditor" method="_on_copy_lyrics_pressed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/VBoxC/OptsButton" to="." method="_on_opts_button_pressed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/VBoxC/HelpButton" to="." method="_on_help_button_pressed"]

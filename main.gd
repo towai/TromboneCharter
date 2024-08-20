@@ -16,6 +16,7 @@ var popup_location : Vector2i:
 enum ClipboardType {
 	NOTES
 }
+# TODO move this somewhere else for the love of babi
 
 func _ready():
 	get_tree().set_auto_accept_quit(false)
@@ -98,10 +99,13 @@ func _on_help_button_pressed(): show_popup($Instructions)
 func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
 
 
-func show_popup(window:Window):
+func show_popup(window:Window,rel_pos:=Vector2i.ZERO):
 	window.current_screen = get_window().current_screen
-	window.position = popup_location
+	window.position = popup_location if rel_pos==Vector2i.ZERO \
+			else DisplayServer.window_get_position(0) + rel_pos
+	window.current_screen = get_window().current_screen
 	window.popup()
+	window.current_screen = get_window().current_screen
 
 
 func _on_new_chart_pressed():
@@ -247,3 +251,7 @@ func _on_diff_calc_win_size_changed():
 	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
 func _on_diff_calc_win_close_requested(): $DiffCalc.visible = false
 func _on_diff_ok_button_pressed(): $DiffCalc.visible = false
+
+
+func _on_opts_button_pressed() -> void: show_popup(%OptsDialog,Vector2.ONE*48)
+func _on_opts_dialog_close_requested() -> void: $OptsDialog.visible = false
