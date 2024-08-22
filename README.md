@@ -31,7 +31,7 @@
  * `note_color_start` and `note_color_end` will be populated iff "Use custom note colors" is checked.
 
 ### Contributing
-IDK, just clone the thing and edit it using the latest 4.2 editor.
+IDK, just clone the thing and edit it using the latest 4.3 editor.
 
 ### Acknowledgements:
 No copyrighted assets were used in making this. Trombone sample from GM.DLS.
