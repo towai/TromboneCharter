@@ -4,6 +4,8 @@ extends HBoxContainer
 
 signal value_changed(new_value)
 
+@onready var line_edit = $SpinBox.get_line_edit()
+
 @export var json_key : String
 @export var field_name : String:
 	set(with):
@@ -13,7 +15,7 @@ signal value_changed(new_value)
 @export var is_float : bool:
 	set(with):
 		is_float = with
-		if !has_node("SpinBox"): return
+		if !has_node("SpinBox"): return # in startup
 		if is_float:
 			# if step is 0 it rounds regardless, might be a godot bug
 			# 0.001 is seemingly as low as it'll let me go
@@ -30,7 +32,7 @@ signal value_changed(new_value)
 		if !is_float: value = int(value)
 		if !has_node("SpinBox"): return
 		$SpinBox.value = value
-		emit_signal("value_changed",value)
+		value_changed.emit(value)
 
 @export var min_value : float:
 	set(with):
@@ -46,10 +48,18 @@ signal value_changed(new_value)
 
 func _ready():
 	$Label.text = field_name
-	$SpinBox.value_changed.connect(_on_spinbox_changed)
+	$SpinBox.value_changed.connect(_on_spinbox_value_changed)
+	line_edit.gui_input.connect(_gui_input)
 	if !Engine.is_editor_hint(): value_changed.connect(Global._on_tmb_updated.bind(json_key))
 
 
-func _on_spinbox_changed(new_value): value = new_value
+func _gui_input(event: InputEvent) -> void:
+	var keyevent = event as InputEventKey
+	if keyevent == null: return
+	if keyevent.is_action_pressed("ui_accept"): line_edit.release_focus()
 
-func _on_spin_box_gui_input(_e) -> void: emit_signal("gui_input",_e)
+
+func _on_spinbox_value_changed(new_value): value = new_value
+
+# TODO is this even used?
+func _on_spin_box_gui_input(event:InputEvent) -> void: gui_input.emit(event)

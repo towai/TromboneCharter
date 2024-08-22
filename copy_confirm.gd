@@ -37,7 +37,7 @@ func _on_copy_confirmed():
 	Global.pasting = false
 	
 	Global.clear_future_edits()
-	Global.actions.append(3) #Record edit as a set of [overwritten,pasted] notes...
+	Global.actions.append(3) # Record edit as a set of [overwritten,pasted] notes...
 	Global.changes.append([Global.overwritten_selection,Global.pasted_selection]) #... and append its data to Global.changes for future use.
 	Global.revision += 1
 	
@@ -45,7 +45,6 @@ func _on_copy_confirmed():
 		note[TMBInfo.NOTE_BAR] += target
 		main.tmb.notes.append(note)
 	main.tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
-	#main.emit_signal("chart_loaded")
 	Global.settings.section_length = 0
 	%Alert.alert("Inserted %s notes from clipboard" % notes.size(), Vector2(%ChartView.global_position.x, 10),
 				Alert.LV_SUCCESS)

@@ -15,3 +15,5 @@ layout_mode = 2
 custom_minimum_size = Vector2(160, 20)
 layout_mode = 2
 size_flags_horizontal = 0
+
+[connection signal="gui_input" from="TextEntry" to="." method="_gui_input"]

@@ -1,4 +1,4 @@
-class_name OptsDialog
+class_name EditorOpts
 extends Window
 
 const builtin_bindings : PackedStringArray = [ "ui_accept", "ui_select", "ui_cancel",
@@ -32,11 +32,12 @@ const special : PackedStringArray = [ # don't allow rebinding these shortcuts
 	"save_chart", "save_chart_as", "new_chart", "load_chart"
 ]
 const bind_edit_scene = preload("res://bind_edit.tscn")
+@onready var conflict_advise : Label = %ConflictAdvise
 
 var waiting_for_input := false
 
 var keybinds : Array[KeyBind] = []
-class KeyBind: # TODO OptsDialog probably shouldn't own this
+class KeyBind: # TODO EditorOpts probably shouldn't own this
 	var events: Array[InputEventKey] ## can be null!
 	var action: String ## Name of the action in the input map.
 	var friendly_name: String ## Name that will show up in the dialog.
@@ -44,7 +45,7 @@ class KeyBind: # TODO OptsDialog probably shouldn't own this
 	var keytype: int ## null if event is null!
 	## Need to keep track of this to know what value to set.
 	## Unicode keys are used for ones on alphanumeric keys which may stand for something relevant
-	## Physical keys are used for modifiers that live on Shift/Ctrl/Alt
+	## Physical keys are used for modifiers that (generally) live on Shift/Ctrl/Alt
 	enum { KEY_PHYSICAL, KEY_UNICODE, SECRET_THIRD_THING }
 	
 	func _init(action_name:String):
@@ -72,7 +73,7 @@ class KeyBind: # TODO OptsDialog probably shouldn't own this
 		InputMap.action_add_event(action,event)
 		events[0] = event
 
-# TODO OptsDialog probably shouldn't own this
+# TODO EditorOpts probably shouldn't own this
 static func get_key_as_text(event:InputEventKey) -> String:
 	if event == null: return "∅"
 	var keycode := event.as_text_physical_keycode()
@@ -94,9 +95,49 @@ func _ready() -> void:
 		if bind.action.begins_with("ui"): %BindList.call_deferred("add_child",new_bind_edit)
 		else: %BindList.add_child(new_bind_edit)
 		#print(bind.friendly_name,"\t:\t",get_keycode(bind.event))
+	refresh_potential_conflicts()
 
 func _process(_delta: float) -> void: pass
 
 func _input(_event: InputEvent) -> void: pass
 
-func _commit_keybind(): pass
+
+func has_potential_conflict(caller:BindEdit) -> Array[BindEdit]:
+	if caller.bind.events.is_empty(): return []
+	
+	var conflicts : Array[BindEdit] = []
+	for child in %BindList.get_children():
+		var bedit := child as BindEdit
+		
+		if bedit == null || bedit == caller || bedit.bind.events.is_empty(): continue
+		if bedit.bind.events[0].is_match(caller.bind.events[0],true):
+			conflicts.append(bedit)
+	
+	return conflicts
+
+## Returns whether any conflicts were found in the keybind list.
+func refresh_potential_conflicts() -> bool:
+	var clean_binds : Array[BindEdit] = []
+	for child in %BindList.get_children(): clean_binds.append(child)
+	var dirty_binds : Array[BindEdit] = []
+	
+	for bedit in clean_binds:
+		var conflicts = has_potential_conflict(bedit)
+		if !conflicts.is_empty():
+			dirty_binds.append_array(conflicts)
+			dirty_binds.append(bedit)
+		
+		while dirty_binds.count(bedit) > 1: dirty_binds.erase(bedit)
+	
+	for bedit in dirty_binds:
+		clean_binds.erase(bedit)
+		bedit.button.get("theme_override_styles/normal").bg_color = BindEdit.CONFLICT_COLOR
+	
+	for bedit in clean_binds:
+		bedit.button.get("theme_override_styles/normal").bg_color = BindEdit.normal_button_color
+	
+	if !dirty_binds.is_empty():
+		conflict_advise.text = "Potential key conflict found. This may be fine, or may not be. You're the expert."
+	else: conflict_advise.text = " "
+	
+	return !dirty_binds.is_empty()

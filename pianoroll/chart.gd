@@ -17,7 +17,7 @@ class ViewBounds:	# effectively a vector2 with nicer code completion
 	var right:float
 	var center: float:
 		get: return (left + right) / 2.0
-		set(_with): assert(false)
+		set(_v): assert(false)
 	func _init(left_bound, right_bound):
 		self.left = left_bound
 		self.right = right_bound
@@ -81,8 +81,10 @@ enum { # enumerates the three indices of a DRAGGED note set: [note_reference, pr
 }
 ###Dew variables###
 
+var should_doot: bool:
+	get: return doot_enabled && !Global.in_ur && !Global.pasting && !%PreviewController.is_playing
 func doot(pitch:float):
-	if !doot_enabled || %PreviewController.is_playing: return
+	if !should_doot: return
 	player.pitch_scale = Global.pitch_to_scale(pitch / Global.SEMITONE)
 	player.play()
 	await(get_tree().create_timer(0.1).timeout)
@@ -259,7 +261,6 @@ func _on_tmb_loaded():
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
-
 func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
 	var note : Note
 	if ur_type == UR_NONE: note = note_scn.instantiate()
@@ -271,12 +272,13 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.x = bar_to_x(bar)
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
-	if doot_enabled && !Global.in_ur && !Global.pasting: doot(pitch)
+	doot(pitch)
 	if Global.in_ur && settings.length.value < tmb.get_last_note_off():
 		settings.length.value = max(2,ceilf(tmb.get_last_note_off()))
 	if ur_type == UR_NONE: add_child(note) # Dew: We don't want to re-add the child to the parent if the data was only changed via drag; it's still on-screen.
 	else: return
 	note.grab_focus()
+	note._set_handle_tooltips()
 
 # move to ???
 func continuous_note_overlaps(time:float, length:float, exclude : Array = []) -> bool:
@@ -421,7 +423,7 @@ func _draw():
 		draw_polyline(play_symbol, Color.ORANGE_RED,0.5,true)
 
 
-func count_onscreen_notes() -> int:
+func count_onscreen_notes() -> int: # currently unused
 	var accum := 0
 	for child in get_children():
 		if (child is Note && child.is_in_view): accum += 1
@@ -440,8 +442,7 @@ func update_playhead(event):
 				settings.playhead_pos = bar
 			else:
 				mouse_default_cursor_shape = CURSOR_ARROW
-	elif event is InputEventMouseMotion:
-		queue_redraw()
+	elif event is InputEventMouseMotion: queue_redraw()
 	# Forward the input event to the handle here otherwise the user will
 	# need to re-click to move the playhead further.
 	var mouse_pos = %PlayheadHandle.get_local_mouse_position()
@@ -515,12 +516,15 @@ func _notification(what):
 			_on_scroll_change()
 
 
-func _on_doot_toggle_toggled(toggle): doot_enabled = toggle
+func _on_doot_toggle_toggled(toggle:bool): doot_enabled = toggle
 
-func _on_show_targets_toggled(toggle):
-	draw_targets = toggle
+func _on_show_targets_toggled(_toggle:bool):
 	for note in get_children(): note.queue_redraw()
 
 func _on_mouse_exited():
 	show_preview = false
 	queue_redraw()
+
+
+func _on_note_tooltips_toggled(_toggle:bool) -> void:
+	for note in get_children(): if note is Note: note._set_handle_tooltips()

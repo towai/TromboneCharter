@@ -39,9 +39,9 @@ func _gui_input(event):
 				Input.CURSOR_POINTING_HAND, Vector2(9, 3))
 		dragging = event.pressed
 		if event.pressed && self == %PlayheadHandle: chart.show_preview = false 
-		if event.double_click: emit_signal("double_clicked",bar) # unused?
+		if event.double_click: double_clicked.emit(bar) # unused?
 	elif event is InputEventMouseMotion && dragging:
 		set_bar(bar)
 
 
-func set_bar(bar:float): emit_signal("bar_changed",bar,self)
+func set_bar(bar:float): bar_changed.emit(bar,self)

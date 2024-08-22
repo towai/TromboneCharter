@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://cb2hl2rctchfk"]
+[gd_scene load_steps=5 format=3 uid="uid://cb2hl2rctchfk"]
 
 [ext_resource type="Script" path="res://bind_edit.gd" id="1_xs5vh"]
 
@@ -21,6 +21,19 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 bg_color = Color(0.101961, 0.101961, 0.101961, 0)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0olgu"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -56,7 +69,9 @@ custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 10
 theme_override_colors/font_disabled_color = Color(1, 1, 1, 0.941176)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/disabled = SubResource("StyleBoxFlat_t7bmh")
+theme_override_styles/normal = SubResource("StyleBoxFlat_0olgu")
 
 [connection signal="pressed" from="HBC/VBC/Button" to="." method="_on_button_pressed"]

@@ -24,10 +24,10 @@ func _on_key_up(): player.stop()
 
 func _on_key_mouseover(key:int):
 	current_key = key
-	emit_signal("redraw_board")
+	redraw_board.emit()
 func _on_key_mouse_exit(key:int):
 	if current_key != key:
 		print("Mouse exited %d but only after entering %d -- do nothing" % [key, current_key])
 		return
 	current_key = 69
-	emit_signal("redraw_board")
+	redraw_board.emit()

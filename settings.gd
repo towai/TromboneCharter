@@ -1,20 +1,23 @@
 class_name Settings
 extends PanelContainer
+# this should really be named something like EditDash, and have a Settings class
+# separately that knows about things from this and the new OptsDialog
+@onready var opts_dialog : EditorOpts = %EditorOpts
 
 var tmb : TMBInfo:
 	get: return Global.working_tmb
 	set(_v): assert(false,"I don't own that!")
-@onready var title		= %SongInfo.get_node("Title")
+@onready var title      = %SongInfo.get_node("Title")
 @onready var short_name = %SongInfo.get_node("ShortTitle")
-@onready var author 	= %SongInfo.get_node("Author")
-@onready var genre		= %SongInfo.get_node("Genre")
+@onready var author     = %SongInfo.get_node("Author")
+@onready var genre      = %SongInfo.get_node("Genre")
 @onready var track_ref  = %SongInfo.get_node("TrackRef")
-@onready var desc		= %SongInfo.get_node("Description")
+@onready var desc       = %SongInfo.get_node("Description")
 @onready var length  :NumField= %SongInfo2.get_node("Length")
-@onready var tempo	 :NumField= %SongInfo2.get_node("Tempo")
+@onready var tempo   :NumField= %SongInfo2.get_node("Tempo")
 @onready var timesig :NumField= %SongInfo2.get_node("TimeSig")
-@onready var year	 :NumField= %SongInfo2.get_node("Year")
-@onready var diff	 :NumField= %SongInfo2.get_node("Diff")
+@onready var year    :NumField= %SongInfo2.get_node("Year")
+@onready var diff    :NumField= %SongInfo2.get_node("Diff")
 @onready var notespc :NumField= %SongInfo2.get_node("NoteSpacing")
 var tween : Tween
 
@@ -36,8 +39,7 @@ var propagate_slide_changes : bool:
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
-	set(value):
-		%UseColors.button_pressed = value
+	set(value): %UseColors.button_pressed = value
 var start_color : Color:
 	get: return %StartColor.color
 	set(value): %StartColor.color = value
@@ -57,6 +59,8 @@ var playhead_pos : float:
 	get: return %PlayheadPos.value
 	set(with):  %PlayheadPos.value = with
 @onready var sect_start_handle = %SectStartHandle
+var note_tooltips : bool:
+	get: return %NoteTooltips.button_pressed
 
 
 var pitch_snap : int:

@@ -94,7 +94,7 @@ func _notification(what):
 
 
 func _on_description_text_changed(): tmb.description = %Description.text
-func _on_refresh_button_pressed(): emit_signal("chart_loaded")
+func _on_refresh_button_pressed(): chart_loaded.emit()
 func _on_help_button_pressed(): show_popup($Instructions)
 func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
 
@@ -119,7 +119,7 @@ func _on_new_chart_confirmed():
 	%TrackPlayer.stream = null
 	print("new tmb")
 	Global.clear_future_edits(true)
-	emit_signal("chart_loaded")
+	chart_loaded.emit()
 	%Chart.chart_updated.emit()
 
 
@@ -132,7 +132,7 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
 	%TrackPlayer.stream = null
-	emit_signal("chart_loaded")
+	chart_loaded.emit()
 	var err = try_to_load_stream(dir)
 	if err: print("No stream loaded -- %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
@@ -253,5 +253,5 @@ func _on_diff_calc_win_close_requested(): $DiffCalc.visible = false
 func _on_diff_ok_button_pressed(): $DiffCalc.visible = false
 
 
-func _on_opts_button_pressed() -> void: show_popup(%OptsDialog,Vector2.ONE*48)
-func _on_opts_dialog_close_requested() -> void: $OptsDialog.visible = false
+func _on_opts_button_pressed() -> void: show_popup(%EditorOpts,Vector2.ONE*48)
+func _on_opts_dialog_close_requested() -> void: %EditorOpts.visible = false

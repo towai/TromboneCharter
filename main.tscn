@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=33 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -35,6 +35,9 @@ bg_color = Color(0.25098, 0.25098, 0.25098, 1)
 border_width_left = 8
 border_width_right = 8
 border_color = Color(0.25098, 0.25098, 0.25098, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_luuyr"]
+font_size = 17
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lyomx"]
 resource_local_to_scene = true
@@ -239,108 +242,124 @@ tab_size = 2
 layout_mode = 2
 text = "OK"
 
-[node name="OptsDialog" type="Window" parent="."]
+[node name="EditorOpts" type="Window" parent="."]
 unique_name_in_owner = true
 auto_translate_mode = 1
 title = "Options"
 position = Vector2i(64, 64)
-size = Vector2i(900, 420)
+size = Vector2i(920, 460)
 visible = false
 wrap_controls = true
 transient = true
-exclusive = true
 unresizable = true
+always_on_top = true
 content_scale_mode = 1
 script = ExtResource("11_vvtum")
 
-[node name="PanelC" type="PanelContainer" parent="OptsDialog"]
+[node name="PanelC" type="PanelContainer" parent="EditorOpts"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginC" type="MarginContainer" parent="OptsDialog/PanelC"]
+[node name="MarginC" type="MarginContainer" parent="EditorOpts/PanelC"]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="HBoxC" type="HBoxContainer" parent="OptsDialog/PanelC/MarginC"]
+[node name="HBoxC" type="HBoxContainer" parent="EditorOpts/PanelC/MarginC"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 8
 
-[node name="BindList" type="VFlowContainer" parent="OptsDialog/PanelC/MarginC/HBoxC"]
+[node name="VBoxC" type="VBoxContainer" parent="EditorOpts/PanelC/MarginC/HBoxC"]
+layout_mode = 2
+
+[node name="ConflictAdvise" type="Label" parent="EditorOpts/PanelC/MarginC/HBoxC/VBoxC"]
+unique_name_in_owner = true
+layout_mode = 2
+text = " "
+label_settings = SubResource("LabelSettings_luuyr")
+horizontal_alignment = 1
+
+[node name="BindList" type="VFlowContainer" parent="EditorOpts/PanelC/MarginC/HBoxC/VBoxC"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="OtherStuff" type="PanelContainer" parent="OptsDialog/PanelC/MarginC/HBoxC"]
-visible = false
+[node name="OtherStuff" type="PanelContainer" parent="EditorOpts/PanelC/MarginC/HBoxC"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_lyomx")
 
-[node name="MarginC" type="MarginContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff"]
+[node name="MarginC" type="MarginContainer" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff"]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxC" type="VBoxContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC"]
+[node name="VBoxC" type="VBoxContainer" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC"]
 layout_mode = 2
 size_flags_horizontal = 10
 
-[node name="Label" type="Label" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="Label" type="Label" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 text = "Key Shortcut Presets"
 label_settings = SubResource("LabelSettings_3qd4f")
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="HBoxContainer" type="HBoxContainer" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 2
 
-[node name="MnemonicBinds" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
+[node name="MnemonicBinds" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
 layout_mode = 2
 text = "Mnemonic"
 
-[node name="ClusterBinds" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
+[node name="ClusterBinds" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
 layout_mode = 2
 text = "Left Hand"
 
-[node name="Label2" type="Label" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="Label2" type="Label" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 text = "Whatever Else"
 label_settings = SubResource("LabelSettings_3qd4f")
 horizontal_alignment = 1
 
-[node name="CheckBox" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="PropagateChanges" type="CheckBox" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "savlaksvlkasdfjasdf"
+button_pressed = true
+text = "Propagate changes in slides"
 
-[node name="CheckBox2" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="NoteTooltips" type="CheckBox" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+unique_name_in_owner = true
 layout_mode = 2
-text = "savlaksvlkasdfjasdf"
+button_pressed = true
+text = "Have notes display pitch and
+timing info on mouseover"
 
-[node name="CheckBox3" type="CheckBox" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="ShowMouseTargets" type="CheckBox" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 0
-text = "savlaksvlkasdfjasdf"
+text = "Outline mouse targets
+"
 
-[node name="OptSaveButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="OptSaveButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 size_flags_vertical = 10
 text = "Save Settings"
 
-[node name="OptRevertButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="OptRevertButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 text = "Revert"
 
-[node name="OptDefaultsButton" type="Button" parent="OptsDialog/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+[node name="OptDefaultsButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 text = "Defaults"
 
@@ -699,18 +718,6 @@ layout_mode = 2
 button_pressed = true
 text = "Doot on pitch change"
 
-[node name="PropagateChanges" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-layout_mode = 2
-button_pressed = true
-text = "Propagate changes in slides"
-
-[node name="ShowMouseTargets" type="CheckBox" parent="Settings/MarginC/HBoxC/EditSettings"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Outline mouse targets
-"
-
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/EditSettings"]
 layout_mode = 2
 
@@ -753,8 +760,8 @@ popup/item_1/id = 1
 
 [node name="PreviewGenLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
+size_flags_vertical = 6
 text = "Generating audio preview..."
 horizontal_alignment = 1
 
@@ -880,7 +887,6 @@ icon = ExtResource("14_8wa4s")
 [node name="LyricsTools" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="ShowLyrics" type="CheckBox" parent="Settings/MarginC/HBoxC/LyricsTools"]
 unique_name_in_owner = true
@@ -966,7 +972,9 @@ text = "toot toot lol"
 [connection signal="size_changed" from="DiffCalc" to="." method="_on_diff_calc_win_size_changed"]
 [connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
-[connection signal="close_requested" from="OptsDialog" to="." method="_on_opts_dialog_close_requested"]
+[connection signal="close_requested" from="EditorOpts" to="." method="_on_opts_dialog_close_requested"]
+[connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/NoteTooltips" to="PianoRoll/ChartView/Chart" method="_on_note_tooltips_toggled"]
+[connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
@@ -986,8 +994,6 @@ text = "toot toot lol"
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/DrawMicrotones" to="PianoRoll/ChartView" method="queue_redraw"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/InsertTapNotes" to="PianoRoll/ChartView" method="queue_redraw"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/DootToggle" to="PianoRoll/ChartView/Chart" method="_on_doot_toggle_toggled"]
-[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/PropagateChanges" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
-[connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/BuildWaveform" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_build_waveform_toggled"]
 [connection signal="toggled" from="Settings/MarginC/HBoxC/EditSettings/HBox/HiResWave" to="PianoRoll/ChartView/Chart/WavePreview" method="_on_hi_res_wave_toggled"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/EditSettings/HBox/FFmpegHelp" to="." method="_on_ffmpeg_help_pressed"]

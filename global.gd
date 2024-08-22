@@ -7,14 +7,23 @@ const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 @onready var version := "%d.%d" % [Engine.get_version_info().major,
 								 Engine.get_version_info().minor]
 # range goes from -13 to 13, b3 to c#5
-const BLACK_KEYS = [
+const NUM_KEYS = 27
+const BLACK_KEYS := [
 	-11, -9, -6,
 	-4, -2,
 	1, 3,
 	6, 8, 10,
 	13
 ]
-const NUM_KEYS = 27
+const KEY_NAMES := [
+	"B3", "C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3",
+	"A4", "A#4", "B4", "C4", "C#4", "D4", "D#4", "E4", "F4", "F#4",
+	"G4", "G#4", "A5", "A#5", "B5", "C5", "C#5",
+]
+func get_key_name(idx:int):
+	if idx < -13 || idx > 13: return "??"
+	return KEY_NAMES[idx + 13]
+
 @onready var working_tmb = TMBInfo.new()
 @onready var ffmpeg_worker = FFmpegWorker.new(self)
 var settings : Settings
@@ -23,9 +32,9 @@ func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
 ###Dew's globals###
-var in_ur := false	#prevents excessive dootage
-var revision = -1 	#unedited chart
-var actions = []	#0 = add, 1 = delete, 2 = dragged, 3 = paste
+var in_ur := false	# prevents excessive dootage
+var revision = -1 	# unedited chart
+var actions = []	# 0 = add, 1 = delete, 2 = dragged, 3 = paste
 enum {
 	ACTION_ADD,
 	ACTION_DELETE,
@@ -33,7 +42,7 @@ enum {
 	ACTION_PASTE,
 	ACTION_NONE = -1,
 }
-var changes = []	#current timeline of past and future revisions in order; see below
+var changes = [] #current timeline of past and future revisions in order; see below
 var revision_format = [
 	"ADD: [*[reference, old bar value]*]",
 	"DEL: [*[reference, old bar value]*]",
@@ -41,7 +50,7 @@ var revision_format = [
 	"PASTED SET: [*[overwritten_reference_1(, overwritten_reference_n)]*, *[pasted_reference_1(, pasted_reference_n)]*] (array of overwrittens can be empty)"
 ]
 
-var fresh := false  #only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
+var fresh := false # only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
 func clear_future_edits(wipe := false):
 	# input will be Global.revision unless loading a fresh chart (wipe = true), in which case argument passed is -1.
 	# remember that Global.revision is negative-one indexed, where -1 is a blank array of changes.
@@ -51,11 +60,11 @@ func clear_future_edits(wipe := false):
 		changes = changes.slice(0,revision+1)
 	return
 
-var clearing_notes := false #Set to true during the load of a new chart, wherein the notes of the previous chart, if any, are discarded.
-var pasting := false #Set to true during the pasting of a copied selection, during which all created note refs are concatenated into p_sel.
-var copy_data : Array #Stores the latest copied note data to insert into the chart via chart.add_note(...) on paste.
-var pasted_selection : Array #Container for pasted-note refs, inserted into Global.changes on paste.
-var overwritten_selection : Array #Container for paste-overwritten note refs, inserted into Global.changes when pasted.
+var clearing_notes := false # Set to true during the load of a new chart, wherein the notes of the previous chart, if any, are discarded.
+var pasting := false # Set to true during the pasting of a copied selection, during which all created note refs are concatenated into p_sel.
+var copy_data : Array # Stores the latest copied note data to insert into the chart via chart.add_note(...) on paste.
+var pasted_selection : Array # Container for pasted-note refs, inserted into Global.changes on paste.
+var overwritten_selection : Array # Container for paste-overwritten note refs, inserted into Global.changes when pasted.
 
 var save_point := -1
 ###Dew's globals###
@@ -90,4 +99,4 @@ func _ready(): pass
 func _on_tmb_updated(value,key:String):
 	if key == "title": key = "name" # fix collision
 	working_tmb.set(key,value)
-	emit_signal("tmb_updated")
+	tmb_updated.emit()
