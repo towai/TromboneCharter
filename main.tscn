@@ -759,6 +759,7 @@ popup/item_1/id = 1
 
 [node name="PreviewGenLabel" type="Label" parent="Settings/MarginC/HBoxC/EditSettings"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 6
 text = "Generating audio preview..."
