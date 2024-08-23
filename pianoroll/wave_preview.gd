@@ -127,18 +127,20 @@ func calculate_width():
 	scale.x = max(scalefactor,0.001)
 
 func _on_preview_type_item_selected(_index:int) -> void:
-	if %BuildWaveform.button_pressed:
-		build_wave_preview()
+	if SaveLoad.loading: return
+	
+	if %BuildWaveform.button_pressed: build_wave_preview()
 
 func _on_build_waveform_toggled(toggled_on: bool) -> void:
-	if toggled_on:
-		build_wave_preview()
-	else:
-		clear_wave_preview()
+	if SaveLoad.loading: return
+	
+	if toggled_on: build_wave_preview()
+	else: clear_wave_preview()
 
 func _on_hi_res_wave_toggled(_toggled_on:bool) -> void:
-	if %BuildWaveform.button_pressed:
-		build_wave_preview()
+	if SaveLoad.loading: return
+	
+	if %BuildWaveform.button_pressed: build_wave_preview()
 
 func _process(_delta): pass
 func _draw(): pass

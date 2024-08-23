@@ -47,6 +47,9 @@ func _ready():
 		return
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir") if !err else "."
 	
+	var errs = saveload.try_load_cfg_values()
+	for e in errs: print(error_string(e))
+	
 	_on_new_chart_confirmed()
 
 
@@ -147,7 +150,7 @@ func do_save(bypass_dialog:=false):
 
 
 func _on_save_dialog_file_selected(path:String) -> void:
-	if OS.get_name() == "Windows": saveload.validate_win_path(path)
+	if OS.get_name() == "Windows": path = saveload.validate_win_path(path)
 
 	var err = saveload.save_tmb_to_file(path)
 	if err == OK:
@@ -166,6 +169,7 @@ func _on_save_dialog_file_selected(path:String) -> void:
 	err = try_to_load_stream(dir)
 	if err: print("No stream loaded — %s" % error_string(err))
 	if %BuildWaveform.button_pressed: %WavePreview.build_wave_preview()
+	Global.save_point = Global.revision
 	settings.update_save_button()
 
 #region AudioLoading

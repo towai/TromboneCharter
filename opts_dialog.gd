@@ -78,7 +78,8 @@ static func get_key_as_text(event:InputEventKey) -> String:
 	return keycode.replace("+"," + ")
 
 
-func _ready() -> void: 
+func _ready() -> void:
+	await get_tree().process_frame # give cfg the chance to load first
 	for action in InputMap.get_actions():
 		if action in builtin_bindings: continue
 		keybinds.append(KeyBind.new(action))

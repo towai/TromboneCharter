@@ -36,6 +36,8 @@ var current_view : int = VIEW_CHART_INFO
 var zoom := 1.0
 var propagate_slide_changes : bool:
 	get: return %PropagateChanges.button_pressed != Input.is_action_pressed("hold_slide_prop")
+	set(value): %PropagateChanges.button_pressed = value
+
 
 var use_custom_colors : bool:
 	get: return %UseColors.button_pressed
@@ -61,17 +63,20 @@ var playhead_pos : float:
 @onready var sect_start_handle = %SectStartHandle
 var note_tooltips : bool:
 	get: return %NoteTooltips.button_pressed
+	set(value): %NoteTooltips.button_pressed = value
 
 
 var pitch_snap : int:
 	get: return %PitchSnap.value
 var snap_pitch : bool:
-	get: return %PitchSnapChk.button_pressed
+	get: return %PitchSnapChk.button_pressed != Input.is_action_pressed("hold_snap_pitch")
+	set(value): %PitchSnapChk.button_pressed = value
 
 var timing_snap : int:
 	get: return %TimingSnap.value
 var snap_time : bool:
-	get: return %TimeSnapChk.button_pressed
+	get: return %TimeSnapChk.button_pressed != Input.is_action_pressed("hold_snap_time")
+	set(value): %TimeSnapChk.button_pressed = value
 
 var tap_notes : bool:
 	get: return %InsertTapNotes.button_pressed || Input.is_action_pressed("hold_insert_taps")

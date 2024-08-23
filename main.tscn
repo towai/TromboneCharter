@@ -975,6 +975,7 @@ text = "toot toot lol"
 [connection signal="close_requested" from="EditorOpts" to="." method="_on_opts_dialog_close_requested"]
 [connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/NoteTooltips" to="PianoRoll/ChartView/Chart" method="_on_note_tooltips_toggled"]
 [connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
+[connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/OptSaveButton" to="SaveLoad" method="try_cfg_save"]
 [connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
