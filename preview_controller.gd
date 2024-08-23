@@ -1,6 +1,7 @@
 extends Node
 
 
+const TAP_NOTE_TIME := 0.1
 @onready var chart : Control = %Chart
 @onready var settings : Settings = %Settings
 @onready var player : AudioStreamPlayer = %TrombPlayer
@@ -9,6 +10,10 @@ extends Node
 var is_playing : bool = false
 var song_position : float = -1.0
 var tmb : TMBInfo
+
+var force_note := false
+var forced_note : float = 0.0
+
 
 
 func _ready(): pass
