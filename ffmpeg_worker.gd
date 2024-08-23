@@ -1,14 +1,12 @@
 class_name FFmpegWorker
 extends Object
 
-var owner : Node # TODO i think this field is completely pointless, verify
 var ffmpeg_exists := false
 #signal ffmpeg_checked(what:bool)
 var ffmpeg_path := "ffmpeg"
 
 
-func _init(caller:Node):
-	owner = caller
+func _init():
 	ffmpeg_exists = does_ffmpeg_exist()
 
 

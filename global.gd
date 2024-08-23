@@ -1,6 +1,6 @@
 extends Node
 @warning_ignore("unused_signal")
-signal tmb_updated
+signal tmb_updated # TODO change to meta_updated and choose between that and Chart.chart_updated
 const SEMITONE := 13.75
 const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 # mainly significant for updates to Ogg loading
@@ -25,7 +25,7 @@ func get_key_name(idx:int):
 	return KEY_NAMES[idx + 13]
 
 @onready var working_tmb = TMBInfo.new()
-@onready var ffmpeg_worker = FFmpegWorker.new(self)
+@onready var ffmpeg_worker = FFmpegWorker.new()
 var settings : Settings
 func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
