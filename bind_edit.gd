@@ -99,11 +99,11 @@ func _input(event: InputEvent) -> void:
 	keyevent.pressed = true
 	match bind.keytype: # keep the events clean
 		KeyBind.KEY_PHYSICAL:
-			keyevent.keycode = 0
-			keyevent.unicode = 0
+			keyevent.keycode = KEY_NONE
+			keyevent.unicode = KEY_NONE
 		KeyBind.KEY_UNICODE:
-			keyevent.keycode = 0
-			keyevent.physical_keycode = 0
+			keyevent.keycode = KEY_NONE
+			keyevent.physical_keycode = KEY_NONE
 		KeyBind.SECRET_THIRD_THING: assert(false,"we don't use this keytype, something went wrong")
 	if bind.events.is_empty(): bind.events.append(keyevent)
 	else: bind.remap(keyevent)

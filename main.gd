@@ -245,10 +245,8 @@ func _on_rich_text_label_meta_clicked(meta):
 	else: print("meta clicked and idk what to do, here's the data: %s" % data)
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
-func _on_diff_calc_about_to_popup():
-	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
-func _on_diff_calc_win_size_changed():
-	$DiffCalc/PanelContainer.set_size($DiffCalc.size)
+func _on_diff_calc_about_to_popup(): $DiffCalc/PanelContainer.set_size($DiffCalc.size)
+func _on_diff_calc_win_size_changed(): $DiffCalc/PanelContainer.set_size($DiffCalc.size)
 func _on_diff_calc_win_close_requested(): $DiffCalc.visible = false
 func _on_diff_ok_button_pressed(): $DiffCalc.visible = false
 

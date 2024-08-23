@@ -265,6 +265,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	var note : Note
 	if ur_type == UR_NONE: note = note_scn.instantiate()
 	else:         note = stuffed_note # Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
+	
 	note.bar = bar
 	note.length = length
 	note.pitch_start = pitch
@@ -272,6 +273,7 @@ func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta
 	note.position.x = bar_to_x(bar)
 	note.position.y = pitch_to_height(pitch)
 	note.dragging = Note.DRAG_INITIAL if start_drag else Note.DRAG_NONE
+	
 	doot(pitch)
 	if Global.in_ur && settings.length.value < tmb.get_last_note_off():
 		settings.length.value = max(2,ceilf(tmb.get_last_note_off()))
@@ -524,7 +526,6 @@ func _on_show_targets_toggled(_toggle:bool):
 func _on_mouse_exited():
 	show_preview = false
 	queue_redraw()
-
 
 func _on_note_tooltips_toggled(_toggle:bool) -> void:
 	for note in get_children(): if note is Note: note._set_handle_tooltips()

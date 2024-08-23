@@ -24,10 +24,6 @@ const builtin_bindings : PackedStringArray = [ "ui_accept", "ui_select", "ui_can
 "ui_graph_duplicate", "ui_graph_delete", "ui_filedialog_up_one_level", "ui_filedialog_refresh",
 "ui_filedialog_show_hidden", "ui_swap_input_direction", ]
 
-#const holds : PackedStringArray = [ # is this necessary or can we get away with starts_with("hold")
-	#"hold_drag_playhead", "hold_slide_prop", "hold_snap_pitch", "hold_snap_time",
-	#"hold_insert_taps",
-#]
 const special : PackedStringArray = [ # don't allow rebinding these shortcuts
 	"save_chart", "save_chart_as", "new_chart", "load_chart"
 ]

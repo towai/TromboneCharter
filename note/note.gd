@@ -326,9 +326,8 @@ func update_handle_visibility():
 	var prev_note = touching_notes.get(START_IS_TOUCHING)
 	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
-	if ((prev_note != null && bar != prev_note.end)
-	|| (next_note != null && end != next_note.bar)):
-		update_touching_notes()
+	if ( (prev_note != null && bar != prev_note.end)
+	|| (next_note != null && end != next_note.bar) ): update_touching_notes()
 	
 	if !should_show_bar_handle:
 		bar_handle.size.x = BARHANDLE_SIZE.x / 2

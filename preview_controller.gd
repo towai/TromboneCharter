@@ -56,16 +56,26 @@ func _do_preview():
 		last_position = song_position
 		
 		var note : Array = _find_note_overlapping_bar(song_position)
-		if note.is_empty():
+		if note.is_empty() && !force_note:
 			player.stop()
 			await(get_tree().process_frame)
 			continue
+		elif !note.is_empty() && force_note && (note[TMBInfo.NOTE_PITCH_START] != forced_note):
+			force_note = false
+			player.stop()
+		elif !force_note && Note.array_is_tap(note):
+			forced_note = note[TMBInfo.NOTE_PITCH_START]
+			force_note = true
+			get_tree().create_timer(TAP_NOTE_TIME).timeout.connect(_end_force_note)
 		
-		var pitch = Global.pitch_to_scale(note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE)
-		var end_pitch = note[TMBInfo.NOTE_PITCH_START] + note[TMBInfo.NOTE_PITCH_DELTA]
+		var pitch : float = Global.pitch_to_scale(forced_note / Global.SEMITONE) if force_note \
+				else Global.pitch_to_scale(note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE)
+		var end_pitch : float = -1 if force_note \
+				else note[TMBInfo.NOTE_PITCH_START] + note[TMBInfo.NOTE_PITCH_DELTA]
 		end_pitch = Global.pitch_to_scale(end_pitch / Global.SEMITONE)
 		
-		var pos_in_note = (song_position - note[TMBInfo.NOTE_BAR]) / note[TMBInfo.NOTE_LENGTH]
+		var pos_in_note = 0 if force_note \
+				else (song_position - note[TMBInfo.NOTE_BAR]) / note[TMBInfo.NOTE_LENGTH]
 		# i don't know why, but using smoothstep in setting pitch_scale doesn't work
 		# so we do it out here
 		pos_in_note = Global.smootherstep(0, 1, pos_in_note)
@@ -78,7 +88,6 @@ func _do_preview():
 		if !player.playing:
 			player.play()
 			slide_start = note[TMBInfo.NOTE_PITCH_START] / Global.SEMITONE
-#			print(slide_start)
 		
 		_previous_time = time
 		await(get_tree().process_frame)
@@ -95,7 +104,7 @@ func _do_preview():
 	song_position = -1.0
 	chart.queue_redraw()
 
-
+# TODO smarter handling of this: get a reference so we can extend taps more properly
 func _find_note_overlapping_bar(time:float):
 	for note in tmb.notes:
 		# we sort the array by note-on every time we make an edit, so we can break early
@@ -112,3 +121,11 @@ func _find_matching_by_note_on(note_ons:Array[float],time:float):
 		var end_bar = on + tmb.notes[i][TMBInfo.NOTE_LENGTH]
 		if time >= on && time <= end_bar: return tmb.notes[i]
 	return []
+
+
+func _end_force_note() -> void: force_note = false
+
+
+func _notification(what: int) -> void:
+	match what:
+		MIDI_MESSAGE_QUARTER_FRAME: pass # need to figure out how to exploit this

@@ -1,6 +1,8 @@
 extends Node
+
+# TODO change to meta_updated and make subscriptions choose between that and Chart.chart_updated
 @warning_ignore("unused_signal")
-signal tmb_updated # TODO change to meta_updated and choose between that and Chart.chart_updated
+signal tmb_updated
 const SEMITONE := 13.75
 const TWELFTH_ROOT_2 : float = pow( 2, (1.0 / 12.0) )
 # mainly significant for updates to Ogg loading

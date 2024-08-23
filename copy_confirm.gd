@@ -17,8 +17,8 @@ func _on_copy_confirmed():
 	if notes.is_empty():
 		print("copy section empy AFTER CONFIRMATION????")
 		return
-	#Dew: save overwritten note data as array of note references by filtering the Note objects by bar
-	Global.overwritten_selection = %Chart.get_children().filter(func(child) : if !(child is Note):
+	# Dew: save overwritten note data as array of note references by filtering the Note objects by bar
+	Global.overwritten_selection = %Chart.get_children().filter(func(child): if child is not Note:
 		return false
 		else: return child.bar >= target && child.bar < target + data.length
 		)
@@ -27,7 +27,7 @@ func _on_copy_confirmed():
 	print("\nTHESE NOTES SHOULD GO AWAY:")
 	for note in Global.overwritten_selection:
 		print(note," @bar: ",note.bar)
-		%Chart.remove_child(note) #simply hides a select note rather than erasing it from the tree
+		%Chart.remove_child(note) # simply hides a select note rather than erasing it from the tree
 	%Chart.clearing_notes = false
 	
 	Global.pasting = true
