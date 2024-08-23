@@ -126,6 +126,10 @@ load_chart={
 ]
 }
 
+[physics]
+
+common/max_physics_steps_per_frame=1
+
 [rendering]
 
 renderer/rendering_method.opengl3="gl_compatibility"

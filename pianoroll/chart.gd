@@ -190,9 +190,14 @@ func redraw_notes():
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
-			child.update_touching_notes()
-			child.update_handle_visibility()
-		else: child.hide()
+			# TODO why were we doing this, notes already update their neighbors on every edit
+			# with this disabled, notes that were created on chart load still have neighbors set
+			# all this seems to have been doing is slamming perf when scrolling huge charts
+			#child.update_touching_notes()
+		else:
+			if !child.visible && child.position.x - (Note.BARHANDLE_SIZE.x/2) >= scroll_end:
+				return # we have reached the end of notes we needed to hide
+			child.hide()
 
 
 func _on_tmb_updated():
@@ -210,7 +215,8 @@ func _do_tmb_update():
 		if note is not Note || note.is_queued_for_deletion():
 			continue
 		note.position.x = note.bar * bar_spacing
-		if !note.touching_notes.has(Note.END_IS_TOUCHING): note.update_slide_idx()
+		# TODO ditto with comment in redraw_notes(), this was causing spikes
+		#if !note.touching_notes.has(Note.END_IS_TOUCHING): note.update_slide_idx()
 	queue_redraw()
 	redraw_notes()
 	_update_queued = false

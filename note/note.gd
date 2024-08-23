@@ -43,9 +43,10 @@ var visual_height : float:
 var is_slide: bool:
 	get: return pitch_delta != 0
 	set(_v): assert(false,"You can't just set that!")
-var is_in_view : bool:
-	get: return position.x + size.x >= chart.scroll_position \
-			&& position.x <= chart.scroll_end
+var is_in_view : bool: # TODO expanding the check to endhandle works but not barhandle. why?
+	# this creates a condition where notes are clickable, but not visible. that's no good
+	get: return position.x + size.x + (ENDHANDLE_SIZE.x/2) >= chart.scroll_position \
+			&& position.x - (BARHANDLE_SIZE.x/2) <= chart.scroll_end
 	set(_v): assert(false,"use Chart.jump_to_note() ya dingus")
 # n.b. a delta of 1e-18 or -1e-17 in a .tmb will round to 0 when parsed in with the JSON parser
 # (see the note in the JSON class's doc) but still show in the game as a note with length. however,
@@ -56,6 +57,9 @@ var is_in_view : bool:
 var is_tap_note: bool:
 	get: return length <= 0.0625 && !is_slide && touching_notes.is_empty()
 	set(_v): assert(false) # maybe we could implement custom logic but probably not worth
+static func array_is_tap(note_arr:Array) -> bool:
+	if note_arr.is_empty(): return false
+	return note_arr[TMBInfo.NOTE_LENGTH] <= 0.0625 && note_arr[TMBInfo.NOTE_PITCH_DELTA] == 0
 var dragging := 0
 enum {
 	DRAG_NONE,
