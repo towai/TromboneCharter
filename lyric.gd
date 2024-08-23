@@ -78,7 +78,7 @@ func _on_line_edit_gui_input(event:InputEvent) -> void:
 					notes.sort_custom(func(a, b): return a.position.x < b.position.x)
 					var next_note : Note
 					for note in notes:
-						if not note is Note: continue
+						if note is not Note: continue
 						if note.bar > bar:
 							next_note = note
 							break

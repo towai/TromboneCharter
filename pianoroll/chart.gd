@@ -186,7 +186,7 @@ func ur_handler():
 
 func redraw_notes():
 	for child in get_children():
-		if !(child is Note): continue
+		if child is not Note: continue
 		if child.is_in_view:
 			child.show()
 			child.resize_handles()
@@ -207,7 +207,7 @@ func _do_tmb_update():
 	%LyricsEditor._update_lyrics()
 	%Settings._update_handles()
 	for note in get_children():
-		if !(note is Note) || note.is_queued_for_deletion():
+		if note is not Note || note.is_queued_for_deletion():
 			continue
 		note.position.x = note.bar * bar_spacing
 		if !note.touching_notes.has(Note.END_IS_TOUCHING): note.update_slide_idx()
@@ -327,7 +327,7 @@ func jump_to_note(note: int, use_tt: bool = false):
 	if not use_tt:
 		children.sort_custom(func(a, b): return a.position.x < b.position.x)
 	for child in children:
-		if !(child is Note): continue
+		if child is not Note: continue
 		count += 1
 		if use_tt and note != child.tt_note_id:
 			continue
@@ -345,7 +345,7 @@ func assign_tt_note_ids():
 	var children = %Chart.get_children()
 	children.sort_custom(func(a, b): return a.position.x < b.position.x)
 	for child in children:
-		if !(child is Note): continue
+		if child is not Note: continue
 		count += 1
 		child.tt_note_id = count
 
