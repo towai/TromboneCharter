@@ -132,4 +132,5 @@ common/max_physics_steps_per_frame=1
 
 [rendering]
 
+textures/vram_compression/import_etc2_astc=true
 renderer/rendering_method.opengl3="gl_compatibility"
