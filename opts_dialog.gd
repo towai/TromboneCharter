@@ -62,10 +62,14 @@ class KeyBind: # TODO EditorOpts probably shouldn't own this
 			key_as_text = events[0].as_text_key_label()
 			keytype = KEY_UNICODE
 		if key_as_text.contains("(Unset)"):
-			keytype = SECRET_THIRD_THING # "Keycode (Latin Equivalent)", only used by builtins
+			if events[0].as_text_keycode().contains("(Unset)"): # unbound, default to physical
+				keytype = KEY_PHYSICAL
+			else: keytype = SECRET_THIRD_THING # "Keycode (Latin Equivalent)", only used by builtins
 		else: keytype = KEY_PHYSICAL
-	func remap(event:InputEventKey):
-		InputMap.action_erase_event(action,events[0])
+	
+	func update_input_map(event:InputEventKey):
+		InputMap.action_erase_events(action)
+		if events.is_empty(): return
 		InputMap.action_add_event(action,event)
 		events[0] = event
 
@@ -75,14 +79,30 @@ static func get_key_as_text(event:InputEventKey) -> String:
 	var keycode := event.as_text_physical_keycode()
 	if keycode.contains("(Unset)"): keycode = event.as_text_key_label()
 	if keycode.contains("(Unset)"): keycode = event.as_text_keycode()
+	if keycode.contains("(Unset)"): return "∅"
 	return keycode.replace("+"," + ")
 
 
 func _ready() -> void:
-	await get_tree().process_frame # give cfg the chance to load first
 	for action in InputMap.get_actions():
 		if action in builtin_bindings: continue
 		keybinds.append(KeyBind.new(action))
+
+func _process(_delta: float) -> void: pass
+
+func _input(_event: InputEvent) -> void: pass
+
+
+func refresh_bind_list() -> void:
+	keybinds.clear()
+	for action in InputMap.get_actions():
+		if action in builtin_bindings: continue
+		keybinds.append(KeyBind.new(action))
+	
+	for child in %BindList.get_children(true):
+		%BindList.remove_child(child)
+		child.queue_free()
+	
 	for i in keybinds.size():
 		var bind : KeyBind = keybinds[i]
 		if bind.keytype == KeyBind.SECRET_THIRD_THING: print(bind.friendly_name)
@@ -93,10 +113,6 @@ func _ready() -> void:
 		else: %BindList.add_child(new_bind_edit)
 		#print(bind.friendly_name,"\t:\t",get_keycode(bind.event))
 	refresh_potential_conflicts()
-
-func _process(_delta: float) -> void: pass
-
-func _input(_event: InputEvent) -> void: pass
 
 
 func has_potential_conflict(caller:BindEdit) -> Array[BindEdit]:

@@ -2,12 +2,10 @@ class_name FFmpegWorker
 extends Object
 
 var ffmpeg_exists := false
-#signal ffmpeg_checked(what:bool)
 var ffmpeg_path := "ffmpeg"
 
 
-func _init():
-	ffmpeg_exists = does_ffmpeg_exist()
+func _init(): ffmpeg_exists = does_ffmpeg_exist()
 
 
 func does_ffmpeg_exist() -> bool:

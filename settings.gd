@@ -50,7 +50,7 @@ var end_color : Color:
 	set(value): %EndColor.color = value
 var default_start_color = Color("#FF3600")
 var default_end_color = Color("#FDCA4B")
-
+# TODO remove magic hidden load-bearing spinboxes
 var section_start : float:
 	get: return %SectionStart.value
 	set(with):  %SectionStart.value = with
@@ -64,7 +64,15 @@ var playhead_pos : float:
 var note_tooltips : bool:
 	get: return %NoteTooltips.button_pressed
 	set(value): %NoteTooltips.button_pressed = value
-
+var return_playhead : bool:
+	get: return %PlaybackEndBehavior.button_pressed
+	set(value): %PlaybackEndBehavior.button_pressed = value
+enum { PASTE_REJECT, PASTE_EXTEND }
+var paste_behavior : int:
+	get: return %PasteBehaviorOption.selected
+	set(value):
+		if !(value == PASTE_REJECT || value == PASTE_EXTEND): assert(false)
+		%PasteBehaviorOption.select(value)
 
 var pitch_snap : int:
 	get: return %PitchSnap.value
@@ -105,6 +113,7 @@ func _ready():
 func _input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey # i want my type hints
 	if key_event == null: return
+	
 	if key_event.is_action_pressed("toggle_slide_prop"):
 		%PropagateChanges.button_pressed = !%PropagateChanges.button_pressed
 	elif key_event.is_action_pressed("toggle_snap_pitch"):
@@ -156,7 +165,7 @@ func _update_view():
 			%EditSettings.hide()
 			%SectionSelection.hide()
 			%ChartInfo.show()
-			%ViewSwitcher.text = "Edit Mode"
+			%ViewSwitcher.text = "Edit View"
 		VIEW_EDIT_SETTINGS:
 			%ChartInfo.hide()
 			%LyricsTools.show()
@@ -169,6 +178,8 @@ func _update_view():
 			assert(false)
 
 
+func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
+# _on_zoom_level_changed is called automatically when reset is pressed
 func _on_zoom_level_changed(value:float):
 	%ZoomLevel.tooltip_text = str(value)
 	var zoom_change = value / zoom
@@ -177,8 +188,6 @@ func _on_zoom_level_changed(value:float):
 	await(get_tree().process_frame)
 	%Chart._on_scroll_change()
 	zoom = value
-# _on_zoom_level_changed is called automatically when reset is pressed
-func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
 
 
 func _update_handles():

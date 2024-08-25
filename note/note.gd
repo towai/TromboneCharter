@@ -45,6 +45,7 @@ var is_slide: bool:
 	set(_v): assert(false,"You can't just set that!")
 var is_in_view : bool: # TODO expanding the check to endhandle works but not barhandle. why?
 	# this creates a condition where notes are clickable, but not visible. that's no good
+	# (not a regression)
 	get: return position.x + size.x + (ENDHANDLE_SIZE.x/2) >= chart.scroll_position \
 			&& position.x - (BARHANDLE_SIZE.x/2) <= chart.scroll_end
 	set(_v): assert(false,"use Chart.jump_to_note() ya dingus")
@@ -176,7 +177,7 @@ func _ready():
 	pitch_handle.size = Vector2.DOWN * TAIL_HEIGHT
 	
 	end_handle.size = ENDHANDLE_SIZE
-	###Dew grabbing the creation of newly pasted notes for the timeline
+	### Dew grabbing the creation of newly pasted notes for the timeline
 	if Global.pasting:
 		Global.pasted_selection.append(self)
 	###
@@ -209,7 +210,7 @@ func _on_handle_input(event, which_handle):
 		MOUSE_BUTTON_LEFT:
 			if !clicking:        # Dew: If this isn't here, the "initial" note data will continue updating itself as we drag/
 				clicking = true  # We need this "initial" data to determine not only whether the note has actually been changed by the user,
-				note_reference = self #see setter
+				note_reference = self # see setter
 				initial_note_data = [note_reference,note_data]
 				note_package = package_neighbors(initial_note_data)
 			dragging = which_handle
@@ -286,20 +287,20 @@ func _end_drag():
 	_set_handle_tooltips()
 
 
-func package_neighbors(self_note) -> Array:				#Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
-	var package = []               						#We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
-	var neighbors = slide_helper.find_touching_notes()	#and then append the note passed by the argument (the note that the user moved).
-	for key in neighbors.keys():   #package_neighbors() can properly log chart- and clipboard-loaded note sets that have been dragged.
-		note_reference = neighbors[key] #see setter
+func package_neighbors(self_note) -> Array: ## Dew: The initial creation of the revision package, taking the argument: [reference,data_array].
+	var package = []                        # We iterate through up to two possible neighboring notes by key (0=next note, 1=prev note),
+	var neighbors = slide_helper.find_touching_notes() # and then append the note passed by the argument (the note that the user moved).
+	for key in neighbors.keys(): # package_neighbors() can properly log chart- and clipboard-loaded note sets that have been dragged.
+		note_reference = neighbors[key] # see setter
 		package.append([note_reference,note_data])
 	package.append(self_note)
-	return package                 #in the format: [[reference_1, data_array_1],[reference_2,data_array_2],...,[reference_n,data_array_n]]
+	return package # in the format: [[reference_1, data_array_1],[reference_2,data_array_2],...,[reference_n,data_array_n]]
 
 
-func remove_note():                #Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
-	Global.clear_future_edits()    #First, check for future, undone edits in the stack that must be overwritten to continue editing...
-	Global.actions.append(Global.ACTION_DELETE) #... allowing us to continue recording our edit history...
-	Global.changes.append([[self,self.bar]])    #... via the note's object reference.
+func remove_note():                # Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
+	Global.clear_future_edits()    # First, check for future, undone edits in the stack that must be overwritten to continue editing...
+	Global.actions.append(Global.ACTION_DELETE) # ... allowing us to continue recording our edit history...
+	Global.changes.append([[self,self.bar]])    # ... via the note's object reference.
 	Global.revision += 1
 	self.bar = -69420
 	chart.remove_child(self)
@@ -322,8 +323,8 @@ func update_touching_notes():
 func receive_slide_propagation(from:int):
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
-	if length <= 0: bar = -69420   #Dew: genuinely vital (thanks twi). We can't remove the child outright, because it still needs to be
-	doot_enabled = true            #referenced as a neighbor of the note which the user dragged over it. Thus, we simply yeet in into the ether.
+	if length <= 0: bar = -69420 # Dew: genuinely vital (thanks twi). We can't remove the child outright, because it still needs to be
+	doot_enabled = true          # referenced as a neighbor of the note which the user dragged over it. Thus, we simply yeet in into the ether.
 
 
 func update_handle_visibility():
@@ -423,7 +424,7 @@ func _draw():
 
 
 func _exit_tree():
-	#bar = -69420.0 Let this be a warning. Whomsoever memes in vain shall themselves be memed til break of script.
+	#bar = -69420.0 # Let this be a warning. Whomsoever memes in vain shall themselves be memed til break of script.
 	if chart.clearing_notes : return
 	print("exiting tree!")
 	update_touching_notes()

@@ -9,6 +9,7 @@ const TAP_NOTE_TIME := 0.1
 @onready var StreamPlayer : AudioStreamPlayer = %TrackPlayer
 var is_playing : bool = false
 var song_position : float = -1.0
+var saved_song_position : float = -1.0
 var tmb : TMBInfo
 
 var force_note := false
@@ -20,23 +21,28 @@ func _ready(): pass
 
 
 func _do_preview():
-	if chart.tmb == null:
-		print("null tmb")
-		return
+	if chart.tmb == null: assert(false,"null tmb") # this should never happen
 	else: tmb = chart.tmb
-	if is_playing:
+	if is_playing: # toggle_playback was pressed to stop playback
 		is_playing = false
 		%PreviewButton.text = "Preview"
+		
+		await get_tree().process_frame
+		if %PlaybackEndBehavior.button_pressed:
+			settings.playhead_pos = saved_song_position
+			%PlayheadHandle.update_pos(saved_song_position)
+		
 		return
 	is_playing = true
 	
 	var bpm : float = tmb.tempo
 	var time : float
-	var _previous_time : float #TODO: add option to toggle returning playhead to previous location
+	var _previous_time : float
 	var last_position : float
 	var initial_time : float = Time.get_ticks_msec() / 1000.0
 	var startpoint_in_stream : float = Global.beat_to_time(settings.playhead_pos)
 	var start_beat : float = settings.playhead_pos
+	saved_song_position = start_beat
 	if settings.section_length:
 		startpoint_in_stream = Global.beat_to_time(settings.section_start)
 		start_beat = settings.section_start
@@ -103,13 +109,13 @@ func _do_preview():
 	StreamPlayer.stop()
 	player.stop()
 
-	if !settings.section_length:
-		settings.playhead_pos = song_position
+	if !settings.section_length: settings.playhead_pos = song_position
 	
 	song_position = -1.0
 	chart.queue_redraw()
 
 # TODO smarter handling of this: get a reference so we can extend taps more properly
+# Current handling means that quick taps on the same note sound like one unbroken note
 func _find_note_overlapping_bar(time:float):
 	for note in tmb.notes:
 		# we sort the array by note-on every time we make an edit, so we can break early
@@ -129,8 +135,3 @@ func _find_matching_by_note_on(note_ons:Array[float],time:float):
 
 
 func _end_force_note() -> void: force_note = false
-
-
-func _notification(what: int) -> void:
-	match what:
-		MIDI_MESSAGE_QUARTER_FRAME: pass # need to figure out how to exploit this

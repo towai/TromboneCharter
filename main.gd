@@ -1,6 +1,9 @@
 extends Control
 
+const DOUBLE_TAP_TIME := 0.25
+var double_tap_queue: Array[InputEventKey] = []
 @onready var cfg = ConfigFile.new()
+var default_cfg : ConfigFile
 @onready var saveload : SaveLoad = $SaveLoad
 @onready var settings : Settings = %Settings
 @onready var save_check : SaveCheck = $SaveCheck
@@ -13,15 +16,13 @@ var tmb : TMBInfo:
 var popup_location : Vector2i:
 	get: return DisplayServer.window_get_position(0) + (Vector2i.ONE * 100)
 
-enum ClipboardType {
-	NOTES
-}
-# TODO move this somewhere else for the love of babi
+enum ClipboardType { NOTES }
 
 func _ready():
 	get_tree().set_auto_accept_quit(false)
 	save_check.confirm_new.connect(_on_new_chart_confirmed)
 	save_check.confirm_load.connect(show_popup.bind($LoadDialog))
+	saveload.generate_default_cfg()
 	
 	DisplayServer.window_set_min_size(Vector2(1280,600))
 	if OS.get_environment("SteamDeck") == "1":
@@ -47,7 +48,7 @@ func _ready():
 		return
 	$LoadDialog.current_dir = cfg.get_value("Config","saved_dir") if !err else "."
 	
-	var errs = saveload.try_load_cfg_values()
+	var errs = saveload.try_load_cfg_values(cfg)
 	for e in errs: print(error_string(e))
 	
 	_on_new_chart_confirmed()
@@ -56,6 +57,7 @@ func _ready():
 func _input(event):
 	event = event as InputEventKey
 	if event == null: return
+	
 	if event.is_action_pressed("save_chart_as",false,true): do_save()
 	if event.is_action_pressed("save_chart"): do_save(true)
 	# If editing text, ignore shortcuts besides Ctrl+(Shift)+S
@@ -75,15 +77,26 @@ func _input(event):
 	if event.is_action_pressed("ui_copy"):  _on_copy()
 	if event.is_action_pressed("ui_paste"): _on_paste()
 	if event.is_action_pressed("toggle_playback"): %PreviewController._do_preview()
-	if event.is_action("select_mode",true) && !Input.get_mouse_button_mask():
-		%Chart.mouse_mode = %Chart.SELECT_MODE
-		$Alert.alert("Switched mouse to Select Mode", Vector2(%ChartView.global_position.x, 10),
-			Alert.LV_SUCCESS)
+	if event.is_action_pressed("edit_mode"): %ShowLyrics.button_pressed = false
+	if event.is_action_pressed("lyrics_mode"): %ShowLyrics.button_pressed = true
+	%Chart.mouse_mode = %Chart.SELECT_MODE if Input.is_action_pressed("hold_drag_selection") \
+			else %Chart.EDIT_MODE
+	if event.is_action_pressed("hold_drag_selection") && is_double_tap(event):
+		settings.section_length = 0
+		settings.section_start = 0
 	
-	if event.is_action("edit_mode",true) && !Input.get_mouse_button_mask():
-		%Chart.mouse_mode = %Chart.EDIT_MODE
-		$Alert.alert("Switched mouse to Edit Mode", Vector2(%ChartView.global_position.x, 10),
-			Alert.LV_SUCCESS)
+	if event.is_pressed() && !event.is_echo():
+		double_tap_queue.append(event)
+		get_tree().create_timer(DOUBLE_TAP_TIME).timeout.connect(
+				func():
+					double_tap_queue.erase(event)
+		)
+
+
+func is_double_tap(event:InputEvent) -> bool:
+	for remembered_event in double_tap_queue:
+		if event.is_match(remembered_event): return true
+	return false
 
 
 func _notification(what):
@@ -231,7 +244,7 @@ func _on_paste():
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
 					Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
-			Global.copy_data = data.notes #Dew: grab copied notes for use in copy_confirm
+			Global.copy_data = data.notes # Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
 
 			$CopyConfirm.set_values(copy_target, data)
@@ -257,3 +270,14 @@ func _on_diff_ok_button_pressed(): $DiffCalc.visible = false
 
 func _on_opts_button_pressed() -> void: show_popup(%EditorOpts,Vector2.ONE*48)
 func _on_opts_dialog_close_requested() -> void: %EditorOpts.visible = false
+
+func _on_opt_defaults_button_pressed() -> void:
+	print("load defaults: ")
+	for e in saveload.try_load_cfg_values(default_cfg): print(error_string(e))
+func _on_opt_revert_button_pressed() -> void:
+	cfg.clear()
+	var err = cfg.load("user://config.cfg")
+	if err:
+		print("Couldn't load config: %s" % error_string(err))
+		return
+	saveload.try_load_cfg_values(cfg)

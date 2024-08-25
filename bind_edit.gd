@@ -9,7 +9,7 @@ var bind: KeyBind
 var can_rebind : bool:
 	get: return bind.rebindable && !(bind.action.begins_with("ui"))
 	set(_v): assert(false)
-# we have a vbox to display multi key bindings,
+# we have a vbox to display multi-key bindings,
 # but any multi-key bindings are builtin ones we don't need or want to rebind
 @onready var button : Button = $HBC/VBC/Button
 @onready var label : Label = $HBC/Label
@@ -106,6 +106,6 @@ func _input(event: InputEvent) -> void:
 			keyevent.physical_keycode = KEY_NONE
 		KeyBind.SECRET_THIRD_THING: assert(false,"we don't use this keytype, something went wrong")
 	if bind.events.is_empty(): bind.events.append(keyevent)
-	else: bind.remap(keyevent)
+	else: bind.update_input_map(keyevent)
 	rebinding = false
 	rebind_signal.emit()

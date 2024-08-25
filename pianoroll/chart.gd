@@ -23,7 +23,6 @@ class ViewBounds:	# effectively a vector2 with nicer code completion
 		self.right = right_bound
 
 var bar_spacing : float = 1.0
-#	get: return tmb.savednotespacing * %ZoomLevel.value
 var middle_c_y : float:
 	get: return (key_height * 13.0) + (key_height / 2.0)
 var key_height : float:
@@ -59,7 +58,7 @@ enum {
 var mouse_mode : int = EDIT_MODE
 var show_preview : bool = false
 var playhead_preview : float = 0.0
-###Dew variables###
+### Dew variables ###
 var rev : int   # the "act" setter determines which revision is to be activated by adding 1 if redoing.
 				# Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
 				# Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
@@ -79,7 +78,7 @@ enum { # enumerates the three indices of a DRAGGED note set: [note_reference, pr
 	OLD,
 	NEW
 }
-###Dew variables###
+### Dew variables ###
 
 var should_doot: bool:
 	get: return doot_enabled && !Global.in_ur && !Global.pasting && !%PreviewController.is_playing
@@ -109,7 +108,7 @@ func _on_scroll_change():
 	redraw_notes()
 	%WavePreview.calculate_width()
 
-##Dew u/r shortcut inputs
+## Dew u/r shortcut inputs
 func _shortcut_input(_event):
 	if Input.is_action_just_pressed("ui_undo",true):
 		print("\n",Global.revision,": undo pressed...","\n")
@@ -129,7 +128,7 @@ func _shortcut_input(_event):
 			Global.revision += 1
 			ur_handler()
 
-##Dew's favorite child :)
+## Dew's favorite child :)
 func ur_handler():
 	Global.in_ur = true
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
@@ -155,7 +154,7 @@ func ur_handler():
 					print("UR dragging (undo)!")
 					stuffed_note = note[REF]
 					add_note(false, note[OLD][0], note[OLD][1], note[OLD][2], note[OLD][3])
-			else:		#redo
+			else: # redo
 				for note in Global.changes[rev]:
 					print("UR dragging (redo)!")
 					stuffed_note = note[REF]
@@ -506,7 +505,7 @@ func _gui_input(event):
 				else: new_note_pos.y = clamp(to_unsnapped(event.position).y,
 						Global.SEMITONE * -13, Global.SEMITONE * 13)
 				add_note(true, new_note_pos.x, note_length, new_note_pos.y)
-				###Dew note add check###
+				### Dew note add check ###
 				Global.clear_future_edits()
 				Global.actions.append(0) # Record edit as an added note. The note's script will append the *self* reference to Global.changes.
 				Global.revision += 1

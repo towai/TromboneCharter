@@ -96,7 +96,7 @@ func clear_section(start:float,length:float):
 
 func load_from_file(filename:String) -> int:
 	var f = FileAccess.open(filename,FileAccess.READ)
-	var err = FileAccess.get_open_error() #no need to act on f; function already applies to latest open() call
+	var err = FileAccess.get_open_error()
 	if err:
 		print(error_string(err))
 		return LoadResult.FILE_ACCESS_ERROR

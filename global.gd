@@ -33,7 +33,7 @@ func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)
 
-###Dew's globals###
+### Dew's globals ###
 var in_ur := false	# prevents excessive dootage
 var revision = -1 	# unedited chart
 var actions = []	# 0 = add, 1 = delete, 2 = dragged, 3 = paste
@@ -44,7 +44,7 @@ enum {
 	ACTION_PASTE,
 	ACTION_NONE = -1,
 }
-var changes = [] #current timeline of past and future revisions in order; see below
+var changes = [] # current timeline of past and future revisions in order; see below
 var revision_format = [
 	"ADD: [*[reference, old bar value]*]",
 	"DEL: [*[reference, old bar value]*]",
@@ -69,7 +69,7 @@ var pasted_selection : Array # Container for pasted-note refs, inserted into Glo
 var overwritten_selection : Array # Container for paste-overwritten note refs, inserted into Global.changes when pasted.
 
 var save_point := -1
-###Dew's globals###
+### Dew's globals ###
 
 # shamelessly copied from wikiped https://en.wikipedia.org/wiki/Smoothstep#Variations
 func smootherstep(from:float, to:float, x:float) -> float:

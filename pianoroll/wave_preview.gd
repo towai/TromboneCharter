@@ -1,7 +1,5 @@
 extends Control
 
-#TODO: remove w_image
-@onready var w_image := Image.new()
 @onready var chart : Node = get_parent()
 var cfg : ConfigFile:
 	get: return get_tree().get_current_scene().cfg
@@ -103,10 +101,6 @@ func do_ffmpeg_convert(dir:String,idx:int=0,type:int=0) -> Image:
 		print("tried to run ffmpeg, got error code %d | %s" % [err,error_string(err)])
 		return null
 	
-#	err = w_image.load(wavechunkpath)
-#	if err:
-#		print(error_string(err))
-#		return
 	var img = Image.load_from_file(wavechunkpath)
 	DirAccess.remove_absolute(wavechunkpath)
 	return img
@@ -120,8 +114,6 @@ func calculate_width():
 		return
 	
 	var true_width : float = (song_length * chart.bar_spacing) / (60.0 / bpm)
-#	if wave_is_hires: true_width /= 2
-	
 	var scalefactor : float = (true_width / width)
 	
 	scale.x = max(scalefactor,0.001)

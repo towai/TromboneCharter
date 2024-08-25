@@ -41,7 +41,7 @@ corner_radius_bottom_left = 3
 corner_detail = 5
 
 [node name="BindEdit" type="PanelContainer"]
-custom_minimum_size = Vector2(360, 0)
+custom_minimum_size = Vector2(330, 0)
 offset_right = 400.0
 offset_bottom = 23.0
 size_flags_horizontal = 3

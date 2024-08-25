@@ -4,17 +4,49 @@ extends Node
 const bindables : PackedStringArray = [
 	"toggle_playback", "toggle_insert_taps", "toggle_slide_prop", "toggle_snap_pitch",
 	"toggle_snap_time", "hold_drag_playhead", "hold_insert_taps", "hold_slide_prop",
-	"hold_snap_pitch", "hold_snap_time", "edit_mode", "select_mode", "lyrics_mode",
+	"hold_snap_pitch", "hold_snap_time", "hold_drag_selection", "edit_mode", "lyrics_mode",
+]
+const mnemonic_binds : PackedInt64Array = [
+	KEY_SPACE, KEY_NONE, KEY_NONE, KEY_P,
+	KEY_T, KEY_SHIFT, KEY_ALT, KEY_ALT,
+	KEY_SHIFT, KEY_CTRL, KEY_S, KEY_E, KEY_L,
+]
+const cluster_binds : PackedInt64Array = [ # negative indicates Shift modifier
+	KEY_SPACE, KEY_NONE, KEY_NONE, -KEY_F,
+	-KEY_D, KEY_SHIFT, KEY_A, KEY_A,
+	KEY_F, KEY_D, KEY_S, KEY_E, KEY_R,
 ]
 @onready var main : Node = get_parent():
 	set(_v): assert(false,"We're inseparable!")
-var cfg:ConfigFile:
+var cfg : ConfigFile:
 	get: return main.cfg
 	set(_v): assert(false,"I don't own that!")
-var tmb:TMBInfo:
+var tmb : TMBInfo:
 	get: return main.tmb
 	set(_v): assert(false,"I don't own that!")
+var settings : Settings:
+	get: return main.settings
+	set(_v): assert(false,"I don't own that!")
+const settings_properties := [ "propagate_slide_changes","note_tooltips","paste_behavior",
+	"return_playhead" ]
 static var loading := false
+var default_cfg : ConfigFile:
+	get: return main.default_cfg
+	set(value): main.default_cfg = value
+
+
+func generate_default_cfg():
+	default_cfg = ConfigFile.new()
+	for action in bindables:
+		var events = InputMap.action_get_events(action)
+		default_cfg.set_value("Binds",action,"" if events.is_empty() else events[0])
+	# use the untouched scene tree for other settings
+	default_cfg.set_value("Config","build_waveform",%BuildWaveform.button_pressed)
+	default_cfg.set_value("Config","hi_res_wave",   %HiResWave.button_pressed)
+	default_cfg.set_value("Config","preview_type",  %PreviewType.selected)
+	for setting in settings_properties:
+		default_cfg.set_value("Config",setting,settings.get(setting))
+
 
 # TODO  - ton of functions called from main that we should own instead
 #		- this should own chart_loaded signal but i'm not fixing it right now!
@@ -27,7 +59,7 @@ func on_load_dialog_file_selected(path:String):
 		%ErrorPopup.dialog_text = "TMB load failed.\n%s" % TMBInfo.load_result_string(err)
 		main.show_popup(%ErrorPopup)
 		return dir
-	###Dew reset u/r variables
+	### Dew reset u/r variables
 	Global.clear_future_edits(true)
 	###
 	%SaveDialog.current_dir = dir
@@ -74,7 +106,7 @@ func save_tmb_to_file(filename : String) -> int:
 func try_cfg_save():
 	print("try cfg save")
 	if !cfg.has_section("Config"): return
-	# start afresh in case of bind name change or deletion
+	# start afresh in case of bind name change or deletion or reorder
 	if cfg.has_section("Binds"): cfg.erase_section("Binds")
 	
 	for child in %BindList.get_children():
@@ -85,13 +117,10 @@ func try_cfg_save():
 		if !bedit.bind.events.is_empty():
 			cfg.set_value("Binds",bedit.bind.action, bedit.bind.events[0])
 		else: cfg.set_value("Binds",bedit.bind.action, "") # make sure it's there
-	#"snap_pitch","snap_time","propagate_slide_changes","note_tooltips"
-	cfg.set_value("Config","propagate_slide_changes",%PropagateChanges.button_pressed)
-	cfg.set_value("Config","note_tooltips", %NoteTooltips.button_pressed)
-	cfg.set_value("Config","build_waveform",%BuildWaveform.button_pressed)
 	cfg.set_value("Config","hi_res_wave",   %HiResWave.button_pressed)
 	cfg.set_value("Config","preview_type",  %PreviewType.selected)
 	cfg.set_value("Config","draw_microtones",  %DrawMicrotones.button_pressed)
+	for setting in settings_properties: cfg.set_value("Config",setting,settings.get(setting))
 	
 	var err = cfg.save("user://config.cfg")
 	if err:
@@ -99,37 +128,64 @@ func try_cfg_save():
 		print(error_string(err))
 
 
-func try_load_cfg_values() -> PackedInt64Array:
+func try_load_cfg_values(config:ConfigFile) -> PackedInt64Array:
 	loading = true
 	var errs : PackedInt64Array = []
-	for key in cfg.get_section_keys("Config"):
+	for key in config.get_section_keys("Config"):
 		match key:
 			"saved_dir": continue
-			"propagate_slide_changes","note_tooltips":
-				Global.settings.set(key, cfg.get_value("Config",key))
-			"build_waveform": %BuildWaveform.set("button_pressed",cfg.get_value("Config",key))
-			"hi_res_wave": %HiResWave.set("button_pressed",cfg.get_value("Config",key))
-			"preview_type": %PreviewType.set("selected",cfg.get_value("Config",key))
-			"draw_microtones": %DrawMicrotones.set("button_pressed",cfg.get_value("Config",key))
+			"build_waveform": %BuildWaveform.set("button_pressed",config.get_value("Config",key))
+			"hi_res_wave": %HiResWave.set("button_pressed",config.get_value("Config",key))
+			"preview_type": %PreviewType.set("selected",config.get_value("Config",key))
+			"draw_microtones": %DrawMicrotones.set("button_pressed",config.get_value("Config",key))
 			_:
-				print("cfg: unknown key ",key)
-				errs.append(ERR_INVALID_DATA)
-	errs.append( try_load_binds() )
+				if key in settings_properties: Global.settings.set(key, config.get_value("Config",key))
+				else:
+					print("cfg: unknown key ",key)
+					errs.append(ERR_INVALID_DATA)
+	errs.append( try_load_binds(config) )
 	loading = false
 	return errs
 
 
-func try_load_binds() -> int:
-	if !cfg.has_section("Binds"):
+func try_load_binds(config:ConfigFile) -> int:
+	if !config.has_section("Binds"):
 		print("no binds saved yet")
 		return ERR_DOES_NOT_EXIST
-	var rebinds := cfg.get_section_keys("Binds")
+	
+	var rebinds := config.get_section_keys("Binds")
 	if rebinds != bindables:
 		print("something weird has happened")
 		return ERR_INVALID_DATA
-	else:
-		for rebind in rebinds:
-			InputMap.action_erase_events(rebind)
-			if cfg.get_value("Binds",rebind) is InputEventKey:
-				InputMap.action_add_event(rebind,cfg.get_value("Binds",rebind))
+	
+	for rebind in rebinds:
+		InputMap.action_erase_events(rebind)
+		if config.get_value("Binds",rebind) is InputEventKey:
+			InputMap.action_add_event(rebind,config.get_value("Binds",rebind))
+	
+	%EditorOpts.refresh_bind_list()
 	return OK
+
+
+func try_load_bind_preset(preset:PackedInt64Array) -> void:
+	for i in bindables.size():
+		var action = bindables[i]
+		var keycode = preset[i]
+		
+		for bedit in %BindList.get_children():
+			bedit = bedit as BindEdit
+			if bedit.bind.action == action:
+				var event = InputEventKey.new()
+				event.shift_pressed = (keycode < 0)
+				match bedit.bind.keytype:
+					EditorOpts.KeyBind.KEY_PHYSICAL: event.physical_keycode = abs(keycode)
+					EditorOpts.KeyBind.KEY_UNICODE:  event.unicode = abs(keycode)
+					EditorOpts.KeyBind.SECRET_THIRD_THING:
+						assert(false,"we don't use this keytype, something went wrong")
+				bedit.bind.update_input_map(event)
+	
+	%EditorOpts.refresh_bind_list()
+
+
+func _on_mnemonic_binds_pressed() -> void: try_load_bind_preset(mnemonic_binds)
+func _on_cluster_binds_pressed() -> void: try_load_bind_preset(cluster_binds)

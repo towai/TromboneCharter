@@ -146,7 +146,7 @@ title = "Error"
 [node name="Instructions" type="AcceptDialog" parent="."]
 title = "Usage"
 position = Vector2i(200, 48)
-size = Vector2i(720, 600)
+size = Vector2i(720, 800)
 dialog_autowrap = true
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Instructions"]
@@ -156,19 +156,25 @@ offset_right = 712.0
 offset_bottom = 554.0
 theme_override_fonts/mono_font = ExtResource("7_jt8rs")
 bbcode_enabled = true
-text = "Click in the chart view to create a note. Click on the piano to hear pitches for reference.
+text = "All these instructions refer to the default keyboard shortcuts. If yours are different, you probably know that.
 
-Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. With \"propagate slide changes\" enabled, hold Alt when dragging to break a note away from its neighbor. Note too short to easily grab the pitch handle? Hold Shift to bring it to the front.
+[font_size=20]Basic Editing[/font_size]
+Click in the chart view to create a note. Click on the piano to hear pitches for reference.
 
-You can hold Shift and click to move the playhead to where your mouse cursor is.
+Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. During a drag, you can disable snapping pitch by holding [b]Shift[/b] and time by holding [b]Ctrl[/b]; [b]P[/b] and [b]T[/b], or the checkboxes in the Edit View, toggle the default behavior for pitch and time respectively (holding the keys will now enable snapping).
 
-You can press the [b]S[/b] key to enter Select Mode. In this mode you can click and drag to select a segment of the song to preview. You can also copy and paste the notes you've selected using the usual keyboard shortcuts. You can press [b]E[/b] to return to Edit Mode.
+With \"propagate slide changes\" enabled, hold Alt when dragging to break a note away from its neighbor. Note too short to easily grab the pitch handle? Hold [b]Shift[/b] to bring it to the front.
 
-In the Lyrics Editor, you can double click to insert a new lyric where your mouse cursor is, and you can hit the Return key to insert a new lyric at the next note by default.
+You can hold [b]Shift[/b] and click to move the playhead to where your mouse cursor is.
 
+You can hold [b]S[/b] to drag the selection box anywhere in the chart without needing it to be onscreen. You can also double-tap S to get it out of your way. You can also copy and paste the notes you've selected using the usual keyboard shortcuts (Ctrl+C, Ctrl+V).
+
+Press [b]L[/b] to open the Lyrics Overlay. In the Lyrics Overlay, you can double click to insert a new lyric where your mouse cursor is, and you can hit the [b]Return[/b] key to insert a new lyric at the next note (by default). You can press [b]E[/b] to return to Edit Mode.
+
+[font_size=20]Working With Charts[/font_size]
 The \"Track Ref\" field should be unique to your chart; you can use the song's name, or include both the name and the artist. If someone else has charted the same song before then make sure it doesn't clash with the existing chart's [code]trackRef[/code]. It is also best practice to name your chart's folder the same as your [code]trackRef[/code].
 
-You can hold Shift when clicking Save Chart to bypass the \"Save As\" dialog.
+You can use Ctrl+Shift+S, or hold [b]Shift[/b] when clicking Save Chart, to bypass the \"Save As\" dialog and save to the last file you saved to.
 
 On chart load and save, Trombone Charter will try to load [code]song.ogg[/code] from the chart's folder. If [code]song.ogg[/code] is not present then no backing track will play.
 
@@ -247,7 +253,7 @@ unique_name_in_owner = true
 auto_translate_mode = 1
 title = "Options"
 position = Vector2i(64, 64)
-size = Vector2i(920, 460)
+size = Vector2i(940, 480)
 visible = false
 wrap_controls = true
 transient = true
@@ -318,7 +324,7 @@ size_flags_vertical = 2
 
 [node name="MnemonicBinds" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
 layout_mode = 2
-text = "Mnemonic"
+text = "Mnemonic (default)"
 
 [node name="ClusterBinds" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer"]
 layout_mode = 2
@@ -349,6 +355,25 @@ layout_mode = 2
 text = "Outline mouse targets
 "
 
+[node name="PlaybackEndBehavior" type="CheckBox" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Return playhead when
+ending preview manually"
+
+[node name="Label3" type="Label" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+layout_mode = 2
+text = "When a paste would go past the end:"
+
+[node name="PasteBehaviorOption" type="OptionButton" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Reject paste"
+popup/item_1/text = "Extend endpoint"
+popup/item_1/id = 1
+
 [node name="OptSaveButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
 size_flags_vertical = 10
@@ -356,11 +381,11 @@ text = "Save Settings"
 
 [node name="OptRevertButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
-text = "Revert"
+text = "Revert to Saved Settings"
 
 [node name="OptDefaultsButton" type="Button" parent="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC"]
 layout_mode = 2
-text = "Defaults"
+text = "Set to Defaults"
 
 [node name="PianoRoll" type="HBoxContainer" parent="."]
 custom_minimum_size = Vector2(360, 270)
@@ -477,7 +502,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
 size_flags_vertical = 2
-text = "Edit Mode"
+text = "Edit View"
 
 [node name="LoadChart" type="Button" parent="Settings/MarginC/HBoxC/Buttons"]
 layout_mode = 2
@@ -893,7 +918,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 2
-text = "Show lyrics editor"
+text = "Show lyrics overlay"
 
 [node name="Label3" type="Label" parent="Settings/MarginC/HBoxC/LyricsTools"]
 custom_minimum_size = Vector2(150, 0)
@@ -973,9 +998,14 @@ text = "toot toot lol"
 [connection signal="meta_clicked" from="DiffCalc/PanelContainer/VBoxContainer/PanelContainer/CalcInfo" to="." method="_on_rich_text_label_meta_clicked"]
 [connection signal="pressed" from="DiffCalc/PanelContainer/VBoxContainer/Button" to="." method="_on_diff_ok_button_pressed"]
 [connection signal="close_requested" from="EditorOpts" to="." method="_on_opts_dialog_close_requested"]
+[connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer/MnemonicBinds" to="SaveLoad" method="_on_mnemonic_binds_pressed"]
+[connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/HBoxContainer/ClusterBinds" to="SaveLoad" method="_on_cluster_binds_pressed"]
 [connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/NoteTooltips" to="PianoRoll/ChartView/Chart" method="_on_note_tooltips_toggled"]
 [connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/ShowMouseTargets" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
+[connection signal="toggled" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/PlaybackEndBehavior" to="PianoRoll/ChartView/Chart" method="_on_show_targets_toggled"]
 [connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/OptSaveButton" to="SaveLoad" method="try_cfg_save"]
+[connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/OptRevertButton" to="." method="_on_opt_revert_button_pressed"]
+[connection signal="pressed" from="EditorOpts/PanelC/MarginC/HBoxC/OtherStuff/MarginC/VBoxC/OptDefaultsButton" to="." method="_on_opt_defaults_button_pressed"]
 [connection signal="mouse_entered" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="PianoRoll/ChartView/Chart" to="PianoRoll/ChartView/Chart" method="_on_mouse_exited"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/Buttons/ViewSwitcher" to="Settings" method="_on_view_switcher_pressed"]
