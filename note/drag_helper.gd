@@ -13,12 +13,12 @@ var drag_start := Vector2.ZERO
 var settings := Global.settings
 
 
-func _init(caller:Note):
+func _init(caller:Note) -> void:
 	owner = caller
 	init_drag()
 
 
-func init_drag():
+func init_drag() -> void:
 	old_bar = owner.bar
 	old_end = owner.end
 	old_pitch = owner.pitch_start

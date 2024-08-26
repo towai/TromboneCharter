@@ -21,14 +21,14 @@ signal confirm_new
 signal confirm_load
 
 
-func _ready():
+func _ready() -> void:
 	cancel_button_text = "Wait, Go Back"
 	ok_button_text = "Continue"
 	about_to_popup.connect(_set_text)
 	confirmed.connect(_confirm)
 
 
-func _set_text():
+func _set_text() -> void:
 	match risky_action:
 			RISKY_QUIT: dialog_text = "Really quit and discard unsaved changes?"
 			RISKY_NEW:  dialog_text = "Really discard your chart and unsaved changes?"
@@ -36,7 +36,7 @@ func _set_text():
 	dialog_text += "\n\nYou are %s %s %s your last save." % [abs(unsaved_changes),plural,grammar]
 
 
-func _confirm():
+func _confirm() -> void:
 	match risky_action:
 			RISKY_QUIT: get_tree().quit()
 			RISKY_NEW:  confirm_new.emit()

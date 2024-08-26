@@ -5,14 +5,14 @@ extends AcceptDialog
 var target: float
 var data: Dictionary
 
-func set_values(_target: float, _data: Dictionary):
+func set_values(_target: float, _data: Dictionary) -> void:
 	target = _target
 	data = _data
 	var overwrite_notes = main.tmb.find_all_notes_in_section(target,data.length)
 	var to_overwrite = ("\nThis will overwrite %s notes!\n" % overwrite_notes.size()) if overwrite_notes else ""
 	dialog_text = template % [data.notes.size(), to_overwrite]
 
-func _on_copy_confirmed():
+func _on_copy_confirmed() -> void:
 	var notes = data.notes
 	if notes.is_empty():
 		print("copy section empy AFTER CONFIRMATION????")
@@ -47,6 +47,6 @@ func _on_copy_confirmed():
 	main.tmb.notes.sort_custom(func(a,b): return a[TMBInfo.NOTE_BAR] < b[TMBInfo.NOTE_BAR])
 	Global.settings.section_length = 0
 	%Alert.alert("Inserted %s notes from clipboard" % notes.size(), Vector2(%ChartView.global_position.x, 10),
-				Alert.LV_SUCCESS)
+			Alert.LV_SUCCESS)
 	
 	%Chart.update_note_array()

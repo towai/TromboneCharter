@@ -34,7 +34,7 @@ var savednotespacing : int = 120
 
 # Assumes that the notes array is sorted. It's always sorted on drag end (including note addition),
 # so this assumption should be OK, but testing against U/R may be needed.
-func get_last_note_off():
+func get_last_note_off() -> float:
 	if notes.is_empty(): return -1
 	return notes[-1][TMBInfo.NOTE_BAR] + notes[-1][TMBInfo.NOTE_LENGTH]
 

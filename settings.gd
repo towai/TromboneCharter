@@ -90,7 +90,7 @@ var tap_notes : bool:
 	get: return %InsertTapNotes.button_pressed || Input.is_action_pressed("hold_insert_taps")
 
 
-func _ready():
+func _ready() -> void:
 	start_color = default_start_color
 	end_color = default_end_color
 	
@@ -122,7 +122,7 @@ func _input(event: InputEvent) -> void:
 		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed
 
 
-func _toggle_ffmpeg_features():
+func _toggle_ffmpeg_features() -> void:
 	var disable = !Global.ffmpeg_worker.ffmpeg_exists
 	%BuildWaveform.disabled = disable
 	%HiResWave.disabled = disable
@@ -130,7 +130,7 @@ func _toggle_ffmpeg_features():
 	%PreviewType.disabled = disable
 
 
-func _update_values():
+func _update_values() -> void:
 	title.value = tmb.title
 	short_name.value = tmb.shortName
 	author.value = tmb.author
@@ -153,12 +153,12 @@ func _update_values():
 		end_color = default_end_color
 
 
-func _on_view_switcher_pressed():
+func _on_view_switcher_pressed() -> void:
 	current_view ^= 1 # check out this fun ligature in JetBrains Mono (Godot's code editor font)
 	_update_view()
 
 
-func _update_view():
+func _update_view() -> void:
 	match current_view:
 		VIEW_CHART_INFO: 
 			%LyricsTools.hide()
@@ -172,15 +172,13 @@ func _update_view():
 			%EditSettings.show()
 			%SectionSelection.show()
 			%ViewSwitcher.text = "Chart Info"
-		_:
-			print("Somehow tried to set Settings pane view to a wrong value (%d)"
+		_: assert(false, "Somehow tried to set Settings pane view to a wrong value (%d)"
 					% current_view)
-			assert(false)
 
 
-func _on_zoom_reset_pressed(): %ZoomLevel.value = 1
+func _on_zoom_reset_pressed() -> void: %ZoomLevel.value = 1
 # _on_zoom_level_changed is called automatically when reset is pressed
-func _on_zoom_level_changed(value:float):
+func _on_zoom_level_changed(value:float) -> void:
 	%ZoomLevel.tooltip_text = str(value)
 	var zoom_change = value / zoom
 	%ChartView.scroll_horizontal *= zoom_change
@@ -190,13 +188,13 @@ func _on_zoom_level_changed(value:float):
 	zoom = value
 
 
-func _update_handles():
+func _update_handles() -> void:
 		%SectStartHandle.update_pos(section_start)
 		%SectEndHandle.update_pos(min(section_length + section_start,tmb.endpoint))
 		%PlayheadHandle.update_pos(playhead_pos)
 
 
-func _force_decimals(box:SpinBox):
+func _force_decimals(box:SpinBox) -> void:
 	var lineedit = box.get_line_edit()
 	if box.value == int(box.value):
 		lineedit.text = str(box.value)
@@ -212,16 +210,13 @@ func ensure_valid_endpoint() -> void:
 #region Sections
 const SECT_HANDLE_RADIUS = 3.0
 
-func section_handle_dragged(value:float,which:Node):
-	if which == %SectStartHandle:
-		_on_section_start_value_changed(value)
-	elif which == %SectEndHandle: 
-		_on_section_length_value_changed(value - section_start)
-	elif which == %PlayheadHandle: 
-		_on_copy_target_value_changed(value)
+func section_handle_dragged(value:float,which:Node) -> void:
+	if which == %SectStartHandle:  _on_section_start_value_changed(value)
+	elif which == %SectEndHandle:  _on_section_length_value_changed(value - section_start)
+	elif which == %PlayheadHandle: _on_copy_target_value_changed(value)
 
 
-func update_save_button():
+func update_save_button() -> void:
 	const default_button_bg := Color("1a1a1a99")
 	const save_hl := Color("26261a99")
 	var style : StyleBoxFlat = %SaveChart.get_theme_stylebox("normal")
@@ -236,7 +231,7 @@ func update_save_button():
 		tween.parallel().tween_property(%SaveChart,"theme_override_colors/font_color",Color.WHITE,0.5)
 
 
-func _on_section_start_value_changed(value):
+func _on_section_start_value_changed(value) -> void:
 	section_start = value
 	%SectionLength.max_value = tmb.endpoint - value
 	_force_decimals(%SectionStart)
@@ -244,13 +239,13 @@ func _on_section_start_value_changed(value):
 	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
-func _on_section_length_value_changed(value):
+func _on_section_length_value_changed(value) -> void:
 	section_length = value
 	_force_decimals(%SectionLength)
 	%SectEndHandle.position.x = %Chart.bar_to_x(section_start + section_length) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
 
-func _on_copy_target_value_changed(value):
+func _on_copy_target_value_changed(value) -> void:
 	playhead_pos = value
 	_force_decimals(%PlayheadPos)
 	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
@@ -258,27 +253,26 @@ func _on_copy_target_value_changed(value):
 
 #endregion
 
-func _on_preview_vol_reset_pressed() -> void:
-	%TrackVolSlider.value = 0 # the below gets called iff volume wasn't already 0
+# the second gets called from the former iff volume wasn't already 0
+func _on_preview_vol_reset_pressed() -> void: %TrackVolSlider.value = 0
 func _on_preview_volume_changed(value: float) -> void:
 	%TrackVolSlider.tooltip_text = str(value)
 	%TrackPlayer.volume_db = value
 
-func _on_toot_vol_reset_pressed() -> void:
-	%TootVolSlider.value = 0
+func _on_toot_vol_reset_pressed() -> void: %TootVolSlider.value = 0
 func _on_toot_volume_changed(value: float) -> void:
 	%TootVolSlider.tooltip_text = str(value)
 	%TrombPlayer.volume_db = value
 
 
-func _on_timing_snap_value_changed(_value):
+func _on_timing_snap_value_changed(_value) -> void:
 	if !snap_time: return
 	var snap = 1.0 / timing_snap
 	%SectionStart.step = snap
 	%SectionLength.step = snap
 
 
-func _on_time_snap_toggled(_button_pressed):
+func _on_time_snap_toggled(_button_pressed) -> void:
 	var snap = 1.0 / timing_snap
 	match snap_time:
 		true: 

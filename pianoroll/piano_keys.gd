@@ -17,15 +17,15 @@ func _ready():
 		key.mouse_entered.connect(_on_key_mouseover.bind(13 - i))
 		key.mouse_exited.connect(_on_key_mouse_exit.bind(13 - i))
 
-func _on_key_down(key:int):
+func _on_key_down(key:int) -> void:
 	player.pitch_scale = Global.pitch_to_scale(key)
 	player.play()
-func _on_key_up(): player.stop()
+func _on_key_up() -> void: player.stop()
 
-func _on_key_mouseover(key:int):
+func _on_key_mouseover(key:int) -> void:
 	current_key = key
 	redraw_board.emit()
-func _on_key_mouse_exit(key:int):
+func _on_key_mouse_exit(key:int) -> void:
 	if current_key != key:
 		print("Mouse exited %d but only after entering %d -- do nothing" % [key, current_key])
 		return

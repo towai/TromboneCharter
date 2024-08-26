@@ -1,14 +1,14 @@
 extends ScrollContainer
 
 
-func _ready(): get_h_scroll_bar().scrolling.connect(_on_scroll_change)
+func _ready() -> void: get_h_scroll_bar().scrolling.connect(_on_scroll_change)
 
-func _on_scroll_change(): %Chart._on_scroll_change()
+func _on_scroll_change() -> void: %Chart._on_scroll_change()
 
-func _on_pitch_snap_value_changed(_value): queue_redraw()
+func _on_pitch_snap_value_changed(_value) -> void: queue_redraw()
 
 
-func _draw():
+func _draw() -> void:
 	var key_height := size.y / Global.NUM_KEYS
 	
 	for i in Global.NUM_KEYS:

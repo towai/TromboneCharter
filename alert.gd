@@ -4,21 +4,17 @@ class_name Alert extends Node2D
 var tween : Tween
 
 
-enum {
-	LV_ERROR,
-	LV_SUCCESS,
-}
-
+enum { LV_ERROR, LV_SUCCESS, }
 const colors := {
 	LV_ERROR: Color(1, 0.3, 0.4),
 	LV_SUCCESS: Color(0.3, 1, 0.6),
 }
 
 
-func _ready(): modulate = Color.TRANSPARENT
+func _ready() -> void: modulate = Color.TRANSPARENT
 
 
-func alert(text:String, pos:Vector2, lvl:int, duration : float = 1.5):
+func alert(text:String, pos:Vector2, lvl:int, duration : float = 1.5) -> void:
 	label.size.x = 0 # let it handle min size itself
 	queue_redraw()
 	position = pos

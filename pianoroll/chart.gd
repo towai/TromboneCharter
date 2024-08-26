@@ -90,26 +90,26 @@ func doot(pitch:float):
 	player.stop()
 
 
-func _ready():
+func _ready() -> void:
 	bar_font = measure_font.duplicate()
 	main.chart_loaded.connect(_on_tmb_loaded)
 	Global.tmb_updated.connect(_on_tmb_updated)
 	%TimingSnap.value_changed.connect(timing_snap_changed)
 
 
-func _process(_delta):
+func _process(_delta) -> void:
 	if _update_queued: _do_tmb_update()
 	if %PreviewController.is_playing: queue_redraw()
 
 
-func _on_scroll_change():
+func _on_scroll_change() -> void:
 	await(get_tree().process_frame)
 	queue_redraw()
 	redraw_notes()
 	%WavePreview.calculate_width()
 
 ## Dew u/r shortcut inputs
-func _shortcut_input(_event):
+func _shortcut_input(_event) -> void:
 	if Input.is_action_just_pressed("ui_undo",true):
 		print("\n",Global.revision,": undo pressed...","\n")
 		if Global.revision != -1: # if we're at the beginning of edit history, there are no changes to undo!
@@ -129,7 +129,7 @@ func _shortcut_input(_event):
 			ur_handler()
 
 ## Dew's favorite child :)
-func ur_handler():
+func ur_handler() -> void:
 	Global.in_ur = true
 	print("UR entered with action: ", action,"!") #[add, del, drag, paste]
 	print("Global.revision: ", Global.revision," which acts on revision #: ", rev)
@@ -183,7 +183,7 @@ func ur_handler():
 	Global.in_ur = false
 
 
-func redraw_notes():
+func redraw_notes() -> void:
 	for child in get_children():
 		if child is not Note: continue
 		if child.is_in_view:
@@ -199,11 +199,11 @@ func redraw_notes():
 			child.hide()
 
 
-func _on_tmb_updated():
+func _on_tmb_updated() -> void:
 	bar_spacing = tmb.savednotespacing * %ZoomLevel.value
 	_update_queued = true
 
-func _do_tmb_update():
+func _do_tmb_update() -> void:
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
 	%SectionStart.max_value = tmb.endpoint
 	%SectionLength.max_value = tmb.endpoint - %SectionStart.value
@@ -221,7 +221,7 @@ func _do_tmb_update():
 	_update_queued = false
 
 
-func to_snapped(pos:Vector2):
+func to_snapped(pos:Vector2) -> Vector2:
 	var new_bar = x_to_bar( pos.x )
 	var timing_snap = 1.0 / settings.timing_snap
 	var pitch = -height_to_pitch( pos.y )
@@ -243,10 +243,10 @@ func to_unsnapped(pos:Vector2):
 	)
 
 
-func timing_snap_changed(_value:float): queue_redraw()
+func timing_snap_changed(_value:float) -> void: queue_redraw()
 
 
-func _on_tmb_loaded():
+func _on_tmb_loaded() -> void:
 	var children := get_children()
 	clearing_notes = true
 	for i in children.size():
@@ -266,10 +266,10 @@ func _on_tmb_loaded():
 	doot_enabled = %DootToggle.button_pressed
 	_on_tmb_updated()
 
-func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0):
+func add_note(start_drag:bool, bar:float, length:float, pitch:float, pitch_delta:float = 0.0) -> void:
 	var note : Note
 	if ur_type == UR_NONE: note = note_scn.instantiate()
-	else:         note = stuffed_note # Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
+	else: note = stuffed_note # Dew: don't create a new note if we're mid-U/R action; we track pre-existing notes via Global.changes when we remove them.
 	
 	note.bar = bar
 	note.length = length
@@ -306,7 +306,7 @@ func continuous_note_overlaps(time:float, length:float, exclude : Array = []) ->
 	return false
 
 
-func update_note_array():
+func update_note_array() -> void:
 	var new_array := []
 	###Dew timeline tracker
 	print("action timeline: ",Global.actions)
@@ -326,18 +326,15 @@ func update_note_array():
 	chart_updated.emit()
 
 
-func jump_to_note(note: int, use_tt: bool = false):
+func jump_to_note(note: int, use_tt: bool = false) -> void:
 	var count = 0
 	var children = get_children()
-	if not use_tt:
-		children.sort_custom(func(a, b): return a.position.x < b.position.x)
+	if not use_tt: children.sort_custom(func(a, b): return a.position.x < b.position.x)
 	for child in children:
 		if child is not Note: continue
 		count += 1
-		if use_tt and note != child.tt_note_id:
-			continue
-		elif not use_tt and count != note:
-			continue
+		if use_tt and note != child.tt_note_id: continue
+		elif not use_tt and count != note: continue
 		else:
 			%ChartView.set_h_scroll(int(child.position.x - (%ChartView.size.x / 2)))
 			redraw_notes()
@@ -345,7 +342,7 @@ func jump_to_note(note: int, use_tt: bool = false):
 			child.grab_focus()
 			break
 
-func assign_tt_note_ids():
+func assign_tt_note_ids() -> void:
 	var count = 0
 	var children = %Chart.get_children()
 	children.sort_custom(func(a, b): return a.position.x < b.position.x)
@@ -355,7 +352,7 @@ func assign_tt_note_ids():
 		child.tt_note_id = count
 
 
-func _draw():
+func _draw() -> void:
 	var font : Font = ThemeDB.get_fallback_font()
 	if tmb == null: return
 	var section_rect = Rect2(bar_to_x(settings.section_start), 1,
@@ -377,8 +374,7 @@ func _draw():
 			draw_line(Vector2(bar_to_x(%PreviewController.song_position),0),
 					Vector2(bar_to_x(%PreviewController.song_position),size.y),
 					Color.CORNFLOWER_BLUE, 2 )
-		else:
-			settings.playhead_pos = %PreviewController.song_position
+		else: settings.playhead_pos = %PreviewController.song_position
 	# Draw bar lines
 	for i in tmb.endpoint + 1:
 		var line_x = i * bar_spacing
@@ -436,7 +432,7 @@ func count_onscreen_notes() -> int: # currently unused
 		if (child is Note && child.is_in_view): accum += 1
 	return accum
 
-func update_playhead(event):
+func update_playhead(event) -> void:
 	var bar = x_to_bar(event.position.x)
 	if settings.snap_time: bar = snapped(bar,current_subdiv)
 	if event is InputEventMouseButton:
@@ -456,7 +452,7 @@ func update_playhead(event):
 	event.position = mouse_pos
 	%PlayheadHandle._gui_input(event)
 
-func _gui_input(event):
+func _gui_input(event) -> void:
 	if event is InputEventPanGesture:
 		# Used for two finger scrolling on trackpads
 		_on_scroll_change()
@@ -514,7 +510,7 @@ func _gui_input(event):
 				%LyricsEditor.move_to_front()
 				%PlayheadHandle.move_to_front()
 
-func _notification(what):
+func _notification(what) -> void:
 	match what:
 		NOTIFICATION_RESIZED:
 			for note in get_children():
@@ -523,12 +519,12 @@ func _notification(what):
 			_on_scroll_change()
 
 
-func _on_doot_toggle_toggled(toggle:bool): doot_enabled = toggle
+func _on_doot_toggle_toggled(toggle:bool) -> void: doot_enabled = toggle
 
-func _on_show_targets_toggled(_toggle:bool):
+func _on_show_targets_toggled(_toggle:bool) -> void:
 	for note in get_children(): note.queue_redraw()
 
-func _on_mouse_exited():
+func _on_mouse_exited() -> void:
 	show_preview = false
 	queue_redraw()
 

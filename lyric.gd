@@ -19,27 +19,27 @@ var is_in_view : bool:
 	get: return position.x + size.x >= chart.scroll_position \
 			&& position.x + line_edit.size.x <= chart.scroll_end
 
-func _ready():
+func _ready() -> void:
 	line_edit.text = text
 	position.x = chart.bar_to_x(bar)
 
 
-func _draw():
+func _draw() -> void:
 	draw_polyline_colors([Vector2.ZERO,Vector2(0, size.y)],
 			[Color.TRANSPARENT,Color.PURPLE],2.0
 			)
 
 
-func _on_line_edit_text_changed(new_text): text = new_text
+func _on_line_edit_text_changed(new_text) -> void: text = new_text
 
 
-func _on_delete_button_pressed():
+func _on_delete_button_pressed() -> void:
 	queue_free()
 	Global.working_tmb.lyrics = editor.package_lyrics()
 	editor._refresh_lyrics()
 
 
-func _process(_delta):
+func _process(_delta) -> void:
 	if !dragging: return
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		dragging = false
@@ -48,13 +48,12 @@ func _process(_delta):
 	bar = chart.to_snapped(pos).x
 
 
-func _on_drag_handle_gui_input(event):
+func _on_drag_handle_gui_input(event) -> void:
 	event = event as InputEventMouseButton
-	if event == null || event.button_index != MOUSE_BUTTON_LEFT || !event.pressed:
-		return
+	if event == null || event.button_index != MOUSE_BUTTON_LEFT || !event.pressed: return
 	dragging = true
 
-func scroll_to_lyric(offset : float = 1.0):
+func scroll_to_lyric(offset : float = 1.0) -> void:
 	offset = chart.bar_to_x(offset)
 	chart_view.set_h_scroll(int(position.x - offset))
 	chart.redraw_notes()

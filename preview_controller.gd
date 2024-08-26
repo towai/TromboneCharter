@@ -17,10 +17,10 @@ var forced_note : float = 0.0
 
 
 
-func _ready(): pass
+func _ready() -> void: pass
 
 
-func _do_preview():
+func _do_preview() -> void:
 	if chart.tmb == null: assert(false,"null tmb") # this should never happen
 	else: tmb = chart.tmb
 	if is_playing: # toggle_playback was pressed to stop playback
@@ -116,7 +116,7 @@ func _do_preview():
 
 # TODO smarter handling of this: get a reference so we can extend taps more properly
 # Current handling means that quick taps on the same note sound like one unbroken note
-func _find_note_overlapping_bar(time:float):
+func _find_note_overlapping_bar(time:float) -> Array:
 	for note in tmb.notes:
 		# we sort the array by note-on every time we make an edit, so we can break early
 		if time < note[TMBInfo.NOTE_BAR]: break
@@ -125,7 +125,7 @@ func _find_note_overlapping_bar(time:float):
 	return []
 
 
-func _find_matching_by_note_on(note_ons:Array[float],time:float):
+func _find_matching_by_note_on(note_ons:Array[float],time:float) -> Array:
 	for i in note_ons.size():
 		var on = note_ons[i]
 		if time < on: break

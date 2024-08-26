@@ -44,7 +44,7 @@ class KeyBind: # TODO EditorOpts probably shouldn't own this
 	## Physical keys are used for modifiers that (generally) live on Shift/Ctrl/Alt
 	enum { KEY_PHYSICAL, KEY_UNICODE, SECRET_THIRD_THING }
 	
-	func _init(action_name:String):
+	func _init(action_name:String) -> void:
 		action = action_name
 		# only care to support 1 bind but redo has multiple... aagh
 		for event in InputMap.action_get_events(action):

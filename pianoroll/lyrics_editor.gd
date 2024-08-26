@@ -7,12 +7,11 @@ var lyric_scn = preload("res://lyric.tscn")
 	get: return %EnterKeyMode.selected
 var _update_queued := false
 
-func _ready():
-	Global.tmb_updated.connect(_on_tmb_update)
+func _ready() -> void: Global.tmb_updated.connect(_on_tmb_update)
 
-func _on_tmb_update(): _update_queued = true
+func _on_tmb_update() -> void: _update_queued = true
 
-func _process(_delta): if _update_queued: _update_lyrics()
+func _process(_delta) -> void: if _update_queued: _update_lyrics()
 
 
 func package_lyrics() -> Array:
@@ -28,7 +27,7 @@ func package_lyrics() -> Array:
 	return result
 
 
-func _add_lyric(bar:float,lyric:String):
+func _add_lyric(bar:float,lyric:String) -> Lyric:
 	var new_lyric = lyric_scn.instantiate()
 	new_lyric.text = lyric
 	new_lyric.bar = bar
@@ -36,14 +35,14 @@ func _add_lyric(bar:float,lyric:String):
 	return new_lyric
 
 
-func _update_lyrics():
+func _update_lyrics() -> void:
 	for child in get_children():
 		if !(child is Lyric): continue
 		child.position.x = chart.bar_to_x(child.bar)
 	_update_queued = false
 
 
-func _refresh_lyrics():
+func _refresh_lyrics() -> void:
 	
 	var children = get_children()
 	
@@ -58,23 +57,22 @@ func _refresh_lyrics():
 	_update_lyrics()
 
 
-func _on_show_lyrics_toggled(button_pressed):
+func _on_show_lyrics_toggled(button_pressed) -> void:
 	move_to_front()
 	%PlayheadHandle.move_to_front()
 	set_visible(button_pressed)
 	%CopyLyrics.disabled = !button_pressed
 
 
-func _on_chart_loaded():
+func _on_chart_loaded() -> void:
 	_refresh_lyrics()
 	move_to_front()
 	%PlayheadHandle.move_to_front()
 
 
-func _draw():
-	draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))
+func _draw() -> void: draw_rect(Rect2(Vector2.ZERO,size), Color(0, 0, 0, 0.15))
 
-func _gui_input(event):
+func _gui_input(event) -> void:
 	if Input.is_key_pressed(KEY_SHIFT):
 		%Chart.update_playhead(event)
 		return
@@ -84,7 +82,7 @@ func _gui_input(event):
 		var new_lyric = _add_lyric(bar,"")
 		new_lyric.line_edit.grab_focus()
 
-func _on_copy_lyrics_pressed():
+func _on_copy_lyrics_pressed() -> void:
 	Global.working_tmb.lyrics = package_lyrics()
 	var lyrics_array : Array = Global.working_tmb.lyrics.duplicate(true)
 	var copied_lyrics := []

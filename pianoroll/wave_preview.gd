@@ -29,11 +29,11 @@ func calc_rects_amount() -> int:
 	var amount = ceil(song_length / divided_by) + 1
 	return amount
 
-func clear_wave_preview():
+func clear_wave_preview() -> void:
 	for i in rects.size(): rects[i].free()
 	rects = []
 
-func build_wave_preview():
+func build_wave_preview() -> void:
 	if !Global.ffmpeg_worker.ffmpeg_exists:
 		print("Roses are chrominance blue\nWater is chrominance red\nYou can't make a waveform preview without ffmpeg")
 		return
@@ -53,11 +53,9 @@ func build_wave_preview():
 		if !result:
 			print("Done in %d steps" % i)
 			break
-		else:
-			textures.append(result)
+		else: textures.append(result)
 		
-	if rects:
-		clear_wave_preview()
+	if rects: clear_wave_preview()
 
 	for i in textures.size():
 		var rect = TextureRect.new()
@@ -106,7 +104,7 @@ func do_ffmpeg_convert(dir:String,idx:int=0,type:int=0) -> Image:
 	return img
 
 
-func calculate_width():
+func calculate_width() -> void:
 	# natural size, before scaling, aka song length in ms (*2 if hi-res wave)
 	var width := get_size().x
 	if width == 0: # no preview exists
@@ -134,6 +132,7 @@ func _on_hi_res_wave_toggled(_toggled_on:bool) -> void:
 	
 	if %BuildWaveform.button_pressed: build_wave_preview()
 
-func _process(_delta): pass
-func _draw(): pass
-func _input(_event): pass
+# want these to exist for overridability when testing
+func _process(_delta) -> void: pass
+func _draw() -> void: pass
+func _input(_event) -> void: pass

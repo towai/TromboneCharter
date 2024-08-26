@@ -18,7 +18,7 @@ var opts_dialog : EditorOpts
 
 signal rebind_signal # TODO bad convention-breaking name
 
-func init_values(caller:EditorOpts,_bind:KeyBind):
+func init_values(caller:EditorOpts,_bind:KeyBind) -> void:
 	opts_dialog = caller
 	bind = _bind
 
@@ -35,7 +35,7 @@ func _ready() -> void:
 	_set_button_text()
 
 
-func _set_button_text():
+func _set_button_text() -> void:
 	if bind.events.is_empty(): # BUG recolor doesn't work on rebind timeout for some reason
 		button.set("theme_override_colors/font_color",Color(0.5,0.5,0.5))
 		button.set("theme_override_colors/font_focus_color",Color(0.5,0.5,0.5))
@@ -74,7 +74,7 @@ func _on_button_pressed() -> void:
 	_end_rebind()
 
 
-func _end_rebind(): 
+func _end_rebind() -> void:
 	button.set_pressed_no_signal(false)
 	_set_button_text()
 	

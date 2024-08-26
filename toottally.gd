@@ -35,7 +35,7 @@ var table_header = "
 [cell border=#fff padding=4,2,4,0][b]Value[/b][/cell][cell][/cell]"
 
 
-func _on_toottally_request_completed(_result, response_code, _headers, body):
+func _on_toottally_request_completed(_result, response_code, _headers, body) -> void:
 	if response_code != HTTPClient.ResponseCode.RESPONSE_OK:
 		push_error("An error occured while submitting to TootTally: Response Code %s" % response_code)
 		%Alert.alert("Couldn't submit! Code %s" % response_code,
@@ -109,7 +109,7 @@ func _on_toottally_request_completed(_result, response_code, _headers, body):
 	disabled = false
 
 
-func _on_toottally_upload_pressed():
+func _on_toottally_upload_pressed() -> void:
 	disabled = true
 	var http_request = HTTPRequest.new()
 	add_child(http_request)

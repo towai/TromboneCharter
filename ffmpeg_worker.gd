@@ -5,7 +5,7 @@ var ffmpeg_exists := false
 var ffmpeg_path := "ffmpeg"
 
 
-func _init(): ffmpeg_exists = does_ffmpeg_exist()
+func _init() -> void: ffmpeg_exists = does_ffmpeg_exist()
 
 
 func does_ffmpeg_exist() -> bool:
@@ -21,7 +21,7 @@ func does_ffmpeg_exist() -> bool:
 	return true
 
 
-func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,type:int=0,idx:int=0):
+func draw_wavechunk(start:float,end:float,dir:String,hi_res:bool,type:int=0,idx:int=0) -> int:
 	var wavechunkpath := '%s/wav%d.png' % [dir,idx]
 	var chunkwidth := int((end - start) * 100) * (2 if hi_res else 1)
 	var command : PackedStringArray = [ "-hide_banner", "-ss", "%.3f" % start, "-to", "%.3f" % end,

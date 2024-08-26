@@ -46,7 +46,7 @@ signal value_changed(new_value)
 		$SpinBox.max_value = max_value
 
 
-func _ready():
+func _ready() -> void:
 	$Label.text = field_name
 	$SpinBox.value_changed.connect(_on_spinbox_value_changed)
 	line_edit.gui_input.connect(_gui_input)
@@ -59,7 +59,7 @@ func _gui_input(event: InputEvent) -> void:
 	if keyevent.is_action_pressed("ui_accept"): line_edit.release_focus()
 
 
-func _on_spinbox_value_changed(new_value): value = new_value
+func _on_spinbox_value_changed(new_value) -> void: value = new_value
 
 # TODO is this even used?
 func _on_spin_box_gui_input(event:InputEvent) -> void: gui_input.emit(event)

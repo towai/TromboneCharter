@@ -53,7 +53,7 @@ var revision_format = [
 ]
 
 var fresh := false # only true for notes that have been ADDED BY HAND and is set to false as soon as the note is added to timeline.
-func clear_future_edits(wipe := false):
+func clear_future_edits(wipe := false) -> void:
 	# input will be Global.revision unless loading a fresh chart (wipe = true), in which case argument passed is -1.
 	# remember that Global.revision is negative-one indexed, where -1 is a blank array of changes.
 	if revision < actions.size()-1 || wipe:
@@ -95,10 +95,10 @@ func overlaps_any_note(time:float, exclude : Array = []) -> bool:
 	return false
 
 
-func _ready(): pass
+func _ready() -> void: pass
 
 
-func _on_tmb_updated(value,key:String):
+func _on_tmb_updated(value,key:String) -> void:
 	if key == "title": key = "name" # fix collision
 	working_tmb.set(key,value)
 	tmb_updated.emit()

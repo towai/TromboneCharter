@@ -8,10 +8,10 @@ var chart : Control:
 var touching_notes : Dictionary = {}
 
 
-func _init(caller:Note): owner = caller
+func _init(caller:Note) -> void: owner = caller
 
 
-func snap_near_pitches():
+func snap_near_pitches() -> void:
 	var near_pitch_threshold = Global.SEMITONE / 12
 	if touching_notes.has(Note.START_IS_TOUCHING):
 		var neighbor : Note = touching_notes[Note.START_IS_TOUCHING]
@@ -23,7 +23,7 @@ func snap_near_pitches():
 			owner.pitch_delta = neighbor.pitch_start - owner.pitch_start
 
 
-func handle_slide_propagation(from:int):
+func handle_slide_propagation(from:int) -> void:
 	var neighbor = touching_notes[from]
 	match from:
 		Note.START_IS_TOUCHING:
@@ -65,7 +65,7 @@ func get_matching_note_off(time:float, exclude:Array = []): # -> Note or null
 	return null
 
 
-func update_touching_notes():
+func update_touching_notes() -> void:
 	var old_prev_note = touching_notes.get(Note.START_IS_TOUCHING)
 	var old_next_note = touching_notes.get(Note.END_IS_TOUCHING)
 	touching_notes = find_touching_notes()
@@ -92,7 +92,7 @@ func update_touching_notes():
 	owner.propagate_to_the_right("update_slide_idx",[])
 
 
-func pass_on_slide_propagation():
+func pass_on_slide_propagation() -> void:
 	if has_slide_neighbor(Note.START_IS_TOUCHING, owner.drag_helper.old_pitch):
 		touching_notes[Note.START_IS_TOUCHING].receive_slide_propagation(Note.END_IS_TOUCHING)
 	
@@ -100,12 +100,15 @@ func pass_on_slide_propagation():
 		touching_notes[Note.END_IS_TOUCHING].receive_slide_propagation(Note.START_IS_TOUCHING)
 
 
-func has_slide_neighbor(direction:int,pitch:float):
+func has_slide_neighbor(direction:int,pitch:float) -> bool:
 	match direction:
 		Note.START_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].end_pitch == pitch
 		Note.END_IS_TOUCHING:
 			return touching_notes.has(direction) && touching_notes[direction].pitch_start == pitch
+		_:
+			assert(false,"wrong enum value")
+			return false
 
 
 static func find_slide_neighbors(note:Note) -> Array:

@@ -9,17 +9,17 @@ signal bar_changed(bar, ref)
 signal double_clicked(bar)
 
 
-func _ready():
+func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	bar_changed.connect(%Settings.section_handle_dragged)
 
-func _on_mouse_entered():
+func _on_mouse_entered() -> void:
 	Input.set_custom_mouse_cursor(
 		grabbing_hand if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) else grabby_hand,
 		Input.CURSOR_POINTING_HAND, Vector2(9, 3)
 	)
-func _on_mouse_exited():
+func _on_mouse_exited() -> void:
 	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		Input.set_custom_mouse_cursor(null, Input.CURSOR_POINTING_HAND)
 
@@ -27,7 +27,7 @@ func _on_mouse_exited():
 func update_pos(bar:float): position.x = %Chart.bar_to_x(bar) - 3
 
 
-func _gui_input(event):
+func _gui_input(event) -> void:
 	var bar = chart.x_to_bar(event.position.x + position.x)
 	if %Settings.snap_time && !(self == %PlayheadHandle && !dragging):
 		bar = snapped(bar, chart.current_subdiv)
@@ -44,4 +44,4 @@ func _gui_input(event):
 		set_bar(bar)
 
 
-func set_bar(bar:float): bar_changed.emit(bar,self)
+func set_bar(bar:float) -> void: bar_changed.emit(bar,self)

@@ -35,7 +35,7 @@ var default_cfg : ConfigFile:
 	set(value): main.default_cfg = value
 
 
-func generate_default_cfg():
+func generate_default_cfg() -> void:
 	default_cfg = ConfigFile.new()
 	for action in bindables:
 		var events = InputMap.action_get_events(action)
@@ -50,7 +50,7 @@ func generate_default_cfg():
 
 # TODO  - ton of functions called from main that we should own instead
 #		- this should own chart_loaded signal but i'm not fixing it right now!
-func on_load_dialog_file_selected(path:String):
+func on_load_dialog_file_selected(path:String) -> String:
 	print("Load tmb from %s" % path)
 	var dir = path.substr(0,path.rfind("/"))
 	if dir == path: dir = path.substr(0,path.rfind("\\"))
@@ -69,7 +69,7 @@ func on_load_dialog_file_selected(path:String):
 	return dir
 
 
-func validate_win_path(path:String):
+func validate_win_path(path:String) -> String:
 	if path[1] == ':': return path
 	print("driveless path %s" % path)
 	var drive : String
@@ -103,7 +103,7 @@ func save_tmb_to_file(filename : String) -> int:
 	return OK
 
 
-func try_cfg_save():
+func try_cfg_save() -> void:
 	print("try cfg save")
 	if !cfg.has_section("Config"): return
 	# start afresh in case of bind name change or deletion or reorder

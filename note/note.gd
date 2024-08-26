@@ -127,7 +127,7 @@ func pitch_to_string(pitch:float) -> String:
 	return result
 
 @warning_ignore("static_called_on_instance")
-func _set_handle_tooltip(handle:Control):
+func _set_handle_tooltip(handle:Control) -> void:
 	match handle:
 		bar_handle:
 			bar_handle.tooltip_text = pitch_to_string(pitch_start) + "\n" + "".num(bar,2)
@@ -137,7 +137,7 @@ func _set_handle_tooltip(handle:Control):
 		end_handle:
 			end_handle.tooltip_text = pitch_to_string(end_pitch) + "\n" + "".num(end,2)
 
-func _set_handle_tooltips():
+func _set_handle_tooltips() -> void:
 	if chart.settings.note_tooltips:
 		_set_handle_tooltip(bar_handle)
 		_set_handle_tooltip(pitch_handle)
@@ -159,7 +159,7 @@ func update_slide_idx() -> int:
 	return index_in_slide
 
 
-func propagate_to_the_right(f:StringName,args:Array=[]):
+func propagate_to_the_right(f:StringName,args:Array=[]) -> void:
 	var right_neighbor : Note = touching_notes.get(END_IS_TOUCHING)
 	
 	match right_neighbor:
@@ -167,7 +167,7 @@ func propagate_to_the_right(f:StringName,args:Array=[]):
 		_: return right_neighbor.propagate_to_the_right(f,args)
 
 
-func _ready():
+func _ready() -> void:
 	for handle in [bar_handle, pitch_handle, end_handle]:
 		handle.focus_entered.connect(grab_focus)
 	
@@ -186,11 +186,11 @@ func _ready():
 	doot_enabled = true
 
 
-func _process(_delta):
+func _process(_delta) -> void:
 	if dragging: _process_drag()
 
 
-func _gui_input(event):
+func _gui_input(event) -> void:
 	var key = event as InputEventKey
 	
 	if key != null && key.pressed:
@@ -200,7 +200,7 @@ func _gui_input(event):
 							  # remove_note() is Dew's function which runs remove_child() on the note and logs the deletion.
 
 
-func _on_handle_input(event, which_handle):
+func _on_handle_input(event, which_handle) -> void:
 	move_child(end_handle, -1 if is_tap_note else 0)
 	move_child(pitch_handle, -1 if Input.is_key_pressed(KEY_SHIFT) else 0)
 	
@@ -221,7 +221,7 @@ func _on_handle_input(event, which_handle):
 						  # remove_note() is my function which runs remove_child() on the note and logs the deletion.
 
 
-func _process_drag():
+func _process_drag() -> void:
 	if !(Input.get_mouse_button_mask() & MOUSE_BUTTON_LEFT):
 		_end_drag()
 		return
@@ -257,7 +257,7 @@ func _process_drag():
 	_update()
 
 
-func _end_drag():
+func _end_drag() -> void:
 	dragging = DRAG_NONE
 	print("Fresh note? ",Global.fresh)
 	slide_helper.snap_near_pitches()
@@ -297,7 +297,7 @@ func package_neighbors(self_note) -> Array: ## Dew: The initial creation of the 
 	return package # in the format: [[reference_1, data_array_1],[reference_2,data_array_2],...,[reference_n,data_array_n]]
 
 
-func remove_note():                # Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
+func remove_note() -> void:        # Dew: We cannot use queue_free(), because we need to reinstate the deleted notes with an undo!
 	Global.clear_future_edits()    # First, check for future, undone edits in the stack that must be overwritten to continue editing...
 	Global.actions.append(Global.ACTION_DELETE) # ... allowing us to continue recording our edit history...
 	Global.changes.append([[self,self.bar]])    # ... via the note's object reference.
@@ -308,26 +308,26 @@ func remove_note():                # Dew: We cannot use queue_free(), because we
 	chart.update_note_array()
 
 
-func _snap_near_pitches(): slide_helper.snap_near_pitches()
+func _snap_near_pitches() -> void: slide_helper.snap_near_pitches()
 
 
-func has_slide_neighbor(direction:int,pitch:float):
+func has_slide_neighbor(direction:int,pitch:float) -> bool:
 	return slide_helper.has_slide_neighbor(direction,pitch)
 
 
-func update_touching_notes():
+func update_touching_notes() -> void:
 	slide_helper.update_touching_notes()
 	update_handle_visibility()
 
 
-func receive_slide_propagation(from:int):
+func receive_slide_propagation(from:int) -> void:
 	doot_enabled = false
 	slide_helper.handle_slide_propagation(from)
 	if length <= 0: bar = -69420 # Dew: genuinely vital (thanks twi). We can't remove the child outright, because it still needs to be
 	doot_enabled = true          # referenced as a neighbor of the note which the user dragged over it. Thus, we simply yeet in into the ether.
 
 
-func update_handle_visibility():
+func update_handle_visibility() -> void:
 	var prev_note = touching_notes.get(START_IS_TOUCHING)
 	var next_note = touching_notes.get(END_IS_TOUCHING)
 	
@@ -349,7 +349,7 @@ func update_handle_visibility():
 	queue_redraw()
 
 
-func _update():
+func _update() -> void:
 	if chart == null: return
 	position.x = chart.bar_to_x(bar)
 	position.y = chart.pitch_to_height(pitch_start)
@@ -368,7 +368,7 @@ func resize_handles() -> void:
 	pitch_handle.size = Vector2(scaledlength, visual_height + TAIL_HEIGHT)
 	pitch_handle.position = Vector2(0, higher_pitch - (TAIL_HEIGHT / 2) )
 
-func _draw():
+func _draw() -> void:
 	if chart.draw_targets:
 		draw_rect(Rect2(bar_handle.position,bar_handle.size),Color.WHITE,false)
 		draw_rect(Rect2(pitch_handle.position,pitch_handle.size),Color.WHITE,false)
@@ -423,7 +423,7 @@ func _draw():
 	if should_show_end_handle: _draw_end_handle.call()
 
 
-func _exit_tree():
+func _exit_tree() -> void:
 	#bar = -69420.0 # Let this be a warning. Whomsoever memes in vain shall themselves be memed til break of script.
 	if chart.clearing_notes : return
 	print("exiting tree!")

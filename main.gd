@@ -18,7 +18,7 @@ var popup_location : Vector2i:
 
 enum ClipboardType { NOTES }
 
-func _ready():
+func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
 	save_check.confirm_new.connect(_on_new_chart_confirmed)
 	save_check.confirm_load.connect(show_popup.bind($LoadDialog))
@@ -54,7 +54,7 @@ func _ready():
 	_on_new_chart_confirmed()
 
 
-func _input(event):
+func _input(event) -> void:
 	event = event as InputEventKey
 	if event == null: return
 	
@@ -99,7 +99,7 @@ func is_double_tap(event:InputEvent) -> bool:
 	return false
 
 
-func _notification(what):
+func _notification(what) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		if !save_check.unsaved_changes:
 			get_tree().quit()
@@ -109,13 +109,13 @@ func _notification(what):
 		show_popup(save_check)
 
 
-func _on_description_text_changed(): tmb.description = %Description.text
-func _on_refresh_button_pressed(): chart_loaded.emit()
-func _on_help_button_pressed(): show_popup($Instructions)
-func _on_ffmpeg_help_pressed(): show_popup($FFmpegInstructions)
+func _on_description_text_changed() -> void: tmb.description = %Description.text
+func _on_refresh_button_pressed() -> void: chart_loaded.emit()
+func _on_help_button_pressed() -> void: show_popup($Instructions)
+func _on_ffmpeg_help_pressed() -> void: show_popup($FFmpegInstructions)
 
 
-func show_popup(window:Window,rel_pos:=Vector2i.ZERO):
+func show_popup(window:Window,rel_pos:=Vector2i.ZERO) -> void:
 	window.current_screen = get_window().current_screen
 	window.position = popup_location if rel_pos==Vector2i.ZERO \
 			else DisplayServer.window_get_position(0) + rel_pos
@@ -124,12 +124,12 @@ func show_popup(window:Window,rel_pos:=Vector2i.ZERO):
 	window.current_screen = get_window().current_screen
 
 
-func _on_new_chart_pressed():
+func _on_new_chart_pressed() -> void:
 	if save_check.unsaved_changes:
 		save_check.risky_action = SaveCheck.RISKY_NEW
 		show_popup(save_check)
 	else: _on_new_chart_confirmed()
-func _on_new_chart_confirmed():
+func _on_new_chart_confirmed() -> void:
 	tmb = TMBInfo.new()
 	%Settings.use_custom_colors = false
 	%TrackPlayer.stream = null
@@ -139,7 +139,7 @@ func _on_new_chart_confirmed():
 	%Chart.chart_updated.emit()
 
 
-func _on_load_chart_pressed():
+func _on_load_chart_pressed() -> void:
 	if save_check.unsaved_changes:
 		save_check.risky_action = SaveCheck.RISKY_LOAD
 		show_popup(save_check)
@@ -155,8 +155,8 @@ func _on_load_dialog_file_selected(path:String) -> void:
 	%Chart.chart_updated.emit()
 
 
-func _on_save_chart_pressed(): do_save(Input.is_key_pressed(KEY_SHIFT))
-func do_save(bypass_dialog:=false):
+func _on_save_chart_pressed() -> void: do_save(Input.is_key_pressed(KEY_SHIFT))
+func do_save(bypass_dialog:=false) -> void:
 	tmb.lyrics = %LyricsEditor.package_lyrics()
 	if bypass_dialog: _on_save_dialog_file_selected($SaveDialog.current_path)
 	else: show_popup($SaveDialog)
@@ -209,9 +209,9 @@ func try_to_load_stream(dir) -> int:
 #endregion
 
 
-func try_cfg_save(): saveload.try_cfg_save()
+func try_cfg_save() -> void: saveload.try_cfg_save()
 
-func _on_copy():
+func _on_copy() -> void:
 	var start = Global.settings.section_start
 	var length = Global.settings.section_length
 
@@ -228,7 +228,7 @@ func _on_copy():
 	$Alert.alert("Copied %s notes to clipboard" % notes.size(),
 			Vector2(%ChartView.global_position.x, 10), Alert.LV_SUCCESS)
 
-func _on_paste():
+func _on_paste() -> void:
 	var clipboard = DisplayServer.clipboard_get()
 	if !clipboard: return
 	var j = JSON.new()
@@ -242,7 +242,7 @@ func _on_paste():
 		ClipboardType.NOTES:
 			if %PlayheadPos.value + data.length > tmb.endpoint:
 				$Alert.alert("Can't paste -- would run past the chart endpoint!",
-					Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
+						Vector2(%ChartView.global_position.x, 10), Alert.LV_ERROR)
 				return
 			Global.copy_data = data.notes # Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
@@ -252,20 +252,20 @@ func _on_paste():
 		_: assert(false, "Clipboard has magic key, but of wrong value. How did we get here?\n%s"
 			% [ data ])
 
-func _on_rich_text_label_meta_clicked(meta):
+func _on_rich_text_label_meta_clicked(meta) -> void:
 	var data = JSON.parse_string(meta)
-	if not data:
-		OS.shell_open(str(meta))
+	
+	if data == null: OS.shell_open(str(meta))
 	elif data.has('note'): %Chart.jump_to_note(data['note'], true)
 	# DisplayServer is a bit of a weird place to have this but it's the window management ig
 	elif data.has('hash'): DisplayServer.clipboard_set(data['hash'])
-	else: print("meta clicked and idk what to do, here's the data: %s" % data)
+	else: print("rich text meta span clicked and idk what to do, here's the data: %s" % data)
 
 # For some reason I have to manually handle resizing the window contents to fit the window size.
-func _on_diff_calc_about_to_popup(): $DiffCalc/PanelContainer.set_size($DiffCalc.size)
-func _on_diff_calc_win_size_changed(): $DiffCalc/PanelContainer.set_size($DiffCalc.size)
-func _on_diff_calc_win_close_requested(): $DiffCalc.visible = false
-func _on_diff_ok_button_pressed(): $DiffCalc.visible = false
+func _on_diff_calc_about_to_popup() -> void: $DiffCalc/PanelContainer.set_size($DiffCalc.size)
+func _on_diff_calc_win_size_changed() -> void: $DiffCalc/PanelContainer.set_size($DiffCalc.size)
+func _on_diff_calc_win_close_requested() -> void: $DiffCalc.visible = false
+func _on_diff_ok_button_pressed() -> void: $DiffCalc.visible = false
 
 
 func _on_opts_button_pressed() -> void: show_popup(%EditorOpts,Vector2.ONE*48)
