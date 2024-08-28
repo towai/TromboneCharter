@@ -164,7 +164,7 @@ func do_save(bypass_dialog:=false) -> void:
 
 func _on_save_dialog_file_selected(path:String) -> void:
 	if OS.get_name() == "Windows": path = saveload.validate_win_path(path)
-
+	
 	var err = saveload.save_tmb_to_file(path)
 	if err == OK:
 		$Alert.alert("chart saved!", Vector2(12, %ViewSwitcher.global_position.y + 38),
@@ -191,20 +191,21 @@ func try_to_load_ogg(path:String) -> int:
 	print("Try load ogg from %s" % path)
 	var f = FileAccess.open(path,FileAccess.READ)
 	if f == null: return FileAccess.get_open_error()
-
+	
 	var stream := AudioStreamOggVorbis.load_from_file(path)
 	if stream == null || stream.packet_sequence.packet_data.is_empty():
 		print("Ogg load: stream null/no data?")
 		return ERR_FILE_CANT_READ
-
+	
 	%TrackPlayer.stream = stream
 	return OK
 
 
 func try_to_load_stream(dir) -> int:
 	var err := try_to_load_ogg(dir + "/song.ogg")
-	if err: print("Failed to load song.ogg: %s"
-		% error_string(err))
+	if err: print("Failed to load song.ogg: %s" % error_string(err))
+	err = try_to_load_ogg(dir + "/song.egg")
+	if err: print("Failed to load song.egg: %s" % error_string(err))
 	return err
 #endregion
 
@@ -234,7 +235,7 @@ func _on_paste() -> void:
 	var j = JSON.new()
 	var err = j.parse(clipboard)
 	if err: return
-
+	
 	var data = j.data
 	if typeof(data) != TYPE_DICTIONARY: return
 	if !data.has('trombone_charter_data_type'): return
@@ -246,7 +247,7 @@ func _on_paste() -> void:
 				return
 			Global.copy_data = data.notes # Dew: grab copied notes for use in copy_confirm
 			var copy_target = Global.settings.playhead_pos
-
+	
 			$CopyConfirm.set_values(copy_target, data)
 			show_popup($CopyConfirm)
 		_: assert(false, "Clipboard has magic key, but of wrong value. How did we get here?\n%s"

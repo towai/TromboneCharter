@@ -1,6 +1,7 @@
 class_name SaveLoad
 extends Node
-# TODO does this really need to be a Node rather than an Object?
+# we have nodes connecting their signals to this via the scene tree therefore a node this shall be.
+# it would also be very cumbersome to have to get references to all the nodes it's using via %
 const bindables : PackedStringArray = [
 	"toggle_playback", "toggle_insert_taps", "toggle_slide_prop", "toggle_snap_pitch",
 	"toggle_snap_time", "hold_drag_playhead", "hold_insert_taps", "hold_slide_prop",
@@ -28,7 +29,7 @@ var settings : Settings:
 	get: return main.settings
 	set(_v): assert(false,"I don't own that!")
 const settings_properties := [ "propagate_slide_changes","note_tooltips","paste_behavior",
-	"return_playhead" ]
+	"return_playhead", ]
 static var loading := false
 var default_cfg : ConfigFile:
 	get: return main.default_cfg
@@ -39,6 +40,7 @@ func generate_default_cfg() -> void:
 	default_cfg = ConfigFile.new()
 	for action in bindables:
 		var events = InputMap.action_get_events(action)
+		@warning_ignore("incompatible_ternary") # i know what i'm doing but thanks for the reminder
 		default_cfg.set_value("Binds",action,"" if events.is_empty() else events[0])
 	# use the untouched scene tree for other settings
 	default_cfg.set_value("Config","build_waveform",%BuildWaveform.button_pressed)

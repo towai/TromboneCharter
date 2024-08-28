@@ -420,8 +420,8 @@ func _draw() -> void:
 	if !%PreviewController.is_playing:
 		var play_symbol_size := 10
 		var play_symbol := [ playhead_pos,
-							playhead_pos+Vector2(play_symbol_size/1.33,play_symbol_size/2),
-							playhead_pos+Vector2(0,play_symbol_size) ]
+							playhead_pos + Vector2(play_symbol_size/1.33, play_symbol_size/2),
+							playhead_pos + Vector2(0, play_symbol_size) ]
 		draw_colored_polygon(play_symbol, Color.ORANGE_RED)
 		draw_polyline(play_symbol, Color.ORANGE_RED,0.5,true)
 
