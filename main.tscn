@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://dqnjrk008ccpy"]
+[gd_scene load_steps=34 format=3 uid="uid://dqnjrk008ccpy"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4hx5p"]
 [ext_resource type="Script" path="res://save_load.gd" id="2_37xub"]
@@ -65,6 +65,9 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
+
+[sub_resource type="LabelSettings" id="LabelSettings_icb47"]
+font_size = 18
 
 [node name="Main" type="VBoxContainer"]
 anchors_preset = -1
@@ -413,7 +416,7 @@ script = ExtResource("3_132ml")
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-horizontal_scroll_mode = 2
+mouse_filter = 2
 vertical_scroll_mode = 0
 script = ExtResource("8_j823s")
 
@@ -799,16 +802,19 @@ text = "Force note refresh"
 [node name="SectionSelection" type="VBoxContainer" parent="Settings/MarginC/HBoxC"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 10
+size_flags_horizontal = 6
 
 [node name="HBox2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
+size_flags_vertical = 2
 alignment = 2
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/HBox2"]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Playback Controls:"
+label_settings = SubResource("LabelSettings_icb47")
 
 [node name="HBox" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 visible = false
@@ -835,33 +841,57 @@ focus_mode = 2
 
 [node name="HBox4" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 6
+size_flags_vertical = 10
+theme_override_constants/separation = 0
 alignment = 2
 
-[node name="MetroIcon" type="TextureRect" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+[node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-texture = ExtResource("11_maqbd")
-stretch_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "(Or press Space.)"
+text = "Preview"
 
 [node name="MetroChk" type="CheckBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
 
-[node name="PreviewButton" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 2.08165e-12)
+[node name="MetroIcon" type="TextureRect" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
 layout_mode = 2
-text = "Preview"
+size_flags_horizontal = 8
+texture = ExtResource("11_maqbd")
+stretch_mode = 2
 
 [node name="PlayheadPos" type="SpinBox" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 tooltip_text = "Playhead Position"
 focus_mode = 2
 step = 2.08165e-12
 custom_arrow_step = 1.0
+
+[node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 0
+
+[node name="MetroVolSlider" type="HSlider" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4/Vol"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = -12.0
+max_value = 6.0
+step = 0.1
+tick_count = 4
+ticks_on_borders = true
+
+[node name="VolReset" type="Button" parent="Settings/MarginC/HBoxC/SectionSelection/HBox4/Vol"]
+layout_mode = 2
+icon = ExtResource("14_8wa4s")
 
 [node name="Vol" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
@@ -888,7 +918,7 @@ icon = ExtResource("14_8wa4s")
 
 [node name="Vol2" type="HBoxContainer" parent="Settings/MarginC/HBoxC/SectionSelection"]
 layout_mode = 2
-size_flags_vertical = 10
+size_flags_vertical = 8
 
 [node name="Label" type="Label" parent="Settings/MarginC/HBoxC/SectionSelection/Vol2"]
 layout_mode = 2
@@ -1034,6 +1064,8 @@ text = "toot toot lol"
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox/SectionLength" to="Settings" method="_on_section_length_value_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PreviewButton" to="PreviewController" method="_do_preview"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/PlayheadPos" to="Settings" method="_on_copy_target_value_changed"]
+[connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/Vol/MetroVolSlider" to="Settings" method="_on_metro_vol_changed"]
+[connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/HBox4/Vol/VolReset" to="Settings" method="_on_metro_vol_reset_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/Vol/TrackVolSlider" to="Settings" method="_on_preview_volume_changed"]
 [connection signal="pressed" from="Settings/MarginC/HBoxC/SectionSelection/Vol/VolReset" to="Settings" method="_on_preview_vol_reset_pressed"]
 [connection signal="value_changed" from="Settings/MarginC/HBoxC/SectionSelection/Vol2/TootVolSlider" to="Settings" method="_on_toot_volume_changed"]

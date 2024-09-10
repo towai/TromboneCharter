@@ -7,6 +7,14 @@ func _on_scroll_change() -> void: %Chart._on_scroll_change()
 
 func _on_pitch_snap_value_changed(_value) -> void: queue_redraw()
 
+# TODO feels a bit weird that scroll inputs outside the chart don't do zoom
+# but i'm not sure that there's anything to be done about that
+func _input(event: InputEvent) -> void:
+	if event is not InputEventWithModifiers: return
+	# Surpress scrolling when CTRL held to zoom
+	match event.is_command_or_control_pressed:
+		true: mouse_filter = MOUSE_FILTER_IGNORE
+		false: mouse_filter = MOUSE_FILTER_PASS
 
 func _draw() -> void:
 	var key_height := size.y / Global.NUM_KEYS
@@ -14,8 +22,10 @@ func _draw() -> void:
 	for i in Global.NUM_KEYS:
 		var key : int = 13 - i
 		if key in [13, -13]: continue
+		@warning_ignore("narrowing_conversion")
 		var key_center : int = key_height * i + (key_height / 2)
-		draw_line(Vector2.DOWN * key_center, Vector2(size.x,key_center),
+		@warning_ignore("narrowing_conversion")
+		draw_line(Vector2i.DOWN * key_center, Vector2i(size.x,key_center),
 				Color(1, 1, 1, 0.1) )
 		if key in [ 12, 0, -12 ]:
 			draw_polyline_colors(

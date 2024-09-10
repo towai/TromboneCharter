@@ -6,8 +6,14 @@ const scrollbar_height : float = 8
 
 var scroll_position : float:
 	get: return %ChartView.scroll_horizontal
+	set(with): %ChartView.scroll_horizontal = with
 var scroll_end : float:
 	get: return scroll_position + %ChartView.size.x
+var scroll_center : float:
+	get: return (scroll_position + scroll_end) / 2.0
+	set(with):
+		var halfscreen = (scroll_end - scroll_position) / 2.0
+		scroll_position = with - halfscreen
 var view_bounds: ViewBounds:
 	get: return ViewBounds.new(x_to_bar(scroll_position),x_to_bar(scroll_end))
 	set(_with): pass # would a function to set the scroll and zoom together be useful?
@@ -62,15 +68,11 @@ var playhead_preview : float = 0.0
 var rev : int   # the "act" setter determines which revision is to be activated by adding 1 if redoing.
 				# Redoing enacts next edit in line(+1) (NOT FOR DRAGS OR PASTE), and undoing enacts current edit(+0).
 				# Drag edits are stored as an array containing 1-3 arrays, each subarray containing [a note's reference, its old data, its new data].
-var ur_type : int = UR_NONE : # -1 = normal operation (0 = undo triggered, 1 = redo triggered)
+enum { UR_NONE = -1, UR_UNDO =  0, UR_REDO =  1, }
+var ur_type : int = UR_NONE:
 	set(value):
 		rev = Global.revision + value 
 		ur_type = value
-enum {
-	UR_NONE = -1,
-	UR_UNDO =  0,
-	UR_REDO =  1,
-}
 var action := Global.ACTION_NONE # initial value, set equal to Global.actions[Global.revision] on successful undo/redo input
 var stuffed_note : Note # note reference waiting to be altered (stuffed with desired data) when u/r-ing a drag
 enum { # enumerates the three indices of a DRAGGED note set: [note_reference, pre-drag_data, post-drag_data]
@@ -199,9 +201,10 @@ func redraw_notes() -> void:
 			child.hide()
 
 
-func _on_tmb_updated() -> void:
+func _on_tmb_updated(defer:bool=true) -> void:
 	bar_spacing = tmb.savednotespacing * %ZoomLevel.value
-	_update_queued = true
+	if defer: _update_queued = true
+	else: _do_tmb_update()
 
 func _do_tmb_update() -> void:
 	custom_minimum_size.x = (tmb.endpoint + 1) * bar_spacing
@@ -397,6 +400,7 @@ func _draw() -> void:
 					else Color(0.7,1,1,0.1),
 					1 )
 		if !(i % tmb.timesig):
+			@warning_ignore("integer_division")
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 16),
 					str(i / tmb.timesig), HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
 			draw_string(font, Vector2(i * bar_spacing, 0) + Vector2(8, 32),
@@ -418,7 +422,7 @@ func _draw() -> void:
 			playhead_pos + Vector2.DOWN*size.y,
 			Color.ORANGE_RED, 2.0)
 	if !%PreviewController.is_playing:
-		var play_symbol_size := 10
+		var play_symbol_size := 10.0
 		var play_symbol := [ playhead_pos,
 							playhead_pos + Vector2(play_symbol_size/1.33, play_symbol_size/2),
 							playhead_pos + Vector2(0, play_symbol_size) ]
@@ -461,6 +465,11 @@ func _gui_input(event) -> void:
 		|| event.button_index == MOUSE_BUTTON_WHEEL_UP \
 		|| event.button_index == MOUSE_BUTTON_WHEEL_LEFT \
 		|| event.button_index == MOUSE_BUTTON_WHEEL_RIGHT:
+			if Input.is_key_pressed(KEY_CTRL):
+				match event.button_index:
+					MOUSE_BUTTON_WHEEL_DOWN: %ZoomLevel.value -= 0.1
+					MOUSE_BUTTON_WHEEL_UP: %ZoomLevel.value += 0.1
+					_: pass
 			_on_scroll_change()
 	if Input.is_action_pressed("hold_drag_playhead"):
 		update_playhead(event)

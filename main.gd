@@ -77,8 +77,8 @@ func _input(event) -> void:
 	if event.is_action_pressed("ui_copy"):  _on_copy()
 	if event.is_action_pressed("ui_paste"): _on_paste()
 	if event.is_action_pressed("toggle_playback"): %PreviewController._do_preview()
-	if event.is_action_pressed("edit_mode"): %ShowLyrics.button_pressed = false
-	if event.is_action_pressed("lyrics_mode"): %ShowLyrics.button_pressed = true
+	if event.is_action_pressed("edit_mode",false,true): %ShowLyrics.button_pressed = false
+	if event.is_action_pressed("lyrics_mode",false,true): %ShowLyrics.button_pressed = true
 	%Chart.mouse_mode = %Chart.SELECT_MODE if Input.is_action_pressed("hold_drag_selection") \
 			else %Chart.EDIT_MODE
 	if event.is_action_pressed("hold_drag_selection") && is_double_tap(event):

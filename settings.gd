@@ -33,7 +33,9 @@ enum {
 }
 
 var current_view : int = VIEW_CHART_INFO
-var zoom := 1.0
+var zoom : float:
+	get: return %ZoomLevel.value
+	set(with): %ZoomLevel.value = with
 var propagate_slide_changes : bool:
 	get: return %PropagateChanges.button_pressed != Input.is_action_pressed("hold_slide_prop")
 	set(value): %PropagateChanges.button_pressed = value
@@ -176,16 +178,15 @@ func _update_view() -> void:
 					% current_view)
 
 
-func _on_zoom_reset_pressed() -> void: %ZoomLevel.value = 1
+func _on_zoom_reset_pressed() -> void: zoom = 1.0
 # _on_zoom_level_changed is called automatically when reset is pressed
 func _on_zoom_level_changed(value:float) -> void:
 	%ZoomLevel.tooltip_text = str(value)
-	var zoom_change = value / zoom
-	%ChartView.scroll_horizontal *= zoom_change
-	%Chart._on_tmb_updated()
+	var center = %Chart.scroll_center / %Chart.size.x # percentage
+	%Chart._on_tmb_updated(false) # HACK but it works
 	await(get_tree().process_frame)
 	%Chart._on_scroll_change()
-	zoom = value
+	%Chart.scroll_center = center * %Chart.size.x
 
 
 func _update_handles() -> void:
@@ -250,19 +251,23 @@ func _on_copy_target_value_changed(value) -> void:
 	_force_decimals(%PlayheadPos)
 	%PlayheadHandle.position.x = %Chart.bar_to_x(playhead_pos) - SECT_HANDLE_RADIUS
 	%Chart.queue_redraw()
-
 #endregion
 
 # the second gets called from the former iff volume wasn't already 0
-func _on_preview_vol_reset_pressed() -> void: %TrackVolSlider.value = 0
+func _on_preview_vol_reset_pressed() -> void: %TrackVolSlider.value = 0.0
 func _on_preview_volume_changed(value: float) -> void:
 	%TrackVolSlider.tooltip_text = str(value)
 	%TrackPlayer.volume_db = value
 
-func _on_toot_vol_reset_pressed() -> void: %TootVolSlider.value = 0
+func _on_toot_vol_reset_pressed() -> void: %TootVolSlider.value = 0.0
 func _on_toot_volume_changed(value: float) -> void:
 	%TootVolSlider.tooltip_text = str(value)
 	%TrombPlayer.volume_db = value
+
+func _on_metro_vol_reset_pressed() -> void: %MetroVolSlider.value = 0.0
+func _on_metro_vol_changed(value: float) -> void:
+	%MetroVolSlider.tooltip_text = str(value)
+	%MetronomePlayer.volume_db = value
 
 
 func _on_timing_snap_value_changed(_value) -> void:

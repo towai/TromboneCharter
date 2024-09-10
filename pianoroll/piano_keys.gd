@@ -20,11 +20,14 @@ func _ready():
 func _on_key_down(key:int) -> void:
 	player.pitch_scale = Global.pitch_to_scale(key)
 	player.play()
-func _on_key_up() -> void: player.stop()
+func _on_key_up() -> void:
+	if !Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT): player.stop()
 
 func _on_key_mouseover(key:int) -> void:
 	current_key = key
 	redraw_board.emit()
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		player.pitch_scale = Global.pitch_to_scale(key)
 func _on_key_mouse_exit(key:int) -> void:
 	if current_key != key:
 		print("Mouse exited %d but only after entering %d -- do nothing" % [key, current_key])
