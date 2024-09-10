@@ -54,9 +54,9 @@ func _ready() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	var keyevent = event as InputEventKey
-	if keyevent == null: return
-	if keyevent.is_action_pressed("ui_accept"): line_edit.release_focus()
+	event = event as InputEventKey
+	if event == null: return
+	if event.is_action_pressed("ui_accept"): line_edit.release_focus()
 
 
 func _on_spinbox_value_changed(new_value) -> void: value = new_value

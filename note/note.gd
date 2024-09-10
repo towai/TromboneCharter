@@ -191,10 +191,10 @@ func _process(_delta) -> void:
 
 
 func _gui_input(event) -> void:
-	var key = event as InputEventKey
+	event = event as InputEventKey
 	
-	if key != null && key.pressed:
-		match key.keycode:
+	if event != null && event.pressed:
+		match event.keycode:
 			KEY_DELETE, KEY_BACKSPACE:
 				remove_note() # Dew: We can't use queue_free(), because we need these notes to reappear when deletion is undone.
 							  # remove_note() is Dew's function which runs remove_child() on the note and logs the deletion.

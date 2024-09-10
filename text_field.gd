@@ -15,6 +15,6 @@ var value : String:
 func _ready() -> void: $Label.text = field_name
 
 func _gui_input(event: InputEvent) -> void:
-	var keyevent = event as InputEventKey
-	if keyevent == null: return
-	if keyevent.keycode == KEY_ENTER: $TextEntry.release_focus()
+	event = event as InputEventKey
+	if event == null: return
+	if event.keycode == KEY_ENTER: $TextEntry.release_focus()

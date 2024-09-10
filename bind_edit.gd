@@ -85,27 +85,27 @@ func _end_rebind() -> void:
 func _input(event: InputEvent) -> void:
 	if !rebinding: return
 	
-	var keyevent := event as InputEventKey
-	if keyevent == null: return
+	event = event as InputEventKey
+	if event == null: return
 	
 	# BUG you can still manage to bind something to esc/backspace,
 	#     but as of right now i don't know exactly what causes it to slip through
-	if keyevent.keycode == KEY_BACKSPACE || keyevent.keycode == KEY_ESCAPE: # allow bailing
+	if event.keycode == KEY_BACKSPACE || event.keycode == KEY_ESCAPE: # allow bailing
 		rebinding = false
 		rebind_signal.emit()
 	
-	if keyevent.pressed: return # getting keyup allows chorded binds!
+	if event.pressed: return # getting keyup allows chorded binds!
 	
-	keyevent.pressed = true
+	event.pressed = true
 	match bind.keytype: # keep the events clean
 		KeyBind.KEY_PHYSICAL:
-			keyevent.keycode = KEY_NONE
-			keyevent.unicode = KEY_NONE
+			event.keycode = KEY_NONE
+			event.unicode = KEY_NONE
 		KeyBind.KEY_UNICODE:
-			keyevent.keycode = KEY_NONE
-			keyevent.physical_keycode = KEY_NONE
+			event.keycode = KEY_NONE
+			event.physical_keycode = KEY_NONE
 		KeyBind.SECRET_THIRD_THING: assert(false,"we don't use this keytype, something went wrong")
-	if bind.events.is_empty(): bind.events.append(keyevent)
-	else: bind.update_input_map(keyevent)
+	if bind.events.is_empty(): bind.events.append(event)
+	else: bind.update_input_map(event)
 	rebinding = false
 	rebind_signal.emit()

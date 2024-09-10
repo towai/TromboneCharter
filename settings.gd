@@ -111,14 +111,14 @@ func _ready() -> void:
 	_toggle_ffmpeg_features()
 
 func _input(event: InputEvent) -> void:
-	var key_event := event as InputEventKey # i want my type hints
-	if key_event == null: return
+	event = event as InputEventKey # i want my type hints
+	if event == null: return
 	
-	if key_event.is_action_pressed("toggle_slide_prop"):
+	if event.is_action_pressed("toggle_slide_prop"):
 		%PropagateChanges.button_pressed = !%PropagateChanges.button_pressed
-	elif key_event.is_action_pressed("toggle_snap_pitch"):
+	elif event.is_action_pressed("toggle_snap_pitch"):
 		%PitchSnapChk.button_pressed = !%PitchSnapChk.button_pressed 
-	elif key_event.is_action_pressed("toggle_snap_time"):
+	elif event.is_action_pressed("toggle_snap_time"):
 		%TimeSnapChk.button_pressed = !%TimeSnapChk.button_pressed
 
 
