@@ -162,7 +162,7 @@ bbcode_enabled = true
 text = "All these instructions refer to the default keyboard shortcuts. If yours are different, you probably know that.
 
 [font_size=20]Basic Editing[/font_size]
-Click in the chart view to create a note. Click on the piano to hear pitches for reference.
+Click in the chart view to create a note. Click on the piano to hear pitches for reference. Scroll the chart with the mouse scrollwheel (or tap-drag on mobile devices), and zoom in/out by holding Ctrl when you scroll.
 
 Drag a note by its start to change the timing, its tail to change its pitch, and its end to change its length and/or turn it into a slide. Middle-click it to delete it. During a drag, you can disable snapping pitch by holding [b]Shift[/b] and time by holding [b]Ctrl[/b]; [b]P[/b] and [b]T[/b], or the checkboxes in the Edit View, toggle the default behavior for pitch and time respectively (holding the keys will now enable snapping).
 
