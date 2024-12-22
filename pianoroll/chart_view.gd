@@ -3,16 +3,16 @@ extends ScrollContainer
 
 func _ready() -> void: get_h_scroll_bar().scrolling.connect(_on_scroll_change)
 
-func _on_scroll_change() -> void: %Chart._on_scroll_change()
 
+func _on_scroll_change() -> void: %Chart._on_scroll_change()
 func _on_pitch_snap_value_changed(_value) -> void: queue_redraw()
 
-# TODO feels a bit weird that scroll inputs outside the chart don't do zoom
-# but i'm not sure that there's anything to be done about that
+
 func _input(event: InputEvent) -> void:
-	if event is not InputEventWithModifiers: return
+	event = event as InputEventWithModifiers
+	if event == null: return
 	# Surpress scrolling when CTRL held to zoom
-	match event.is_command_or_control_pressed:
+	match event.is_command_or_control_pressed():
 		true: mouse_filter = MOUSE_FILTER_IGNORE
 		false: mouse_filter = MOUSE_FILTER_PASS
 
