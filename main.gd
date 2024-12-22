@@ -147,6 +147,7 @@ func _on_load_chart_pressed() -> void:
 func _on_load_dialog_file_selected(path:String) -> void:
 	%WavePreview.clear_wave_preview()
 	var dir = saveload.on_load_dialog_file_selected(path)
+	if OS.get_name() == "Windows": saveload.last_used_drive_letter = path.substr(0,2)
 	%TrackPlayer.stream = null
 	chart_loaded.emit()
 	var err = try_to_load_stream(dir)
@@ -163,7 +164,9 @@ func do_save(bypass_dialog:=false) -> void:
 
 
 func _on_save_dialog_file_selected(path:String) -> void:
-	if OS.get_name() == "Windows": path = saveload.validate_win_path(path)
+	if OS.get_name() == "Windows":
+		saveload.last_used_drive_letter = path.substr(0,2)
+		path = saveload.validate_win_path(path)
 	
 	var err = saveload.save_tmb_to_file(path)
 	if err == OK:

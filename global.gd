@@ -29,6 +29,7 @@ func get_key_name(idx:int):
 @onready var working_tmb = TMBInfo.new()
 @onready var ffmpeg_worker = FFmpegWorker.new()
 var settings : Settings
+var saveload : SaveLoad
 func pitch_to_scale(pitch:float) -> float: return pow(TWELFTH_ROOT_2,pitch)
 func beat_to_time(beat:float) -> float: return beat / (working_tmb.tempo / 60.0)
 func time_to_beat(time:float) -> float: return time * (60.0 / working_tmb.tempo)

@@ -49,7 +49,12 @@ func build_wave_preview() -> void:
 	var textures : Array = []
 
 	for i in calc_rects_amount():
-		var result =  await do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i,%PreviewType.selected)
+		# HACK enough said
+		var dir = (Global.saveload.last_used_drive_letter if OS.get_name() == "Windows"
+				else "") + %LoadDialog.current_dir
+		#var result = await do_ffmpeg_convert(cfg.get_value("Config","saved_dir"),i,%PreviewType.selected)
+		var result = await do_ffmpeg_convert(dir,i,%PreviewType.selected)
+		
 		if !result:
 			print("Done in %d steps" % i)
 			break

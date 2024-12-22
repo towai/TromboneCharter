@@ -34,6 +34,11 @@ static var loading := false
 var default_cfg : ConfigFile:
 	get: return main.default_cfg
 	set(value): main.default_cfg = value
+# TODO replace with a better solution?
+var last_used_drive_letter := ""
+
+
+func _ready() -> void: Global.saveload = self
 
 
 func generate_default_cfg() -> void:
