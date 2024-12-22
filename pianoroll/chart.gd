@@ -317,7 +317,7 @@ func update_note_array() -> void:
 	###
 	for child in get_children():
 		var note := child as Note
-		if note == null || note.is_queued_for_deletion(): continue
+		if note == null || note.is_queued_for_deletion() || note.bar < 0: continue
 		
 		var note_array := note.as_array()
 		new_array.append(note_array)

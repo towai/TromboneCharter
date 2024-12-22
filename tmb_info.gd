@@ -67,31 +67,29 @@ func find_all_notes_in_section(start:float,length:float) -> Array:
 	return result
 
 
-"""
-func clear_section(start:float,length:float):
-	var is_in_section := func(bar:float) -> bool:
-		return (bar >= start && bar < start + length)
-	print("Clear section %d - %d" % [start,length + start])
-	var note_array = notes.duplicate(true)
-	print("note_array: ",note_array)
-	
-	var any_notes_left : bool = true
-	if note_array == [] : any_notes_left = false
-	while any_notes_left:
-		for note in note_array:
-			var bar = note[NOTE_BAR]
-			var end = bar + note[NOTE_LENGTH]
-			print("%d notes left" % note_array.size())
-			if is_in_section.call(bar) || is_in_section.call(end):
-				print("Erase note @ %.3f" % bar)
-				#TODO: index and save cleared note data for undo/redo
-				note_array.erase(note)
-				if note_array.is_empty(): any_notes_left = false
-				break # start from the beginning of the array
-			
-			if note == note_array.back(): any_notes_left = false
-	notes = note_array
-"""
+#func clear_section(start:float,length:float):
+#	var is_in_section := func(bar:float) -> bool:
+#		return (bar >= start && bar < start + length)
+#	print("Clear section %d - %d" % [start,length + start])
+#	var note_array = notes.duplicate(true)
+#	print("note_array: ",note_array)
+#	
+#	var any_notes_left : bool = true
+#	if note_array == [] : any_notes_left = false
+#	while any_notes_left:
+#		for note in note_array:
+#			var bar = note[NOTE_BAR]
+#			var end = bar + note[NOTE_LENGTH]
+#			print("%d notes left" % note_array.size())
+#			if is_in_section.call(bar) || is_in_section.call(end):
+#				print("Erase note @ %.3f" % bar)
+#				#TODO: index and save cleared note data for undo/redo
+#				note_array.erase(note)
+#				if note_array.is_empty(): any_notes_left = false
+#				break # start from the beginning of the array
+#			
+#			if note == note_array.back(): any_notes_left = false
+#	notes = note_array
 
 
 func load_from_file(filename:String) -> int:
