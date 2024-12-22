@@ -53,7 +53,7 @@ func _on_toottally_request_completed(_result, response_code, _headers, body) -> 
 		return
 	data["short_note_hash"] = data['note_hash'].left(6) + ' ... ' + data['note_hash'].right(6)
 	data["short_file_hash"] = data['file_hash'].left(6) + ' ... ' + data['file_hash'].right(6)
-	@warning_ignore("shadowed_variable") #
+	
 	var big_whole_part = func(value:float,font_size:int=20,places:int=4) -> String:
 		var format_string : String = "[font_size=%s]%d[/font_size]" % [font_size,value]
 		format_string += str(value).substr(str(value).find('.'),places + 1)

@@ -206,7 +206,8 @@ func try_to_load_ogg(path:String) -> int:
 
 func try_to_load_stream(dir) -> int:
 	var err := try_to_load_ogg(dir + "/song.ogg")
-	if err: print("Failed to load song.ogg: %s" % error_string(err))
+	if err == OK: return err
+	print("Failed to load song.ogg: %s" % error_string(err))
 	err = try_to_load_ogg(dir + "/song.egg")
 	if err: print("Failed to load song.egg: %s" % error_string(err))
 	return err
